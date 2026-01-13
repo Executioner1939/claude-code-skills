@@ -3,145 +3,342 @@ name: eventcatalog
 description: EventCatalog - Open source tool for documenting event-driven architectures. Use for event documentation, API specifications, domain modeling, service catalogs, and EDA (Event-Driven Architecture) documentation.
 ---
 
-# Eventcatalog Skill
+# EventCatalog Skill
 
-Eventcatalog - open source tool for documenting event-driven architectures. use for event documentation, api specifications, domain modeling, service catalogs, and eda (event-driven architecture) documentation., generated from official documentation.
+EventCatalog is an open-source documentation platform for event-driven architectures (EDA). It enables teams to document events, commands, queries, services, domains, flows, and channels in a structured, version-controlled catalog.
 
 ## When to Use This Skill
 
-This skill should be triggered when:
-- Working with eventcatalog
-- Asking about eventcatalog features or APIs
-- Implementing eventcatalog solutions
-- Debugging eventcatalog code
-- Learning eventcatalog best practices
+Use this skill when:
+
+**Architecture Documentation:**
+- Documenting events, commands, queries, or services
+- Creating domain models for DDD (Domain-Driven Design)
+- Building service catalogs for microservices
+- Mapping message flows between services
+
+**API Specifications:**
+- Adding OpenAPI or AsyncAPI specs to services
+- Documenting event schemas (JSON, Avro, Protobuf)
+- Creating channel/topic documentation
+
+**Catalog Configuration:**
+- Setting up EventCatalog projects
+- Configuring frontmatter for resources
+- Customizing landing pages or navigation
+- Adding visualizations (Mermaid, Miro, NodeGraph)
+
+**AI & Automation:**
+- Connecting MCP servers for AI-powered catalog exploration
+- Setting up GitHub Actions for schema review
+- Using the EventCatalog SDK for automation
+
+## Key Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Domain** | Business capability boundary (DDD bounded context) |
+| **Service** | Microservice that sends/receives messages |
+| **Event** | Immutable fact that something happened |
+| **Command** | Request to perform an action |
+| **Query** | Request for data |
+| **Flow** | Visual sequence of message interactions |
+| **Channel** | Communication pathway (topic, queue, exchange) |
 
 ## Quick Reference
 
-### Common Patterns
+### 1. Service Definition (Basic)
 
-**Pattern 1:** Connect AI with EventCatalogEventCatalog MCP ServerInstallationOn this pageGetting startediThis feature is available on the Scale plan. Prerequisites​ SSR mode - EventCatalog must run in server mode (not static) Scale license - You can get a 14 day free trial at eventcatalog.cloud Quick start​ Your MCP server is available at: https://your-eventcatalog.com/docs/mcp/ For local development: http://localhost:3000/docs/mcp/ Verify the server​ Visit the endpoint in your browser to verify. It returns available tools and resources: { "name": "EventCatalog MCP Server", "version": "1.0.0", "status": "running", "tools": ["getResources", "getResource", ...], "resources": ["eventcatalog://all", "eventcatalog://events", ...]} Connect clients​ Claude Desktop Get your MCP URL https://your-eventcatalog.com/docs/mcp/ Navigate to the Connectors page in Claude Settings. Select Add custom connector Select Add When using Claude, select the attachments button (the plus icon). Select your MCP server. Claude Code Get your MCP URL https://your-eventcatalog.com/docs/mcp/ Run the command to connect claude code to your eventcatalog instance claude mcp add --transport http <name> <url> Cursor Get your MCP URL https://your-eventcatalog.com/docs/mcp/ Use Command + Shift + P (Ctrl + Shift + P on Windows) to open the Command Palette. Search for "Open MCP settings" Select Add custom MCP. This opens the mcp.json file. Add the following to the mcp.json file: { "servers": { "<your-mcp-server-name>": { "url": "https://your-eventcatalog.com/docs/mcp/" } }} VS Code Get your MCP URL https://your-eventcatalog.com/docs/mcp/ Create a .vscode/mcp.json file. Inside the mcp.json file, add the following: { "servers": { "<your-mcp-server-name>": { "type": "http", "url": "https://your-eventcatalog.com/docs/mcp/" } }} Available tools​ 15 built-in tools​ getResources - Get events, services, commands, queries, flows, domains getResource - Get a specific resource by id and version getMessagesProducedOrConsumedByResource - Messages a resource sends/receives getSchemaForResource - Get OpenAPI, AsyncAPI, or other schemas findResourcesByOwner - Resources owned by a team or user getProducersOfMessage - Services that produce a message getConsumersOfMessage - Services that consume a message analyzeChangeImpact - Impact of changing a message explainBusinessFlow - Detailed flow information getTeams / getTeam - Query teams getUsers / getUser - Query users findMessageBySchemaId - Find messages by schema identifiers explainUbiquitousLanguageTerms - DDD ubiquitous language from domains See full API documentation → 12 resources​ eventcatalog://all - All resources eventcatalog://events - All events eventcatalog://commands - All commands eventcatalog://queries - All queries eventcatalog://services - All services eventcatalog://channels - All channels eventcatalog://diagrams - All diagrams eventcatalog://containers - All containers eventcatalog://domains - All domains eventcatalog://flows - All flows eventcatalog://teams - All teams eventcatalog://users - All users Add custom tools​ Extend the MCP server with custom tools in eventcatalog.chat.js: // eventcatalog.chat.jsexport const tools = { myCustomTool: { description: 'My custom tool for EventCatalog', parameters: z.object({ query: z.string().describe('The query parameter'), }), execute: async ({ query }) => { // Your custom logic here return { result: 'Custom data' }; }, },}; Custom tools appear alongside built-in tools automatically. Use standalone server​ For catalogs without SSR mode, use the standalone @eventcatalog/mcp-server package. We plan to deprecate this in a future release, so we recommend migrating to the built-in server when possible. Standalone server on stdioFor local development and testing, you can use the MCP Server on stdio. This is useful for single-client, low-latency tools.Prerequisites: EventCatalog configured with the LLMS.txt feature EventCatalog Scale license MCP client installed Command:npx -y @eventcatalog/mcp-server {URL_TO_YOUR_EVENTCATALOG_INSTANCE} {EVENTCATALOG_LICENSE_KEY} Standalone server over HTTPRun the MCP Server over HTTP for production deployments.Prerequisites: EventCatalog instance running EventCatalog Scale license MCP client installed Run using npx:npx -y @eventcatalog/mcp-server https://your-eventcatalog-instance.com {EVENTCATALOG_LICENSE_KEY} http {PORT} {ROOT_PATH}Example:npx -y @eventcatalog/mcp-server https://demo.eventcatalog.dev {EVENTCATALOG_LICENSE_KEY} http 3000 /mcpThis starts the MCP Server over HTTP on port 3000 with root path /mcp.Run using Docker:See instructions on the GitHub repository.Edit this pagePreviousIntroductionNextConfigurationPrerequisitesQuick startVerify the serverConnect clientsAvailable tools15 built-in tools12 resourcesAdd custom toolsUse standalone server
+Define a service with events it sends and receives:
 
-```
-https://your-eventcatalog.com/docs/mcp/
-```
-
-**Pattern 2:** Components & DiagramsComponentsDiagram Tools<Miro />On this page<Miro />Added in eventcatalog@2.33.4 The <Miro /> component renders a Miro board in your documentation. Each Miro board embedded can also be loaded in a full screen mode, letting your teams edit the board live (view demo). Support​ The <Miro /> component is supported in domains, services, all messages and custom documentation. Usage​ Include the <Miro /> component inside the markdown e.g /events/MyEvent/index.mdx Basic Example ---#event frontmatter---<Miro boardId="uXjVIHCImos=/" edit={false} /> Example with edit enabled and scroll to default widget in Miro ---#event frontmatter---<Miro boardId="uXjVIHCImos=/" moveToWidget="3074457347671667709" edit={false} /> Output example in EventCatalog​ Example: View demo in a domain page Example: View demo in custom documentation page Example: View demo of screen Miro board in EventCatalog Props​ NameTypeDefaultRequiredDescriptionboardIdstringYesThe ID of the Miro board to embed. (miro docs)editbooleanfalseNoWhether to enable edit mode for the Miro board.moveToViewportstringNoThe ID of the widget to scroll to. (miro docs)moveToWidgetstringNoThe ID of the widget to scroll to. (miro docs)heightstring500NoThe height of the Miro board.titlestringNoThe title of the Miro board.autoplaybooleantrueNoWhether to skip the preloader of the miro board. (miro docs)Edit this pagePreviousDiagram ToolsNext<Lucid />SupportUsageOutput example in EventCatalogProps
-
-```
-eventcatalog@2.33.4
-```
-
-**Pattern 3:** Documenting your architectureServicesAdding to servicesOpenAPI specificationsOn this pageAdding OpenAPI specificationsAdded in eventcatalog@2.6.0 Services in EventCatalog allow you to render OpenAPI specifications (see demo). You have two options for adding OpenAPI specifications to your service: Adding OpenAPI files to EventCatalog Reference the OpenAPI file from a remote URL Why not automate your EventCatalog from your OpenAPI files?Did you know you can automate your documentation, visualizations and owners using your OpenAPI Files?We have a OpenAPI plugin that can generate your catalog from your OpenAPI files, transforming your operations into commands, queries and events. You can assign these to services and domains and much more... Adding OpenAPI files to EventCatalog​ This option is useful if you want to keep your OpenAPI files in your EventCatalog. To add an OpenAPI file to your service you will need to include the file itself inside the service directory. /services/{Service Name}/openapi.yml (example /services/Orders/openapi.yml) Then you need to reference the file in the service frontmatter. example: /services/Orders/index.mdx--- specifications: - type: openapi # Path to the OpenAPI file relative to the service directory path: openapi.yml # Friendly name for the specification name: OpenAPI Specification--- Reference the OpenAPI file from a remote URL​ Added in eventcatalog@2.61.2 This can be useful if you want to keep your OpenAPI files in a remote repository and render them in EventCatalog. The pages will be built at build time, so the URL needs to be accessible by the build machine. If your specifications changes you need to rebuild your EventCatalog as the pages are built at build time. example: /services/Orders/index.mdx--- specifications: - type: openapi # Path to the OpenAPI file from a remote URL (accessible by the build machine) path: https://raw.githubusercontent.com/event-catalog/generator-openapi/refs/heads/main/examples/product-api/openapi.yml # Friendly name for the specification name: Product API--- Multiple OpenAPI Files​ Added in eventcatalog@2.39.1 If your service exposes multiple APIs or versions of the same API, you can assign multiple OpenAPI files to a single service. example: /services/Orders/index.mdx--- specifications: - type: openapi path: openapi-v1.yml name: v1 - type: openapi path: openapi-v2.yml name: v2--- This will render a list of specification files on your service page and navigation bar. Edit this pagePreviousEntitiesNextAsyncAPI specificationsAdding OpenAPI files to EventCatalogReference the OpenAPI file from a remote URLMultiple OpenAPI Files
-
-```
-eventcatalog@2.6.0
-```
-
-**Pattern 4:** Developer toolsAI ReviewerOn this pageAI ReviewerFeature: EventCatalog Scale Plan Feature The EventCatalog GitHub Action brings AI-powered insight into your Git workflows. It uses large language models (LLMs) to automatically review changes to your EventCatalog, helping you catch issues early—before they reach production. You can pick from OpenAI, Anthropic, or Google. Think of it as a smart assistant for your pull requests. It doesn't just lint code—it understands the implications of your changes. Watch the video to see the GitHub Action in action What it does: Detect breaking changes in schemas during pull requests Score how likely a change is to cause issues List affected consumers so you know who’s impacted Recommend actions to resolve problems before merging By automating the review process, this GitHub Action saves your team hours of manual effort, reduces human error, and brings consistency to your EventCatalog maintenance. You’re always in control—the final merge decision is still up to you. But now, you’ll have the insights to make it with confidence. Functionality​ The GitHub action supports many different tasks, and you can use the same action for multiple tasks. Tasks: schema_review: Automatically review the schemas for breaking changes in your pull requests More tasks will be added in the future Task: Automated schema reviews​ The schema review task is used to review schemas for breaking changes. This task let's you catch breaking changes in your schemas before they are deployed. The schema review supports any schema format, including (JSON, Avro, Protobuf, Thrift, etc.). Why use the schema review task? Capture breaking changes in your schemas before they are deployed Get a score of how likely the changes are to be breaking See a list of consumers that will be affected by the changes Take action to fix breaking changes before they are deployed Workflow example: Your team member makes a change to a schema in EventCatalog (inside your events, queries or commands folders) The action will review the schema for breaking changes using your configured LLM (OpenAI, Anthropic, Google) The action will return a summary of changes, and give you a score of how likely the changes are to be breaking The action will list affected consumers so you know who’s impacted Your team member is still in control of the merge decision, but now has the information to make a more informed decision Setup​ EventCatalog Scale LicenseThe GitHub action requires an EventCatalog Scale License. You can get a 14 day free trial from EventCatalog Cloud. Set your EventCatalog Scale License key in the license_key parameter. We recommend storing the license_key value as a GitHub secret. To use the EventCatalog GitHub Action, create a new .github/workflows/eventcatalog-ci.yaml file in your repository with the following content: .github/workflows/eventcatalog-ci.yamlname: EventCatalog CIon: push: pull_request: types: [opened, synchronize, reopened, labeled, unlabeled] delete:permissions: contents: read pull-requests: writejobs: schema_review: runs-on: ubuntu-latest steps: - uses: actions/checkout@v4 - uses: event-catalog/github-action@main with: # The task to run, currently only schema_review is supported task: schema_review # The AI LLM provider to use (openai, anthropic, google) provider: openai # The model to use for the task, defaults to o4-mini # Find the models in the documentation below model: o4-mini # Your API KEY for the LLM provider api_key: ${{ secrets.OPENAI_API_KEY }} # Your EventCatalog Scale License key license_key: ${{ secrets.EVENT_CATALOG_LICENSE_KEY }} # Your GitHub token github_token: ${{ secrets.GITHUB_TOKEN }} Configuration options​ ParameterDescriptionRequiredDefaulttaskThe task to run, currently only schema_review is supportedYesN/Acatalog_directoryThe directory where the EventCatalog files are located. Useful for monorepos. By default, the action will review all files in the repository. If you have EventCatalog in a subdirectory, you can specify the directory here.No./failure_thresholdThe score below which the action will fail. The score is a number between 0 and 100. The default is 25. The LLM will return a score between 0 and 100, based on the likelihood of the changes being breaking.No25providerThe AI LLM provider to use (openai, anthropic, google)YesopenaimodelThe model to use for the task, defaults to o4-mini. See the list of supported models: OpenAI models, Anthropic models, Google modelsYeso4-miniapi_keyYour API KEY for the LLM providerYesN/Alicense_keyYour EventCatalog Scale License keyYesN/A Got an issue?​ If you have any issues with the GitHub action, please open an issue on the GitHub action repository.Edit this pagePreviousschemas.txtNextAuthenticationFunctionalityTask: Automated schema reviews
-
-```
-EventCatalog Scale Plan Feature
-```
-
-**Pattern 5:** CustomizationCustom landing pageOn this pageCustomize landing pageAdded in eventcatalog@2.37.1 EventCatalog provides a landing page for your catalog, this is the first page that users see when they visit your catalog. See the demo here. You can customize the landing page with your own content, HTML and EventCatalog components. infoLanding page customization is only available for customers on paid plans. You can get a 14 day free trial of EventCatalog Starter Plan on EventCatalog Cloud. Example of a custom landing page​ You can add any HTML you want to your landing page, in this example we have added custom content using EventCatalog components, which includes the visualizer for a domains, subdomains and flows. View custom landing page demo How to customize your landing page​ Setup and configure your EventCatalog Starter or Scale License key. You can get a 14 day free trial of EventCatalog Starter Plan on EventCatalog Cloud. Create a new folder called pages and an Astro file called homepage.astro Example: /pages/homepage.astro Add the contents to your Astro file. You can see a full example of this on our GitHub repository. Run npm run dev or npm run build to see your changes. What is Astro?Astro is a static site builder that powers EventCatalog. You can learn more about Astro here. Example of homepage.astro /pages/homepage.astro---# Import EventCatalog components to use in your landing pageconst { Tile, Tiles, Flow, NodeGraph, Admonition } = Astro.props.components;---<div class="p-8 pt-2 max-w-8xl mx-auto"> <h1 class="text-4xl font-bold text-gray-800 mb-4">Welcome to FlowMart's EventCatalog</h1> <p class="text-lg text-gray-600 mb-8">Explore the events, services, and domains that power the FlowMart ecosystem. This catalog provides a centralized place to discover and understand our asynchronous architecture.</p> <Admonition type="info" title="Demo application"> <p>This is a demo of the EventCatalog and what it can do. The company is called FlowMart and they are an e-commerce company.</p> <p>Using EventCatalog, we documented their systems (domains, services, events, commands, flows) and how they fit together.</p> </Admonition> <div class="grid grid-cols-2 gap-4 border-b border-gray-200 pb-8 pt-4"> <div class="col-span-1"> <h2 class="text-2xl font-semibold text-gray-700 mb-2">E-Commerce Domain</h2> <p class="text-gray-500 mb-2">The core domain of FlowMart, responsible for all e-commerce operations.</p> <NodeGraph id="E-Commerce" version="1.0.0" type="domain" /> </div> <div class="col-span-1"> <h2 class="text-2xl font-semibold text-gray-700 mb-2">Orders Domain</h2> <p class="text-gray-500 mb-2">The sub-domain responsible for all orders.</p> <NodeGraph id="Orders" version="0.0.3" type="domain" /> </div> <div class="col-span-1"> <h2 class="text-2xl font-semibold text-gray-700 mb-2">Payment Domain</h2> <p class="text-gray-500 mb-2">The sub-domain responsible for all payments.</p> <NodeGraph id="Payment" version="0.0.1" type="domain" /> </div> <div class="col-span-1"> <h2 class="text-2xl font-semibold text-gray-700 mb-2">Subscription Domain</h2> <p class="text-gray-500 mb-2">The sub-domain responsible for all subscriptions.</p> <NodeGraph id="Subscription" version="0.0.1" type="domain" /> </div> </div> <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-12"> <h2 class="text-2xl font-semibold text-blue-800 mb-3">Discover Our Architecture</h2> <p class="text-gray-700 mb-4"> Navigate through our Domains to understand the different business capabilities, explore Services to see the microservices involved, and dive into Events and Commands to see how they communicate. </p> <p class="text-gray-700"> Use the search bar above or browse the sections in the sidebar to get started. </p> </div> <div class="grid grid-cols-2 gap-4 border-b border-gray-200 pb-8"> <div class="col-span-1"> <h2 class="text-2xl font-semibold text-gray-700 mb-2">Cancel Subscription Flow</h2> <p class="text-gray-500 mb-2">This flow is triggered when a user cancels their subscription.</p> <Flow id="CancelSubscription" version="latest" includeKey={false} /> </div> <div class="col-span-1"> <h2 class="text-2xl font-semibold text-gray-700 mb-2">Payment Flow</h2> <p class="text-gray-500 mb-2">This flow documents how a payment is processed at FlowMart.</p> <Flow id="PaymentFlow" version="latest" includeKey={false} /> </div> </div> <div class="border-b border-gray-200 pb-8 py-4"> <h2 class="text-3xl font-semibold text-gray-700 py-4">Quick Links</h2> <p class="text-gray-700 mb-4">Learn how to get started with EventCatalog, create domains, services, events, and commands.</p> <Tiles columns={3}> <Tile icon="BookOpenIcon" href="https://eventcatalog.dev/docs/development/getting-started" title="Getting started with EventCatalog" description="How to get started with EventCatalog" /> <Tile icon="RectangleGroupIcon" href="https://eventcatalog.dev/docs/development/guides/domains/creating-domains/adding-domains" title="Creating domains" description="Learn how to create domains in your event catalog" /> <Tile icon="ServerIcon" href="https://eventcatalog.dev/docs/development/guides/services/adding-services" title="Creating services" description="Learn how to create services in your event catalog" /> <Tile icon="ChatBubbleLeftIcon" iconColor="text-blue-500" href="https://eventcatalog.dev/docs/development/guides/messages/commands/introduction" title="Creating commands" description="Learn how to create commands in your event catalog" /> <Tile icon="BoltIcon" iconColor="text-orange-500" href="https://eventcatalog.dev/docs/development/guides/messages/events/introduction" title="Creating events" description="Learn how to create events in your event catalog" /> <Tile icon="UserGroupIcon" iconColor="text-green-500" href="https://eventcatalog.dev/docs/owners" title="Assigning owners to resources" description="Learn how to assign owners to resources in your event catalog" /> </Tiles> </div> <div class="pb-8 py-4"> <h2 class="text-3xl font-semibold text-gray-700 mb-6 pt-4">Join the community</h2> <p class="text-gray-700 mb-4">Our project and community is growing fast. We have over 1000+ members in our <a href="https://discord.gg/3rjaZMmrAm" class="text-blue-500 hover:text-blue-600">Discord community</a>.</p> <Tiles columns={2}> <Tile icon="UserGroupIcon" iconColor="text-green-500" href="https://discord.gg/3rjaZMmrAm" title="Join the Discord community" description="Join the community to get help and support" /> <Tile icon="StarIcon" iconColor="text-yellow-500" href="https://github.com/event-catalog/eventcatalog/stargazers" title="Star EventCatalog on GitHub" description="If you like the project, please star it on GitHub to show your support ❤️" /> </Tiles> </div></div> See the example output here Using components​ You can use EventCatalog components in your custom landing page. These include embedding visuals, flows, and more. Example: <Tiles columns={3}> <Tile icon="BookOpenIcon" href="https://eventcatalog.dev/docs/development/getting-started" title="Getting started with EventCatalog" description="How to get started with EventCatalog" /></Tiles> You can get a list of components here.Edit this pagePreviousCustomizationNextCustomize tablesExample of a custom landing pageHow to customize your landing pageUsing components
-
-```
-eventcatalog@2.37.1
-```
-
-**Pattern 6:** Documenting your architectureChangelogsCreating a changelogOn this pageCreating changelogsChangelogs are currently supported in domains, services and messages. To add a changelog to your resources you need to create a changelog.mdx file. /{resource}/{resource name}/changelog.mdx example: /services/My Service/changelog.mdx example for verion: /services/My Service/versioned/0.0.1/changelog.mdx Example of changelogs for resources EventsServicesDomains/events/OrderPlaced/changelog.mdx---createdAt: 2024-08-01badges: - content: ⭐️ JSON Schema backgroundColor: purple textColor: purple---### Added support for JSON SchemaInventoryAdjusted uses Avro but now also supports JSON Draft 7.```json title="Employee JSON Draft"// labeled-line-markers.jsx{"$schema": "http://json-schema.org/draft-07/schema#","type": "object","title": "Employee","properties": { "Name": { "type": "string" }, "Age": { "type": "integer" }, "Town": { "type": "string" }},"required": ["Name", "Age", "Town"]}``/services/Inventory/changelog.mdx---createdAt: 2024-08-01---### Service receives additional eventsService now receives [OrderAmended](/docs/events/OrderAmended/0.0.1) and [UpdateInventory](/docs/commands/UpdateInventory/0.0.3) events./domains/Order/changelog.mdx---createdAt: 2024-08-01---### New service added to the Payment domainService now receives [OrderAmended](/docs/events/OrderAmended/0.0.1) and [UpdateInventory](/docs/commands/UpdateInventory/0.0.3) events. Viewing your changelog​ Domains, services and messages have a Changelog button. Clicking this button will take you to the changelog for that resource. Domains, services and messages all have a changelog url. See example changelog: https://demo.eventcatalog.dev/docs/events/InventoryAdjusted/1.0.1/changelogEdit this pagePreviousWhat are changelogs?NextAutomated diffsViewing your changelog
-
-```
-changelog.mdx
-```
-
-**Pattern 7:** CustomizationBring your own documentationAdding custom documentationOn this pageAdding custom documentationAdded in eventcatalog@2.33.0 Getting started​ Custom documentation requires a Starter or Scale plan, you can get a 14 day free trial to test it out at EventCatalog Cloud. Once you have a license key you can start to use the feature. Adding custom documentation​ Custom documentation is split into two parts: Creating your documentation (markdown files) Configuring your sidebar (eventcatalog.config.js) Creating documentation​ Custom documentation is stored in the /docs folder in your catalog (see example on GitHub), and can be accessed via the url /docs/custom/. All documentation is a .mdx (markdown ) file. You can organize these however you want, for example: docs/├── architecture-decision-records/│ ├── drafts/│ │ ├── 01-introduction.mdx│ │ ├── 02-example-record.mdx│ ├── published/│ │ ├── 01-introduction.mdx│ │ ├── 02-example-record.mdx│ ├── examples/│ │ ├── 01-introduction.mdx│ │ ├── 02-example-record.mdx├── runbooks/│ ├── 01-introduction.mdx│ ├── 02-deployment-procedure.mdx│ ├── 03-disaster-recovery.mdx│ ├── 04-incident-response.mdx In this example we have a custom documentation for: architecture Decision Records Runbooks Organize your documentationWe added numbers (01, 02, 03) to the files to help with maintenance, you can configure the order of the files in your configuration. Structure of markdown files​ Each markdown file is split into two parts: The frontmatter (properties at the top of the file) The content (the rest of the file) ---title: Creating new microservicessummary: A comprehensive guide to creating new microservices at FlowMart following our best practices and standardsowners: - dboynebadges: - content: 'Guide' backgroundColor: 'teal' textColor: 'teal'---This is your content for your file. Frontmatter properties PropertyRequiredDescriptiontitleYesThe title of the pagesummaryYesA summary of the pageslugNoAbility to override the slug (url) of the pageownersNoOwners of the page (EventCatalog owners)badgesNoThe badges of the page Sidebar configuration​ You need to configure the sidebar to include your custom documentation, we do this by using the customDocs property in your eventcatalog.config.js file. We have two options for the sidebar: Manually map files and paths to the sidebar Use the autogenerated option to generate the sidebar items Autogenerated sidebarThe autogenerated sidebar is the easiest option, it will render all the files in the directory and subdirectories. If you want to choose which files and order they are displayed in, you can manually map the files and paths to the sidebar. export default { // rest of your config customDocs: { sidebar: [ { label: 'architecture Decision Records', badge: { text: 'New', color: 'green' }, collapsed: false, items: [ { // Here we map the directory, and use autogenerated to generate the sidebar items // Any item added to the folder will be rendered automatically in EventCatalog label: 'Drafts', autogenerated: { directory: '/architecture-decision-records/drafts' } }, { label: 'Published', autogenerated: { directory: '/architecture-decision-records/published' } }, { label: 'Examples', autogenerated: { directory: '/architecture-decision-records/examples' } } ] }, { label: 'Runbooks', badge: { text: 'New', color: 'green' }, collapsed: false, items: [ { // Here we create custom pages in the sidebar // We can manually map the slug to a file, or use the autogenerated to generate the sidebar items label: 'Creating a new runbook', items: [ { label: 'Introduction', slug: 'runbooks/01-introduction' }, { label: 'Deployment Procedure', slug: 'runbooks/02-deployment-procedure' }, { label: 'Disaster Recovery', slug: 'runbooks/03-disaster-recovery' }, { label: 'Incident Response', slug: 'runbooks/04-incident-response' }, ] }, ] } ] }}; Rendered output​ The rendered output will be the content of the markdown file, with the frontmatter properties. View demo Custom HTML attributes​ Added in eventcatalog@2.33.4 Links can also include an attrs property to add custom HTML attributes to the link element. In the following example, attrs is used to add a target="_blank" attribute, so that the link opens in a new tab, and to apply a custom style attribute to italicize the link label: export default { // rest of your config customDocs: { sidebar: [ { label: 'My Links', items: [ { label: 'Read more on GitHub', link: 'https://github.com/event-catalog/eventcatalog', attrs: { target: '_blank', style: 'font-style: italic;' }, }, ] }, ] }}; Rendered output​ Edit this pagePreviousIntroductionNextComponentsGetting startedAdding custom documentationCreating documentationCustom HTML attributes
-
-```
-eventcatalog@2.33.0
-```
-
-**Pattern 8:** Documenting your architectureDomainsVersioning & changelogsVersioningOn this pageVersioningAll content in EventCatalog can be versioned. This allows you to keep historic versions of content which can give context to users why things are changing. Tip: Versioning can be great for contextVersioning in EventCatalog is a great way to track changes over time. At any point users using EventCatalog can look back in time and understand what changes have been made to domains, services and messages. This gives extra context that is usually missed.Example would when new developers come on board, maybe they are interested in a particular domain, maybe they want to understand the history of this domain, where it started and how it came to be what it is today. Versioning allows you to capture this context. How to version a domain​ Create a /versioned directory inside the /domains folder if one is not created already. Create a new folder with the version number inside the folder. Example: /domains/Orders/versioned/0.0.1 Copy contents into the new folder, it at least needs your index.mdx file. Example: /domains/Orders/versioned/0.0.1/index.mdx Note: the version inside this index.mdx file would be 0.0.1 Bump the version of the index.mdx file in the route of the domain. Example /domains/Orders/index.mdx, change the version to 0.0.2 How to navigate to versions​ EventCatalog will automatically create links for you within your latest version of your document. Users will also be able to navigate to any version by adding the version in the url (e.g /docs/domains/Orders/1.0.2 would load the 1.0.2 version of this domain). Edit this pagePreviousVersioning & changelogsNextAdding a changelogHow to version a domainHow to navigate to versions
-
-```
-/versioned
-```
-
-### Example Code Patterns
-
-**Example 1** (yaml):
 ```yaml
----  id: Orders---
+---
+id: Orders
+name: Orders Service
+version: 0.0.1
+summary: Service that handles order processing
+owners:
+  - dboyne
+sends:
+  - id: OrderCreated
+    version: 0.0.1
+receives:
+  - id: PaymentCompleted
+    version: 0.0.1
+---
 ```
 
-**Example 2** (yaml):
+### 2. Event Definition
+
+Define an event with schema and producers/consumers:
+
 ```yaml
----  id: inventory.{env}.events---
+---
+id: OrderCreated
+name: Order Created
+version: 0.0.1
+summary: Triggered when a new order is placed
+owners:
+  - orders-team
+badges:
+  - content: Critical
+    backgroundColor: red
+    textColor: red
+---
 ```
 
-**Example 3** (jsx):
+### 3. Adding OpenAPI Specifications
+
+Reference local or remote OpenAPI files in service frontmatter:
+
+```yaml
+---
+id: Orders
+name: Orders Service
+version: 0.0.1
+specifications:
+  - type: openapi
+    path: openapi.yml
+    name: Orders API v1
+  - type: openapi
+    path: https://example.com/api/openapi.yml
+    name: Remote API
+---
+```
+
+### 4. Channel with Parameters
+
+Define a channel with protocol and address parameters:
+
+```yaml
+---
+id: inventory.{env}.events
+name: Inventory Events Channel
+version: 0.0.1
+address: inventory.{env}.events
+protocols:
+  - kafka
+parameters:
+  env:
+    description: Environment (dev, staging, prod)
+---
+```
+
+### 5. Embedding Mermaid Diagrams
+
+Load Mermaid diagrams from external files:
+
 ```jsx
----# event frontmatter---The User Registered event is triggered when a new user signs up for our platform.<MermaidFileLoader file="mermaid.mmd" />
+---
+# Service frontmatter
+---
+
+## Architecture Overview
+
+<MermaidFileLoader file="architecture.mmd" />
 ```
 
-**Example 4** (yaml):
-```yaml
-https://your-eventcatalog.com/docs/mcp/
+The Mermaid file (`architecture.mmd`):
+
+```
+sequenceDiagram
+  participant Customer
+  participant OrdersService
+  participant InventoryService
+
+  Customer->>OrdersService: Place Order
+  OrdersService->>InventoryService: Check Inventory
+  InventoryService-->>OrdersService: Inventory Available
+  OrdersService->>Customer: Order Confirmed
 ```
 
-**Example 5** (yaml):
+### 6. Embedding Miro Boards
+
+Embed interactive Miro boards in documentation:
+
+```jsx
+---
+# domain frontmatter
+---
+
+## Domain Visualization
+
+<Miro boardId="uXjVIHCImos=/" edit={false} />
+
+<!-- With scroll to specific widget -->
+<Miro
+  boardId="uXjVIHCImos=/"
+  moveToWidget="3074457347671667709"
+  edit={false}
+/>
+```
+
+### 7. Creating Changelogs
+
+Add changelogs to track resource changes:
+
 ```yaml
-http://localhost:3000/docs/mcp/
+# /events/OrderCreated/changelog.mdx
+---
+createdAt: 2024-08-01
+badges:
+  - content: Breaking Change
+    backgroundColor: red
+    textColor: red
+---
+
+### Schema Update v0.0.2
+
+Added required `customerId` field to the event payload.
+
+**Migration:** All consumers must update to handle the new field.
+```
+
+### 8. SDK: Write Event Programmatically
+
+Use the EventCatalog SDK to automate catalog updates:
+
+```javascript
+import utils from '@eventcatalog/utils';
+
+const { writeEvent } = utils('/path/to/eventcatalog');
+
+await writeEvent({
+  id: 'OrderCreated',
+  name: 'Order Created',
+  version: '0.0.1',
+  summary: 'Triggered when an order is placed',
+  markdown: '# Order Created\n\nThis event fires when...',
+});
+```
+
+### 9. MCP Server Connection (Claude Code)
+
+Connect Claude Code to EventCatalog's MCP server:
+
+```bash
+claude mcp add --transport http eventcatalog https://your-catalog.com/docs/mcp/
+```
+
+MCP server response format:
+
+```json
+{
+  "name": "EventCatalog MCP Server",
+  "version": "1.0.0",
+  "status": "running",
+  "tools": ["getResources", "getResource", "analyzeChangeImpact"],
+  "resources": ["eventcatalog://events", "eventcatalog://services"]
+}
+```
+
+### 10. GitHub Action for Schema Review
+
+Set up AI-powered schema reviews in CI:
+
+```yaml
+# .github/workflows/eventcatalog-ci.yaml
+name: EventCatalog CI
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  schema_review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: event-catalog/github-action@main
+        with:
+          task: schema_review
+          provider: openai
+          model: o4-mini
+          api_key: ${{ secrets.OPENAI_API_KEY }}
+          license_key: ${{ secrets.EVENT_CATALOG_LICENSE_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Reference Files
 
 This skill includes comprehensive documentation in `references/`:
 
-- **api.md** - Api documentation
-- **domains.md** - Domains documentation
-- **events.md** - Events documentation
-- **getting_started.md** - Getting Started documentation
-- **services.md** - Services documentation
-
-Use `view` to read specific reference files when detailed information is needed.
+| File | Contents |
+|------|----------|
+| **api.md** | Frontmatter API reference for all resource types (services, events, commands, queries, channels), code block features, CLI commands |
+| **domains.md** | Domain modeling, subdomains, ubiquitous language (DDD), domain versioning, SDK functions for domains |
+| **events.md** | Events, commands, queries documentation, MCP server setup, authentication, SDK functions for messages |
+| **getting_started.md** | Installation, project setup, initial configuration, deployment guides |
+| **services.md** | Service documentation, OpenAPI/AsyncAPI integration, service relationships, specifications |
 
 ## Working with This Skill
 
 ### For Beginners
-Start with the getting_started or tutorials reference files for foundational concepts.
+1. Start with `getting_started.md` for project setup
+2. Create your first service using the frontmatter examples above
+3. Add events and link them to services
 
-### For Specific Features
-Use the appropriate category reference file (api, guides, etc.) for detailed information.
+### For Intermediate Users
+1. Use `api.md` to understand all frontmatter options
+2. Add OpenAPI/AsyncAPI specifications to services
+3. Create flows to document message sequences
+4. Set up versioning with `/versioned` directories
 
-### For Code Examples
-The quick reference section above contains common patterns extracted from the official docs.
+### For Advanced Users
+1. Configure MCP server for AI-powered exploration
+2. Use SDK functions to automate catalog updates
+3. Set up GitHub Actions for schema review
+4. Build custom landing pages with Astro components
 
-## Resources
+## Project Structure
 
-### references/
-Organized documentation extracted from official sources. These files contain:
-- Detailed explanations
-- Code examples with language annotations
-- Links to original documentation
-- Table of contents for quick navigation
+```
+eventcatalog/
+├── domains/
+│   └── {DomainName}/
+│       ├── index.mdx           # Domain definition
+│       └── versioned/          # Historical versions
+├── services/
+│   └── {ServiceName}/
+│       ├── index.mdx           # Service definition
+│       ├── openapi.yml         # API specification
+│       └── changelog.mdx       # Change history
+├── events/
+│   └── {EventName}/
+│       ├── index.mdx           # Event definition
+│       └── schema.json         # Event schema
+├── commands/
+├── queries/
+├── channels/
+├── flows/
+├── docs/                       # Custom documentation
+├── pages/
+│   └── homepage.astro          # Custom landing page
+└── eventcatalog.config.js      # Configuration
+```
 
-### scripts/
-Add helper scripts here for common automation tasks.
+## MCP Tools Available
 
-### assets/
-Add templates, boilerplate, or example projects here.
+When connected to EventCatalog's MCP server:
+
+| Tool | Description |
+|------|-------------|
+| `getResources` | Get all events, services, commands, queries, flows, domains |
+| `getResource` | Get specific resource by ID and version |
+| `analyzeChangeImpact` | Analyze impact of changing a message |
+| `getProducersOfMessage` | Find services that produce a message |
+| `getConsumersOfMessage` | Find services that consume a message |
+| `explainBusinessFlow` | Get detailed flow information |
+| `findResourcesByOwner` | Find resources owned by a team/user |
+| `getSchemaForResource` | Get OpenAPI, AsyncAPI, or other schemas |
 
 ## Notes
 
-- This skill was automatically generated from official documentation
-- Reference files preserve the structure and examples from source docs
-- Code examples include language detection for better syntax highlighting
-- Quick reference patterns are extracted from common usage examples in the docs
-
-## Updating
-
-To refresh this skill with updated documentation:
-1. Re-run the scraper with the same configuration
-2. The skill will be rebuilt with the latest information
+- EventCatalog is built on Astro (static site generator)
+- All content uses MDX (Markdown with JSX components)
+- Versioning uses `/versioned/{version}/` directory structure
+- Scale plan required for MCP server, AI features, and custom landing pages
+- Starter plan includes basic customization features

@@ -1,55 +1,75 @@
 ---
 name: eventcatalog
-description: EventCatalog - Open source tool for documenting event-driven architectures. Use for event documentation, API specifications, domain modeling, service catalogs, and EDA (Event-Driven Architecture) documentation.
+description: Open source tool for documenting event-driven architectures
 ---
 
-# EventCatalog Skill
+# EventCatalog Skill Documentation
 
-EventCatalog is an open-source documentation platform for event-driven architectures (EDA). It enables teams to document events, commands, queries, services, domains, flows, and channels in a structured, version-controlled catalog.
+This skill helps you interact with EventCatalog, an open-source tool for documenting event-driven architectures. Use it for event documentation, API specifications, domain modeling, service catalogs, and general EDA (Event-Driven Architecture) documentation. It enables you to create a structured, version-controlled catalog of events, commands, queries, services, domains, flows, and channels.
+
+## Table of Contents
+
+- [When to Use This Skill](#when-to-use-this-skill)
+- [Key Concepts](#key-concepts)
+- [Quick Reference](#quick-reference)
+- [Reference Files](#reference-files)
+- [Working with This Skill](#working-with-this-skill)
+- [Project Structure](#project-structure)
+- [MCP Tools Available](#mcp-tools-available)
+- [Notes](#notes)
 
 ## When to Use This Skill
 
-Use this skill when:
+Use this skill when you need to:
 
 **Architecture Documentation:**
-- Documenting events, commands, queries, or services
-- Creating domain models for DDD (Domain-Driven Design)
-- Building service catalogs for microservices
-- Mapping message flows between services
+
+- Document events, commands, queries, or services within an event-driven architecture.
+- Create domain models aligned with Domain-Driven Design (DDD) principles.
+- Build and manage service catalogs for microservices.
+- Map message flows and interactions between services.
 
 **API Specifications:**
-- Adding OpenAPI or AsyncAPI specs to services
-- Documenting event schemas (JSON, Avro, Protobuf)
-- Creating channel/topic documentation
+
+- Integrate OpenAPI or AsyncAPI specifications into service documentation.
+- Document event schemas using formats like JSON, Avro, or Protobuf.
+- Create detailed channel/topic documentation.
 
 **Catalog Configuration:**
-- Setting up EventCatalog projects
-- Configuring frontmatter for resources
-- Customizing landing pages or navigation
-- Adding visualizations (Mermaid, Miro, NodeGraph)
+
+- Set up and configure EventCatalog projects.
+- Customize resource frontmatter for enhanced metadata.
+- Tailor landing pages and navigation elements.
+- Add visualizations using Mermaid, Miro, or custom components.
 
 **AI & Automation:**
-- Connecting MCP servers for AI-powered catalog exploration
-- Setting up GitHub Actions for schema review
-- Using the EventCatalog SDK for automation
+
+- Connect to MCP (Model Context Protocol) servers for AI-powered catalog exploration.
+- Automate schema reviews using GitHub Actions.
+- Utilize the EventCatalog SDK for programmatic catalog management.
 
 ## Key Concepts
 
 | Concept | Description |
-|---------|-------------|
-| **Domain** | Business capability boundary (DDD bounded context) |
-| **Service** | Microservice that sends/receives messages |
-| **Event** | Immutable fact that something happened |
-| **Command** | Request to perform an action |
-| **Query** | Request for data |
-| **Flow** | Visual sequence of message interactions |
-| **Channel** | Communication pathway (topic, queue, exchange) |
+|---|---|
+| **Domain** | A business capability boundary (DDD bounded context) encompassing related services and data. |
+| **Service** | A microservice or application component that sends and/or receives messages. |
+| **Event** | An immutable record of something that has occurred in the system. |
+| **Command** | A request for a service to perform a specific action. |
+| **Query** | A request for data from a service or data store. |
+| **Flow** | A visual representation of a sequence of message interactions between services. |
+| **Channel** | A communication pathway or medium (e.g., topic, queue, exchange) for messages. |
+| **Entity** | An object with a unique identity that persists over time, central to DDD. |
+| **Data Store (Container)** | Represents data stores within the architecture, following the C4 model. |
+| **MCP (Model Context Protocol)** | A protocol for AI tools to understand and interact with the EventCatalog. |
 
 ## Quick Reference
 
-### 1. Service Definition (Basic)
+Here are some common tasks and examples to get you started:
 
-Define a service with events it sends and receives:
+### 1. Defining a Service with Events and Owners
+
+This example shows the basic structure for defining a service and listing the events it sends and receives:
 
 ```yaml
 ---
@@ -68,9 +88,9 @@ receives:
 ---
 ```
 
-### 2. Event Definition
+### 2. Defining an Event with Badges
 
-Define an event with schema and producers/consumers:
+This shows how to define an event and add badges to highlight its importance:
 
 ```yaml
 ---
@@ -87,9 +107,9 @@ badges:
 ---
 ```
 
-### 3. Adding OpenAPI Specifications
+### 3. Adding OpenAPI Specification to a Service
 
-Reference local or remote OpenAPI files in service frontmatter:
+Reference a local OpenAPI file in your service's frontmatter:
 
 ```yaml
 ---
@@ -100,15 +120,12 @@ specifications:
   - type: openapi
     path: openapi.yml
     name: Orders API v1
-  - type: openapi
-    path: https://example.com/api/openapi.yml
-    name: Remote API
 ---
 ```
 
-### 4. Channel with Parameters
+### 4. Defining a Channel with Parameters
 
-Define a channel with protocol and address parameters:
+Demonstrates how to define a channel with protocol and address parameters, useful for dynamic configurations:
 
 ```yaml
 ---
@@ -124,9 +141,9 @@ parameters:
 ---
 ```
 
-### 5. Embedding Mermaid Diagrams
+### 5. Embedding a Mermaid Diagram
 
-Load Mermaid diagrams from external files:
+Load a Mermaid diagram from an external file to visualize architecture or flows:
 
 ```jsx
 ---
@@ -138,23 +155,9 @@ Load Mermaid diagrams from external files:
 <MermaidFileLoader file="architecture.mmd" />
 ```
 
-The Mermaid file (`architecture.mmd`):
-
-```
-sequenceDiagram
-  participant Customer
-  participant OrdersService
-  participant InventoryService
-
-  Customer->>OrdersService: Place Order
-  OrdersService->>InventoryService: Check Inventory
-  InventoryService-->>OrdersService: Inventory Available
-  OrdersService->>Customer: Order Confirmed
-```
-
 ### 6. Embedding Miro Boards
 
-Embed interactive Miro boards in documentation:
+Embed an interactive Miro board in your documentation:
 
 ```jsx
 ---
@@ -164,21 +167,13 @@ Embed interactive Miro boards in documentation:
 ## Domain Visualization
 
 <Miro boardId="uXjVIHCImos=/" edit={false} />
-
-<!-- With scroll to specific widget -->
-<Miro
-  boardId="uXjVIHCImos=/"
-  moveToWidget="3074457347671667709"
-  edit={false}
-/>
 ```
 
-### 7. Creating Changelogs
+### 7. Adding a Changelog Entry
 
-Add changelogs to track resource changes:
+Create a changelog to track resource changes:
 
-```yaml
-# /events/OrderCreated/changelog.mdx
+```markdown
 ---
 createdAt: 2024-08-01
 badges:
@@ -194,7 +189,7 @@ Added required `customerId` field to the event payload.
 **Migration:** All consumers must update to handle the new field.
 ```
 
-### 8. SDK: Write Event Programmatically
+### 8. SDK: Writing an Event Programmatically
 
 Use the EventCatalog SDK to automate catalog updates:
 
@@ -212,29 +207,9 @@ await writeEvent({
 });
 ```
 
-### 9. MCP Server Connection (Claude Code)
+### 9. GitHub Action for Schema Review
 
-Connect Claude Code to EventCatalog's MCP server:
-
-```bash
-claude mcp add --transport http eventcatalog https://your-catalog.com/docs/mcp/
-```
-
-MCP server response format:
-
-```json
-{
-  "name": "EventCatalog MCP Server",
-  "version": "1.0.0",
-  "status": "running",
-  "tools": ["getResources", "getResource", "analyzeChangeImpact"],
-  "resources": ["eventcatalog://events", "eventcatalog://services"]
-}
-```
-
-### 10. GitHub Action for Schema Review
-
-Set up AI-powered schema reviews in CI:
+Configuration for schema review in CI:
 
 ```yaml
 # .github/workflows/eventcatalog-ci.yaml
@@ -264,34 +239,37 @@ jobs:
 
 ## Reference Files
 
-This skill includes comprehensive documentation in `references/`:
+This skill leverages the following reference files:
 
 | File | Contents |
-|------|----------|
-| **api.md** | Frontmatter API reference for all resource types (services, events, commands, queries, channels), code block features, CLI commands |
-| **domains.md** | Domain modeling, subdomains, ubiquitous language (DDD), domain versioning, SDK functions for domains |
-| **events.md** | Events, commands, queries documentation, MCP server setup, authentication, SDK functions for messages |
-| **getting_started.md** | Installation, project setup, initial configuration, deployment guides |
-| **services.md** | Service documentation, OpenAPI/AsyncAPI integration, service relationships, specifications |
+|---|---|
+| `api.md` | Comprehensive frontmatter API reference for all resource types (services, events, commands, queries, channels), code block features, and CLI commands. |
+| `domains.md` | Details on domain modeling, subdomains, ubiquitous language (DDD), domain versioning, and SDK functions for domains. |
+| `events.md` | In-depth information on events, commands, queries documentation, MCP server setup, authentication, and SDK functions for messages. |
+| `getting_started.md` | Guides for installation, project setup, initial configuration, and deployment. |
+| `services.md` | Details on service documentation, OpenAPI/AsyncAPI integration, service relationships, and specifications. |
 
 ## Working with This Skill
 
 ### For Beginners
-1. Start with `getting_started.md` for project setup
-2. Create your first service using the frontmatter examples above
-3. Add events and link them to services
+
+1.  Begin with `getting_started.md` to set up your EventCatalog project.
+2.  Create your initial service using the frontmatter examples provided.
+3.  Add events and link them to the created service.
 
 ### For Intermediate Users
-1. Use `api.md` to understand all frontmatter options
-2. Add OpenAPI/AsyncAPI specifications to services
-3. Create flows to document message sequences
-4. Set up versioning with `/versioned` directories
+
+1.  Consult `api.md` to explore the range of frontmatter options available.
+2.  Integrate OpenAPI/AsyncAPI specifications into your services.
+3.  Design flows to visualize and document message sequences.
+4.  Implement versioning using the `/versioned` directory structure.
 
 ### For Advanced Users
-1. Configure MCP server for AI-powered exploration
-2. Use SDK functions to automate catalog updates
-3. Set up GitHub Actions for schema review
-4. Build custom landing pages with Astro components
+
+1.  Set up an MCP server to enable AI-powered catalog exploration.
+2.  Utilize the SDK functions to automate catalog updates and management.
+3.  Implement GitHub Actions for automated schema reviews.
+4.  Develop custom landing pages using Astro components to enhance the user experience.
 
 ## Project Structure
 
@@ -322,23 +300,23 @@ eventcatalog/
 
 ## MCP Tools Available
 
-When connected to EventCatalog's MCP server:
+When connected to EventCatalog's MCP server, these tools become available:
 
 | Tool | Description |
-|------|-------------|
-| `getResources` | Get all events, services, commands, queries, flows, domains |
-| `getResource` | Get specific resource by ID and version |
-| `analyzeChangeImpact` | Analyze impact of changing a message |
-| `getProducersOfMessage` | Find services that produce a message |
-| `getConsumersOfMessage` | Find services that consume a message |
-| `explainBusinessFlow` | Get detailed flow information |
-| `findResourcesByOwner` | Find resources owned by a team/user |
-| `getSchemaForResource` | Get OpenAPI, AsyncAPI, or other schemas |
+|---|---|
+| `getResources` | Retrieves all events, services, commands, queries, flows, and domains in the catalog. |
+| `getResource` | Fetches a specific resource by its ID and version. |
+| `analyzeChangeImpact` | Analyzes the potential impact of changes to a particular message. |
+| `getProducersOfMessage` | Finds all services that produce a given message. |
+| `getConsumersOfMessage` | Finds all services that consume a given message. |
+| `explainBusinessFlow` | Provides detailed information about a specific business flow. |
+| `findResourcesByOwner` | Identifies resources owned by a specific team or user. |
+| `getSchemaForResource` | Retrieves the schema (OpenAPI, AsyncAPI, etc.) for a specified resource. |
 
 ## Notes
 
-- EventCatalog is built on Astro (static site generator)
-- All content uses MDX (Markdown with JSX components)
-- Versioning uses `/versioned/{version}/` directory structure
-- Scale plan required for MCP server, AI features, and custom landing pages
-- Starter plan includes basic customization features
+-   EventCatalog is built on Astro, a static site generator.
+-   All content is written using MDX (Markdown with JSX components).
+-   Versioning is managed through a `/versioned/{version}/` directory structure.
+-   The MCP server, AI features, and custom landing pages require a Scale plan.
+-   The Starter plan provides basic customization options.
