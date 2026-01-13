@@ -2,9 +2,9 @@
 
 A curated collection of Claude Code skills for modern development workflows. This repository contains high-quality documentation and reference materials for various tools and frameworks.
 
-## 📦 Available Skills
+## Available Skills
 
-### 🌙 moonrepo
+### moonrepo
 **Monorepo Task Runner & Build System**
 
 Comprehensive documentation for [moonrepo](https://moonrepo.dev/) - build, run, and manage monorepo tasks efficiently.
@@ -21,7 +21,7 @@ Comprehensive documentation for [moonrepo](https://moonrepo.dev/) - build, run, 
 
 ---
 
-### 🦀 utoipa
+### utoipa
 **Rust OpenAPI Documentation Generator**
 
 Auto-generate OpenAPI 3.1 documentation from Rust code using procedural macros.
@@ -37,7 +37,7 @@ Auto-generate OpenAPI 3.1 documentation from Rust code using procedural macros.
 
 ---
 
-### 📚 EventCatalog
+### EventCatalog
 **Event-Driven Architecture Documentation**
 
 Document and visualize event-driven architectures with [EventCatalog](https://www.eventcatalog.dev/).
@@ -52,7 +52,7 @@ Document and visualize event-driven architectures with [EventCatalog](https://ww
 
 **Use when:** Documenting EDA systems, AsyncAPI specs, event sourcing, or microservices architectures.
 
-## 📥 Installation
+## Installation
 
 ### Install Individual Skills
 
@@ -73,7 +73,7 @@ git clone https://github.com/Executioner1939/claude-code-skills.git
 claude --plugin-dir /path/to/claude-code-skills/skills/moonrepo
 ```
 
-## 🎯 Skill Structure
+## Skill Structure
 
 Each skill follows a consistent structure:
 
@@ -92,7 +92,7 @@ skills/
     └── references/       # API documentation
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! To add a new skill or improve existing ones:
 
@@ -102,11 +102,11 @@ Contributions are welcome! To add a new skill or improve existing ones:
 4. Update marketplace.json with skill metadata
 5. Submit a pull request
 
-## 📄 License
+## License
 
 MIT
 
-## 🔗 Links
+## Links
 
 - [moonrepo](https://moonrepo.dev/)
 - [utoipa](https://github.com/juhaku/utoipa)
