@@ -1,5 +1,5 @@
 ---
-name: designing-solana-dex-tables
+name: clickhouse
 description: Designs ClickHouse tables for Solana DEX analytics. Use when creating schemas for trades, pools, tokens, wallets, or time-series aggregations. Triggers on "Solana", "DEX", "swap", "liquidity pool", "OHLCV", "trade analytics", "ClickHouse blockchain", "skip index", "bloom filter", "PREWHERE", "time series", "Delta codec", "DateTime64", "histogram", "backfill materialized view", "AggregatingMergeTree".
 ---
 

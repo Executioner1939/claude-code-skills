@@ -1,7 +1,6 @@
 ---
 name: moonrepo
 description: Build, run, and manage monorepo tasks with moon. Use when working with moon.yml, .moon/ configuration, running moon commands, setting up CI/CD pipelines, Docker builds, or managing multi-project workspaces. Trigger on "moon run", "moon ci", "monorepo", "workspace tasks", or project orchestration.
-allowed-tools: Read, Bash, Glob, Grep, Edit, Write
 ---
 
 # Moonrepo - Monorepo Task Orchestration
@@ -99,18 +98,18 @@ tasks:
 - `moon docker scaffold <project>` - Generate Docker skeleton
 - `moon docker file <project>` - Generate Dockerfile
 
-## Additional Resources
+## Reference Files
 
-For detailed information, see these reference files:
+For detailed information, see these reference files in `references/`:
 
-- [COMMANDS.md](COMMANDS.md) - Complete command reference with all flags
-- [CONFIG.md](CONFIG.md) - Full configuration schemas
-- [CONCEPTS.md](CONCEPTS.md) - Core concepts (workspace, project, task, tokens, MQL)
-- [CI.md](CI.md) - CI/CD setup and best practices
-- [DOCKER.md](DOCKER.md) - Docker integration guide
-- [PROTO.md](PROTO.md) - Proto toolchain manager
-- [FRAMEWORKS.md](FRAMEWORKS.md) - Framework-specific examples (Next.js, Vite, etc.)
-- [ADVANCED.md](ADVANCED.md) - Advanced patterns and automation
+- [references/COMMANDS.md](references/COMMANDS.md) - Complete command reference with all flags
+- [references/CONFIG.md](references/CONFIG.md) - Full configuration schemas
+- [references/CONCEPTS.md](references/CONCEPTS.md) - Core concepts (workspace, project, task, tokens, MQL)
+- [references/CI.md](references/CI.md) - CI/CD setup and best practices
+- [references/DOCKER.md](references/DOCKER.md) - Docker integration guide
+- [references/PROTO.md](references/PROTO.md) - Proto toolchain manager
+- [references/FRAMEWORKS.md](references/FRAMEWORKS.md) - Framework-specific examples (Next.js, Vite, etc.)
+- [references/ADVANCED.md](references/ADVANCED.md) - Advanced patterns and automation
 
 ## Utility Scripts
 
