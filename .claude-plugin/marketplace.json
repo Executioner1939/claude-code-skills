@@ -1,13 +1,29 @@
 {
-  "name": "executioner-plugins",
+  "name": "skunkworks",
   "owner": {
     "name": "Executioner1939"
   },
   "metadata": {
     "description": "Claude Code skills collection by Executioner1939",
-    "version": "2.0.1"
+    "version": "2.1.0"
   },
   "plugins": [
+    {
+      "name": "clickhouse",
+      "source": {
+        "source": "github",
+        "repo": "Executioner1939/claude-code-skills",
+        "path": "skills/clickhouse"
+      },
+      "description": "Design ClickHouse tables for Solana DEX analytics. Covers trades, pools, tokens, OHLCV aggregations, materialized views, deduplication, skip indexes, and time-series patterns.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Executioner1939"
+      },
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT",
+      "keywords": ["clickhouse", "solana", "dex", "blockchain", "analytics", "time-series", "ohlcv"]
+    },
     {
       "name": "moonrepo",
       "source": {
