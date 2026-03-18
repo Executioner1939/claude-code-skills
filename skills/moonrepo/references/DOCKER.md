@@ -1,84 +1,91 @@
 # Docker Integration Reference
 
-moon provides built-in Docker support to reduce the complexity of containerizing monorepo projects, leveraging layer caching and staged builds.
+Moon provides first-class Docker support with commands to scaffold workspaces, generate Dockerfiles, set up dependencies, and prune for production.
 
 ## Table of Contents
-- [Prerequisites](#prerequisites)
-- [Commands](#commands)
-- [Workflow](#workflow)
-- [Multi-stage build pattern](#multi-stage-build-pattern)
-- [Configuration](#configuration)
-- [Custom Dockerfile templates](#custom-dockerfile-templates)
+- [Workflow overview](#workflow-overview)
+- [moon docker scaffold](#moon-docker-scaffold)
+- [moon docker file](#moon-docker-file)
+- [moon docker setup](#moon-docker-setup)
+- [moon docker prune](#moon-docker-prune)
+- [Multi-stage Dockerfile pattern](#multi-stage-dockerfile-pattern)
 - [Alpine compatibility](#alpine-compatibility)
 - [Remote caching in Docker](#remote-caching-in-docker)
+- [Custom Dockerfile templates](#custom-dockerfile-templates)
+- [Workspace-level Docker config](#workspace-level-docker-config)
+- [Project-level Docker config](#project-level-docker-config)
+- [v2 Docker changes](#v2-docker-changes)
 
-## Prerequisites
+## Workflow Overview
 
-1. Add `.moon/cache` to `.dockerignore` — cache files aren't portable across environments
-2. Decide on `.git` handling:
-   - **Recommended**: Exclude `.git` to reduce image size (some moon features disabled)
-   - **Alternative**: Include `.git` + install git in image for full functionality
+The Docker integration follows a layered approach for optimal Docker layer caching:
 
-## Commands
+1. **Scaffold** -- `moon docker scaffold <project>` -- create minimal workspace skeleton
+2. **Copy configs** -- Copy workspace configs (Docker layer cached)
+3. **Setup** -- `moon docker setup` -- install toolchain + deps (layer cached if configs unchanged)
+4. **Copy sources** -- Copy source files
+5. **Build** -- Run build tasks
+6. **Prune** -- `moon docker prune` -- remove dev dependencies
 
-### moon docker scaffold \<project\>
+## moon docker scaffold
 
-Generates a minimal workspace skeleton containing only the files needed to install dependencies — manifests, lockfiles, and config files. This enables Docker layer caching: the dependency install layer only rebuilds when these files change.
+Create a minimal workspace skeleton for a project and its dependencies. Output goes to `.moon/docker/` with two subdirectories:
 
-```bash
-moon docker scaffold app
-```
-
-Output goes to `.moon/docker/` with two phases:
-- `configs/` — workspace config files (previously called `workspace/` in v1)
-- `sources/` — source files for the target project and its dependencies
-
-### moon docker file
-
-Auto-generates a Dockerfile based on your workspace configuration.
+- `configs/` -- workspace config files (package.json, lockfiles, moon configs)
+- `sources/` -- source files for the target project and its dependencies
 
 ```bash
-moon docker file                          # default Dockerfile
-moon docker file --template ./Dockerfile.tera   # custom template
+moon docker scaffold <...projects>
 ```
 
-### moon docker setup
+## moon docker file
 
-Installs the toolchain and project dependencies inside the container.
+Generate a multi-stage Dockerfile for a project.
+
+```bash
+moon docker file <project> [dest]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--defaults` | Use default options, skip prompts |
+| `--build-task <task>` | Task to build the project |
+| `--start-task <task>` | Task to start the project |
+| `--image <image>` | Base Docker image |
+| `--no-prune` | Skip dependency pruning |
+| `--no-setup` | Skip dependency setup (v2.0.0+) |
+| `--no-toolchain` | Use system binaries instead of toolchain |
+| `--template <path>` | Custom Tera template for Dockerfile (v2.0.0+) |
+
+**Example:**
+```bash
+moon docker file web-app --image node:22-alpine --build-task build --start-task start
+```
+
+## moon docker setup
+
+Install toolchain and dependencies inside a Docker container. Run this after copying the scaffolded configs.
 
 ```bash
 moon docker setup
 ```
 
-### moon docker prune
+## moon docker prune
 
-Removes extraneous dependencies and installs production-only packages.
+Remove extraneous dependencies and install production-only packages. Run after building.
 
 ```bash
 moon docker prune
 ```
 
-## Workflow
-
-The typical Docker build workflow with moon:
-
-1. **Scaffold** — Generate the minimal skeleton
-2. **Copy configs** — Copy workspace configs first (layer cached)
-3. **Setup** — Install toolchain and dependencies (layer cached if configs unchanged)
-4. **Copy sources** — Copy actual source files
-5. **Build** — Run build tasks
-6. **Prune** — Remove dev dependencies for production
-
-This approach has O(1) complexity — you don't need to manually list every package.json or manifest file.
-
-## Multi-stage build pattern
+## Multi-Stage Dockerfile Pattern
 
 ```dockerfile
 # Stage 1: Base
-FROM node:20 AS base
+FROM node:22 AS base
 WORKDIR /app
 
-# Stage 2: Skeleton (dependency install)
+# Stage 2: Skeleton (dependency install -- layer cached)
 FROM base AS skeleton
 COPY .moon/docker/configs/ .
 RUN moon docker setup
@@ -90,71 +97,26 @@ RUN moon run app:build
 
 # Stage 4: Production
 FROM base AS production
-COPY --from=build /app/.moon/docker/sources/ .
+COPY --from=build /app .
 RUN moon docker prune
 CMD ["node", "dist/index.js"]
 ```
 
-## Configuration
+The key insight: by copying configs first and running `moon docker setup`, Docker caches the dependency layer. Source changes only invalidate the build stage, not the dependency install.
 
-### Workspace-level (`.moon/workspace.*`)
+## Alpine Compatibility
 
-```yaml
-docker:
-  file:
-    template: './docker/Dockerfile.tera'     # custom Tera template
-  scaffold:
-    configsPhaseGlobs:                       # extra files for configs phase
-      - '*.config.js'
-      - '.browserslistrc'
-  prune:
-    installToolchainDependencies: true       # reinstall prod deps after prune
-    deleteVendorDirectories: true            # remove node_modules, vendor, etc.
-```
-
-### Project-level (`moon.*`)
-
-```yaml
-docker:
-  scaffold:
-    sourcesPhaseGlobs:                       # extra files for sources phase
-      - 'assets/**/*'
-  file:
-    template: './custom-project-dockerfile.tera'
-```
-
-Project-level settings override workspace-level settings.
-
-## Custom Dockerfile templates
-
-v2 supports Tera-powered custom Dockerfile templates:
-
-```bash
-moon docker file --template ./Dockerfile.tera
-```
-
-Or configure it:
-```yaml
-# .moon/workspace.yml
-docker:
-  file:
-    template: './docker/Dockerfile.tera'
-```
-
-## Alpine compatibility
-
-Alpine Linux images (e.g., `node:alpine`) lack prebuilt binaries that moon's toolchain expects. Set this env var to use globally installed tools instead:
+Alpine Linux uses musl libc which can cause issues with precompiled binaries. Set this env var to use system-installed tools instead of proto-managed ones:
 
 ```dockerfile
 ENV MOON_TOOLCHAIN_FORCE_GLOBALS=true
 ```
 
-## Remote caching in Docker
+## Remote Caching in Docker
 
-To benefit from remote caching during Docker builds, you need to pass credentials into the build context:
+Use Docker build secrets to pass cache tokens:
 
 ```dockerfile
-# Using Docker secrets (recommended)
 RUN --mount=type=secret,id=cache_token \
   REMOTE_CACHE_TOKEN=$(cat /run/secrets/cache_token) \
   moon run app:build
@@ -164,3 +126,68 @@ Build with:
 ```bash
 docker build --secret id=cache_token,env=REMOTE_CACHE_TOKEN .
 ```
+
+## Custom Dockerfile Templates
+
+Moon uses the Tera template engine for Dockerfile generation. Provide a custom template:
+
+### Via workspace config
+
+```yaml
+# .moon/workspace.yml
+docker:
+  file:
+    template: './docker/Dockerfile.tera'
+```
+
+### Via CLI
+
+```bash
+moon docker file app --template ./Dockerfile.tera
+```
+
+## Workspace-Level Docker Config
+
+```yaml
+# .moon/workspace.yml
+docker:
+  file:
+    template: './docker/Dockerfile.tera'     # Custom Tera template
+  scaffold:
+    configsPhaseGlobs:                       # Extra files for configs phase
+      - '*.config.js'
+      - '.browserslistrc'
+  prune:
+    installToolchainDependencies: true       # Reinstall prod deps (default: true)
+    deleteVendorDirectories: true            # Remove node_modules, etc. (default: true)
+```
+
+## Project-Level Docker Config
+
+```yaml
+# <project>/moon.yml
+docker:
+  file:
+    buildTask: 'build'
+    startTask: 'start'
+    image: 'node:22-alpine'
+    template: './custom-Dockerfile.tera'
+    runSetup: true                           # v2.0.0+
+    runPrune: true                           # v2.0.0+
+  scaffold:
+    sourcesPhaseGlobs:
+      - 'src/**/*'
+      - 'assets/**/*'
+    configsPhaseGlobs:
+      - '*.config.js'
+```
+
+## v2 Docker Changes
+
+- `docker.scaffold.include` renamed to `docker.scaffold.configsPhaseGlobs` (workspace) and `docker.scaffold.sourcesPhaseGlobs` (project)
+- `docker.prune.installToolchainDeps` renamed to `docker.prune.installToolchainDependencies`
+- `.moon/docker/workspace` directory renamed to `.moon/docker/configs`
+- `docker.scaffold.copyToolchainFiles` removed
+- `--no-setup` option added to `moon docker file`
+- `--template` option added for custom Tera templates
+- `runSetup` and `runPrune` options added to project-level config

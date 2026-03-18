@@ -1,80 +1,118 @@
 # CI/CD Integration Reference
 
-moon provides first-class CI support through the `moon ci` command, which automates change detection, task selection, and parallel execution.
+How to set up moon in continuous integration pipelines, including provider configs, parallelization, caching strategies, and affected detection.
 
 ## Table of Contents
-- [moon ci command](#moon-ci-command)
-- [How it works](#how-it-works)
-- [Revision comparison](#revision-comparison)
-- [Target selection](#target-selection)
-- [Parallel distribution](#parallel-distribution)
-- [Caching in CI](#caching-in-ci)
-- [Provider setup](#provider-setup)
+- [How moon ci works](#how-moon-ci-works)
+- [GitHub Actions](#github-actions)
+- [GitLab CI](#gitlab-ci)
+- [CircleCI](#circleci)
+- [Azure Pipelines](#azure-pipelines)
+- [Parallelization / sharding](#parallelization--sharding)
+- [Caching strategies](#caching-strategies)
+- [Remote caching in CI](#remote-caching-in-ci)
+- [Run reports](#run-reports)
+- [Affected detection](#affected-detection)
+- [v2 CI changes](#v2-ci-changes)
 
-## moon ci command
+## How moon ci Works
 
-```bash
-moon ci                                # run all affected tasks
-moon ci :build :test :lint             # run specific task types
-moon ci --base main --head HEAD        # explicit revision range
-moon ci --job 0 --job-total 4          # shard across jobs
-moon ci --include-relations            # include dependency/dependent tasks
-```
+`moon ci` runs affected tasks in CI environments. Internally it uses `moon exec` with these defaults: `--affected`, `--ci`, `--on-failure=continue`, `--summary=detailed`, `--upstream=deep`, `--downstream=direct`.
 
-## How it works
+The workflow:
 
-When `moon ci` runs, it automatically:
-
-1. Determines changed files by comparing HEAD against a base revision
-2. Identifies all tasks affected by those changes
-3. Additionally runs affected tasks' dependencies (and dependents if `--include-relations`)
-4. Generates an action and dependency graph
-5. Installs the toolchain and dependencies
-6. Executes all actions using a thread pool (parallel by default)
-7. Reports pass/fail statistics
-
-In v2, graph relations (dependents) are **not** included by default. Use `--include-relations` to restore v1 behavior.
-
-## Revision comparison
-
-moon auto-detects base/head based on CI provider. Fallback is `vcs.defaultBranch` → `HEAD`.
-
-Override with:
-```bash
-moon ci --base origin/main --head HEAD
-```
-
-Or environment variables (highest precedence):
-```bash
-MOON_BASE=origin/main
-MOON_HEAD=HEAD
-```
-
-## Target selection
-
-By default, `moon ci` runs ALL affected tasks. You can filter:
+1. Determines changed files by comparing HEAD against base revision
+2. Identifies affected targets and their dependencies
+3. Generates action and dependency graphs
+4. Installs toolchain and dependencies
+5. Runs affected tasks with `runInCI` enabled
+6. Reports pass/fail statistics
 
 ```bash
-moon ci :build :test            # only "build" and "test" tasks
-moon ci app:build api:test      # specific project:task pairs
+moon ci                              # All affected CI tasks
+moon ci :build :lint                 # Specific affected task types
+moon ci --base main                  # Compare against main branch
+moon ci --job 0 --job-total 4        # Shard across CI jobs
+moon ci --include-relations          # Include dependency/dependent tasks
 ```
 
-Tasks with `runInCI: false` are excluded. Tasks named `dev`, `start`, or `serve` are excluded by default.
+## GitHub Actions
 
-The `runInCI` option is now respected across `moon ci`, `moon check`, `moon run`, and `moon exec`. Commands also respect the `CI` environment variable — use `--ci` to force CI mode or `--ignore-ci-checks` to override.
+```yaml
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
 
-## Parallel distribution
-
-For CI environments with matrix/sharding support:
-
-```bash
-moon ci --job-total 4 --job 0    # job 0 of 4
-moon ci --job-total 4 --job 1    # job 1 of 4
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0                   # REQUIRED for affected detection
+      - uses: moonrepo/setup-toolchain@v1  # Installs both moon and proto
+        with:
+          auto-install: true
+      - run: moon ci
 ```
 
-moon distributes tasks evenly across jobs. Each job independently determines which tasks it owns.
+`fetch-depth: 0` is critical -- without full history, moon cannot determine which files changed.
 
-### GitHub Actions example
+## GitLab CI
+
+```yaml
+ci:
+  image: node:22
+  before_script:
+    - curl -fsSL https://moonrepo.dev/install/moon.sh | bash
+    - export PATH="$HOME/.moon/bin:$PATH"
+  script:
+    - moon ci
+  variables:
+    GIT_DEPTH: 0                         # Full history for affected detection
+```
+
+## CircleCI
+
+```yaml
+version: 2.1
+jobs:
+  ci:
+    docker:
+      - image: cimg/node:22.0
+    steps:
+      - checkout
+      - run:
+          name: Install moon
+          command: curl -fsSL https://moonrepo.dev/install/moon.sh | bash
+      - run:
+          name: Run CI
+          command: |
+            export PATH="$HOME/.moon/bin:$PATH"
+            moon ci
+```
+
+## Azure Pipelines
+
+```yaml
+steps:
+  - checkout: self
+    fetchDepth: 0                        # Full history
+  - script: curl -fsSL https://moonrepo.dev/install/moon.sh | bash
+    displayName: Install moon
+  - script: |
+      export PATH="$HOME/.moon/bin:$PATH"
+      moon ci
+    displayName: Run CI
+```
+
+## Parallelization / Sharding
+
+Use `--job` and `--job-total` to shard tasks across multiple CI jobs. Moon distributes tasks evenly across the total number of jobs.
+
+### GitHub Actions
 
 ```yaml
 jobs:
@@ -87,75 +125,122 @@ jobs:
         with:
           fetch-depth: 0
       - uses: moonrepo/setup-toolchain@v1
-      - run: moon ci --job-total 4 --job ${{ matrix.index }}
+        with:
+          auto-install: true
+      - run: moon ci --job ${{ matrix.index }} --job-total 4
 ```
 
-### Other providers
+### Provider-specific variables
 
-- **CircleCI**: Use `parallelism` + `CIRCLE_NODE_INDEX`/`CIRCLE_NODE_TOTAL`
-- **Buildkite**: Use `parallelism` + `BUILDKITE_PARALLEL_JOB`/`BUILDKITE_PARALLEL_JOB_COUNT`
-- **GitLab CI**: Use `parallel` + `CI_NODE_INDEX`/`CI_NODE_TOTAL`
+Some CI providers expose job indices automatically:
 
-## Caching in CI
+| Provider | Job Index | Job Total |
+|----------|-----------|-----------|
+| CircleCI | `CIRCLE_NODE_INDEX` | `CIRCLE_NODE_TOTAL` |
+| Buildkite | `BUILDKITE_PARALLEL_JOB` | `BUILDKITE_PARALLEL_JOB_COUNT` |
+| GitLab | `CI_NODE_INDEX` | `CI_NODE_TOTAL` |
 
-### Remote caching (recommended)
+## Caching Strategies
 
-Configure in `.moon/workspace.*`:
+Control cache behavior via the `--cache` flag:
+
+| Mode | Description | Use case |
+|------|-------------|----------|
+| `read-write` (default) | Read and write cache | Normal CI runs |
+| `read` | Read-only | Deploy builds (don't pollute cache) |
+| `write` | Write-only | Cache warming |
+| `off` | No caching | Debugging |
+
+```bash
+moon ci --cache read               # Read-only for deploy
+moon ci --cache write              # Cache warming run
+```
+
+Use `--force` (or `-f`) to bypass cache entirely and re-run all tasks.
+
+## Remote Caching in CI
+
+Configure remote caching in `.moon/workspace.yml`:
 
 ```yaml
 remote:
-  host: 'grpcs://cache.example.com:9092'
+  host: 'grpcs://cache.depot.dev'
   auth:
-    token: '$REMOTE_CACHE_TOKEN'
+    token: 'DEPOT_TOKEN'               # Env var name
+    headers:
+      'X-Depot-Org': 'my-org'
+  cache:
+    compression: 'zstd'
 ```
 
-Cache strategies via CLI:
-- `--cache read-write` — default, read and write to cache
-- `--cache read` — read-only, useful for deploy builds
-- `--cache write` — write-only, useful for cache warming
-- `--update-cache` — force cache refresh
+Or enable conditionally via environment variable:
 
-### Manual caching (alternative)
+```bash
+MOON_REMOTE_HOST=grpc://cache:9092 moon ci
+```
 
-If not using remote caching, persist these directories in your CI cache:
-- `.moon/cache/hashes`
-- `.moon/cache/outputs`
+What gets cached:
+- Task outputs (as defined in config)
+- stdout and stderr
+- Identified by moon-generated hash
+- Source code is NOT stored
 
-Do NOT persist other `.moon/cache/` directories — they aren't portable.
+### Self-hosted (bazel-remote)
 
-Since tasks can generate different hashes each run, you'll need to handle invalidation manually. This is why remote caching is recommended.
+```bash
+docker run -p 9092:9092 \
+  -v /data/moon-cache:/data \
+  buchgr/bazel-remote-cache \
+  --dir=/data \
+  --max_size=50 \
+  --storage_mode uncompressed \
+  --grpc_address=0.0.0.0:9092
+```
 
-## Provider setup
+```yaml
+remote:
+  host: 'grpc://cache.internal:9092'
+```
+
+## Run Reports
 
 ### GitHub Actions
 
+Post a summary of the CI run as a PR comment:
+
 ```yaml
-jobs:
-  ci:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0          # full history for change detection
-      - uses: moonrepo/setup-toolchain@v1
-        with:
-          auto-install: true
-      - run: moon ci
+- uses: moonrepo/run-report-action@v1
+  if: success() || failure()
+  with:
+    access-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-The `moonrepo/setup-toolchain` action installs both moon and proto.
+## Affected Detection
 
-### Other providers
+Moon determines affected projects/tasks by comparing changed files against project source directories and task inputs.
 
-Install moon via npm or the install script:
+### Environment variables for affected detection
+
+| Variable | Description |
+|----------|-------------|
+| `MOON_BASE` | Override base revision |
+| `MOON_HEAD` | Override head revision |
+
+### CLI flags
 
 ```bash
-# Via npm (add to devDependencies)
-npx moon ci
-
-# Via install script
-curl -fsSL https://moonrepo.dev/install/moon.sh | bash
-moon ci
+moon ci --base main                  # Compare against main
+moon ci --affected local             # Use local changes
+moon ci --affected remote            # Use remote changes
+moon ci --status staged              # Only staged changes
 ```
 
-Ensure `fetch-depth: 0` (or equivalent) for full git history — moon needs it for change detection.
+## v2 CI Changes
+
+Key differences from v1:
+
+1. **Graph relations excluded by default**: Use `--include-relations` or `MOON_INCLUDE_RELATIONS` env var to restore v1 behavior
+2. **`--update-cache` removed**: Use `--force` instead
+3. **`moon ci` uses `moon exec` internally**: All exec options available
+4. **Shallow checkout errors**: v2.0.3 temporarily disabled the hard error for shallow checkouts
+5. **"run" type tasks**: Fixed in v2.0.3 to execute correctly in CI

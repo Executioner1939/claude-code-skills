@@ -1,6 +1,6 @@
 # Workspace Configuration Reference
 
-The `.moon/workspace.*` file is required and configures the entire workspace. It supports YAML, JSON, JSONC, TOML, HCL, and Pkl formats.
+The `.moon/workspace.*` file is the only required config file and controls the entire workspace. Supports YAML, JSON, JSONC, TOML, HCL, and Pkl formats.
 
 ## Table of Contents
 - [extends](#extends)
@@ -14,16 +14,20 @@ The `.moon/workspace.*` file is required and configures the entire workspace. It
 - [pipeline](#pipeline)
 - [notifier](#notifier)
 - [remote](#remote)
-- [telemetry](#telemetry)
 - [vcs](#vcs)
+- [experiments](#experiments)
+- [telemetry](#telemetry)
 - [versionConstraint](#versionconstraint)
+- [Complete example](#complete-example)
 
 ## extends
 
-Inherit settings from external workspace configs. Accepts HTTPS URLs or relative file paths. Local settings take precedence over inherited ones.
+Inherit settings from an external workspace config. Accepts HTTPS URLs or relative file paths. Local settings override inherited ones.
 
 ```yaml
 extends: 'https://raw.githubusercontent.com/org/shared-configs/main/.moon/workspace.yml'
+# or
+extends: '../shared/.moon/workspace.yml'
 ```
 
 ## projects
@@ -31,30 +35,37 @@ extends: 'https://raw.githubusercontent.com/org/shared-configs/main/.moon/worksp
 **Required.** Defines where projects live. Three forms:
 
 ```yaml
-# Manual map
+# Manual map -- project ID to path
 projects:
   app: 'apps/frontend'
   api: 'apps/backend'
   shared: 'packages/shared'
 
-# Glob patterns (auto-discover)
+# Glob patterns -- auto-discover projects
 projects:
   - 'apps/*'
   - 'packages/*'
 
-# Both
+# Combined globs and explicit sources
 projects:
-  sources:
+  globs:
     - 'apps/*'
     - 'packages/*'
-  app: 'apps/frontend'   # explicit override
-```
+  sources:
+    root: '.'
+    app: 'apps/frontend'
 
-Use `globFormat: 'source-path'` in cases where directory names collide (uses full relative path as project ID).
+# Source-path based IDs (prevents name collisions)
+projects:
+  globs:
+    - 'apps/*'
+    - 'packages/*'
+  globFormat: 'source-path'   # Uses full path as ID, e.g., "apps/web"
+```
 
 ## defaultProject
 
-When no project scope is provided on the command line, moon uses this project. Useful for single-project repos or repos with a primary app.
+Fallback project when no scope is provided on the command line. Useful for single-project repos or repos with a primary app.
 
 ```yaml
 defaultProject: 'app'
@@ -62,173 +73,252 @@ defaultProject: 'app'
 
 ## codeowners
 
-Auto-generates a `CODEOWNERS` file.
+Auto-generate a `CODEOWNERS` file from project configuration.
 
 ```yaml
 codeowners:
+  sync: true                          # Regenerate on target runs (default: false)
+  orderBy: 'project-id'              # 'file-source' (default) or 'project-id'
   globalPaths:
-    '*': ['@org/platform-team']
-    '*.rs': ['@org/rust-team']
-  orderBy: 'project-id'   # or 'file-source' (default)
-  sync: true               # regenerate when targets run
+    '*': ['@admins']
+    '/.github/': ['@infra']
+    '*.rs': ['@rust-team']
 ```
 
 ## constraints
 
-Enforce project relationship rules.
+Enforce dependency rules between projects based on layers and tags.
 
 ```yaml
 constraints:
-  enforceLayerRelationships: true   # layers: automation > application > tool > library > scaffolding > configuration
+  enforceLayerRelationships: true     # Validates hierarchy: automation > application > tool > library > scaffolding > configuration
   tagRelationships:
-    frontend:
-      - 'shared'
-      - 'ui'
-    backend:
-      - 'shared'
-      - 'db'
+    next: ['react']
+    frontend: ['shared', 'ui']
+    backend: ['shared', 'db']
 ```
 
 ## docker
 
-Workspace-level Docker defaults for scaffold and prune operations.
+Workspace-level Docker defaults for scaffold, file generation, and prune operations.
 
 ```yaml
 docker:
   file:
-    template: './docker/Dockerfile.tera'   # custom Tera template
+    template: './docker/Dockerfile.tera'     # Custom Tera template
   scaffold:
-    configsPhaseGlobs:
+    configsPhaseGlobs:                       # Extra files for the configs phase
       - '*.config.js'
-      - 'tsconfig.json'
+      - '.browserslistrc'
   prune:
-    installToolchainDependencies: true
-    deleteVendorDirectories: true
+    installToolchainDependencies: true       # Reinstall prod deps (default: true)
+    deleteVendorDirectories: true            # Remove node_modules, etc. (default: true)
 ```
 
 ## generator
 
-Configure template locations for code generation.
+Configure template locations for code generation (`moon generate`).
 
 ```yaml
 generator:
   templates:
-    - './templates'                              # local directory
-    - 'git://github.com/org/templates#main'      # git repo
-    - 'npm://@company/templates#1.0.0'           # npm package
-    - 'https://example.com/templates.zip'        # remote archive
-    - 'glob://projects/*/templates/*'            # glob pattern
+    - './templates'                                 # Local directory
+    - 'file://./shared-templates'                   # Explicit file path
+    - 'git://github.com/org/templates#main'         # Git repo + branch/tag
+    - 'npm://@company/moon-templates#2.0.0'         # npm package + version
+    - 'https://example.com/templates.tar.gz'        # Remote archive
+    - 'glob://projects/*/templates/*'               # Glob pattern
 ```
 
 ## hasher
 
-Controls how moon hashes inputs for cache determination.
+Controls how moon hashes inputs for cache key determination.
 
 ```yaml
 hasher:
-  optimization: 'accuracy'        # 'accuracy' (default) or 'performance'
-  walkStrategy: 'vcs'             # 'vcs' (default) or 'glob'
-  ignoreMissingPatterns: false
+  optimization: 'accuracy'        # 'accuracy' (default, parses lockfile) or 'performance' (uses manifest)
+  walkStrategy: 'vcs'             # 'vcs' (default, uses git) or 'glob' (filesystem walk)
+  warnOnMissingInputs: true       # default: true
   ignorePatterns:
-    - '**/*.test.*'
-  warnOnMissingInputs: true
+    - '**/*.log'
+  ignoreMissingPatterns:           # default: ['**/.env', '**/.env.*']
+    - 'optional/**/*'
 ```
 
-- `accuracy` uses lockfiles for dependency hashing
+- `accuracy` parses lockfiles for precise dependency hashing
 - `performance` uses manifests (faster but less precise)
-- `vcs` walk strategy uses git to find files (faster), `glob` walks the filesystem
+- `vcs` walk uses git to enumerate files (faster); `glob` does a filesystem walk
 
 ## pipeline
 
-Controls the task execution pipeline (renamed from `runner` in v1).
+Controls the task execution pipeline. Renamed from `runner` in v1.
 
 ```yaml
 pipeline:
-  autoCleanCache: true
-  cacheLifetime: '7 days'
-  installDependencies: true
-  logRunningCommand: false
-  syncWorkspace: true
-  syncProjects: true
+  autoCleanCache: true                     # default: true
+  cacheLifetime: '7 days'                  # default: '7 days'
+  installDependencies: true                # true, false, or list of toolchain IDs
+  syncProjects: true                       # true, false, or list of project IDs
+  syncWorkspace: true                      # default: true
+  inheritColorsForPipedTasks: true         # default: true
+  logRunningCommand: false                 # default: false -- log resolved command + args
+  killProcessThreshold: 2000              # ms, default: 2000
 ```
-
-- `cacheLifetime`: how long cached artifacts persist before cleanup
-- `installDependencies`: auto-run InstallWorkspaceDeps/InstallProjectDeps before tasks
-- `logRunningCommand`: log the resolved command, args, and working directory
 
 ## notifier
 
-Configure notifications for pipeline events.
+Configure webhook and terminal notifications for pipeline events.
 
 ```yaml
 notifier:
-  terminalNotifications: true      # OS-level notifications
   webhookUrl: 'https://hooks.example.com/moon'
+  webhookAcknowledge: false               # Wait for webhook response (default: false)
+  terminalNotifications: 'always'         # 'always', 'failure', 'success', 'task-failure'
 ```
 
-Webhook events are fired for pipeline start/finish, task start/finish, tool installs, etc.
+Webhook events: `pipeline.started`, `pipeline.finished`, `pipeline.aborted`, `task.running`, `task.ran`, `dependencies.installing`, `dependencies.installed`, `toolchain.*`
 
 ## remote
 
-Configure remote caching. Supports any Bazel Remote Execution v2 API compatible service.
+Configure remote caching. Compatible with any Bazel Remote Execution v2 API service.
 
 ```yaml
 remote:
-  host: 'grpcs://cache.example.com:9092'    # required
-  api: 'grpc'                                # 'grpc' (default) or 'http'
+  host: 'grpcs://cache.example.com:9092'  # Required. grpc://, grpcs://, http://, https://
+  api: 'grpc'                             # 'grpc' (default) or 'http'
+
   auth:
-    token: '$REMOTE_CACHE_TOKEN'             # Bearer token
+    token: 'CACHE_TOKEN'                  # Env var name for Bearer token
     headers:
-      x-org-id: 'my-org'
+      'X-Custom-Header': 'value'
+
   cache:
-    compression: 'zstd'
-    instanceName: 'moon-cache'
-    checkIntegrity: true
+    compression: 'zstd'                   # 'none' (default) or 'zstd'
+    instanceName: 'moon-outputs'          # Cache partition identifier
+    localReadOnly: false                  # Download-only locally, upload in CI
+    verifyIntegrity: false                # Validate blob digests
+
   tls:
-    cert: '/path/to/cert.pem'
+    cert: 'certs/ca.pem'
     domain: 'cache.example.com'
+    assumeHttp2: false
+
   mtls:
-    caCert: '/path/to/ca.pem'
-    clientCert: '/path/to/client-cert.pem'
-    clientKey: '/path/to/client-key.pem'
+    caCert: 'certs/ca.pem'
+    clientCert: 'certs/client.pem'
+    clientKey: 'certs/client.key'
+    domain: 'cache.example.com'
+    assumeHttp2: false
 ```
 
-Can also be enabled conditionally via `MOON_REMOTE_HOST` environment variable.
+Can be conditionally enabled via `MOON_REMOTE_HOST` environment variable.
 
-### Depot (managed service)
+### Depot (managed cloud service)
 
 ```yaml
 remote:
   host: 'grpcs://cache.depot.dev'
   auth:
+    token: 'DEPOT_TOKEN'
     headers:
-      x-depot-org: '$DEPOT_ORG_ID'
-    token: '$DEPOT_TOKEN'
+      'X-Depot-Org': '<your-org-id>'
 ```
 
 ## vcs
 
-Version control system configuration.
+Version control system configuration, including git hooks.
 
 ```yaml
 vcs:
-  client: 'git'
-  provider: 'github'           # 'github', 'gitlab', 'bitbucket', 'other'
-  defaultBranch: 'main'
+  client: 'git'                          # default: 'git'
+  provider: 'github'                     # 'github' (default), 'gitlab', 'bitbucket', 'other'
+  defaultBranch: 'main'                  # default: 'master'
+  remoteCandidates:                      # default: ['origin', 'upstream']
+    - 'origin'
+    - 'upstream'
+  sync: true                             # Auto-generate + link hooks (default: false)
+  hookFormat: 'native'                   # 'native' (default) or 'bash'
+
   hooks:
     pre-commit:
-      - 'moon run :lint'
+      - 'moon run :lint :format --affected --status=staged'
+    commit-msg:
+      - 'commitlint --edit $ARG1'
     pre-push:
-      - 'moon run :test'
-  sync: true                   # auto-generate hook scripts in .moon/hooks
+      - 'moon run :test --affected'
 ```
 
-Hooks are now written to `.moon/hooks/` (not `.git/hooks/`), and git is configured to use `core.hooksPath`. This supports worktrees.
+Hooks are written to `.moon/hooks/` (not `.git/hooks/`). Git is configured with `core.hooksPath`. Supports worktrees. Scripts: `.sh` on Unix, `.ps1` on Windows. Arguments: `$ARG0` (script), `$ARG1`, `$ARG2`, etc.
+
+## experiments
+
+```yaml
+experiments:
+  fasterGlobWalk: true                   # Concurrent glob with caching (default: true)
+  gitV2: true                            # Improved Git handling (default: true in v2)
+```
+
+## telemetry
+
+```yaml
+telemetry: true                          # default: true
+```
 
 ## versionConstraint
 
 Enforce a minimum moon version across your team.
 
 ```yaml
+versionConstraint: '>=2.0.0'
+```
+
+## Complete Example
+
+```yaml
+# .moon/workspace.yml
+extends: 'https://raw.githubusercontent.com/org/configs/main/.moon/workspace.yml'
+
+projects:
+  - 'apps/*'
+  - 'packages/*'
+
+defaultProject: 'web-app'
+
+vcs:
+  provider: 'github'
+  defaultBranch: 'main'
+  hooks:
+    pre-commit:
+      - 'moon run :lint :format --affected --status=staged'
+  sync: true
+
+pipeline:
+  cacheLifetime: '7 days'
+  logRunningCommand: true
+
+remote:
+  host: 'grpcs://cache.depot.dev'
+  auth:
+    token: 'DEPOT_TOKEN'
+    headers:
+      'X-Depot-Org': 'my-org'
+  cache:
+    compression: 'zstd'
+
+generator:
+  templates:
+    - './templates'
+    - 'git://github.com/org/templates#main'
+
+codeowners:
+  sync: true
+  orderBy: 'project-id'
+
+constraints:
+  enforceLayerRelationships: true
+
+hasher:
+  optimization: 'accuracy'
+
 versionConstraint: '>=2.0.0'
 ```

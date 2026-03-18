@@ -1,24 +1,31 @@
 # Migration from v1 to v2 Reference
 
-Run `moon migrate v2` to automate what it can, then review this guide for everything else.
+Complete guide to migrating from moon v1 to v2 "Phobos". Includes all breaking changes, renamed settings, and migration steps.
 
 ## Table of Contents
+- [Automated migration](#automated-migration)
 - [Installation](#installation)
 - [CLI changes](#cli-changes)
-- [Workspace config](#workspace-config)
-- [Toolchains config](#toolchains-config)
-- [Project config](#project-config)
+- [Workspace config changes](#workspace-config-changes)
+- [Toolchain config changes](#toolchain-config-changes)
+- [Project config changes](#project-config-changes)
 - [Task changes](#task-changes)
-- [Environment variables](#environment-variables)
-- [VCS & hooks](#vcs--hooks)
-- [Docker](#docker)
-- [Extensions](#extensions)
-- [Query language (MQL)](#query-language-mql)
-- [Webhooks](#webhooks)
+- [Changed defaults](#changed-defaults)
+- [Environment variable changes](#environment-variable-changes)
+- [MQL field renames](#mql-field-renames)
+- [Other breaking changes](#other-breaking-changes)
+
+## Automated Migration
+
+```bash
+moon migrate v2
+```
+
+This automates common renames and restructuring. Manual review is still required for everything it cannot handle.
 
 ## Installation
 
-`moon upgrade` does NOT work from v1 → v2 because the distribution format changed. Install fresh:
+`moon upgrade` does NOT work from v1 to v2 because the distribution format changed (archives instead of direct executables). Install fresh:
 
 ```bash
 proto install moon 2.0.0
@@ -26,49 +33,34 @@ proto install moon 2.0.0
 curl -fsSL https://moonrepo.dev/install/moon.sh | bash
 ```
 
-**OS note**: `x86_64-apple-darwin` (Intel Mac) support was removed. Only Apple Silicon (`aarch64-apple-darwin`) is supported.
+Intel Mac (`x86_64-apple-darwin`) support was removed in v2.
 
-## CLI changes
+## CLI Changes
 
-### Naming convention
-All flags converted to kebab-case:
-- `--logLevel` → `--log-level`
-- `--platform` → `--toolchain`
-
-### Removed commands
-- `moon node` (use toolchain plugins)
-- `moon migrate from-package-json`
-- `moon query hash` and `moon query hash-diff` (use `moon hash`)
-
-### Command changes
-
-| Command | Change |
-|---------|--------|
-| `moon check` | Uses `moon exec` internally; `--update-cache` → `--force`; add `--closest` to find nearest project |
-| `moon ci` | Relations excluded by default; add `--include-relations` for v1 behavior |
-| `moon generate` | Destination changed from positional arg to `--to` option |
-| `moon init` | Removed scaffolding functionality |
-| `moon run` | `--dependents` requires value (`deep` or `direct`); removed `--no-bail`, `--profile`, `--remote` |
+| Change | Details |
+|--------|---------|
+| Naming convention | All flags changed from camelCase to kebab-case (`--logLevel` becomes `--log-level`) |
+| `--platform` | Renamed to `--toolchain` |
+| Removed commands | `moon node`, `moon migrate from-package-json`, `moon query hash`, `moon query hash-diff` |
+| `moon check` | Uses `moon exec` internally; `--update-cache` becomes `--force`; added `--closest` |
+| `moon ci` | Relations excluded by default; use `--include-relations` for v1 behavior |
+| `moon generate` | Destination changed from positional argument to `--to` option |
+| `moon run` | `--dependents` requires a value; removed `--no-bail`, `--profile`, `--remote` |
 | `moon run` (no scope) | No longer auto-finds closest project; use `~:` prefix |
+| Interactive selection | Multiple commands now prompt when no identifier provided |
 
-### New commands
-- `moon exec` — low-level task execution
-- `moon extension` — extension management
-- `moon hash` — hash inspection
-- `moon projects` — list all projects as table
-- `moon tasks` — list all tasks
-- `moon template` — template info
-- `moon query affected` — affected projects/tasks
+### New commands in v2
 
-### Interactive selection
-`moon check`, `moon run`, and `moon project` now prompt for target selection when no identifier is provided.
+- `moon exec` -- low-level task execution
+- `moon extension` -- extension management
+- `moon hash` -- hash inspection and comparison
+- `moon projects` -- list all projects as table
+- `moon tasks` -- list all tasks
+- `moon template` -- template info
+- `moon query affected` -- affected projects/tasks
+- `moonx` -- stabilized as dedicated binary
 
-### moonx
-`moonx` is now stabilized as a dedicated binary for `moon exec` operations.
-
-## Workspace config
-
-File: `.moon/workspace.*`
+## Workspace Config Changes
 
 | v1 | v2 |
 |----|-----|
@@ -81,16 +73,13 @@ File: `.moon/workspace.*`
 | `unstable_remote` | `remote` |
 | `vcs.manager` | `vcs.client` |
 | `vcs.syncHooks` | `vcs.sync` |
+| `extensions` (in workspace file) | Moved to separate `.moon/extensions.*` file |
 
-**Removed**: `docker.scaffold.copyToolchainFiles`, `experiments.*`, `hasher.batchSize`, `pipeline.archivableTargets`
+**Removed settings:** `docker.scaffold.copyToolchainFiles`, `experiments.*`, `hasher.batchSize`, `pipeline.archivableTargets`
 
-## Toolchains config
+## Toolchain Config Changes
 
-**File renamed**: `.moon/toolchain.*` → `.moon/toolchains.*` (plural)
-
-Remove `unstable_` prefix from all toolchain identifiers **except Python**.
-
-### JavaScript ecosystem restructuring
+The file is renamed from `.moon/toolchain.*` (singular) to `.moon/toolchains.*` (plural).
 
 | v1 | v2 |
 |----|-----|
@@ -100,113 +89,60 @@ Remove `unstable_` prefix from all toolchain identifiers **except Python**.
 | `node.rootPackageOnly` | `javascript.rootPackageDependenciesOnly` |
 | `node.syncPackageManagerField` | `javascript.syncPackageManagerField` |
 | `node.syncProjectWorkspaceDependencies` | `javascript.syncProjectWorkspaceDependencies` |
+| `node.bun` | `bun` (top-level) |
+| `node.npm` | `npm` (top-level) |
+| `node.pnpm` | `pnpm` (top-level) |
+| `node.yarn` | `yarn` (top-level) |
 
-### Package managers promoted to top-level
+`bun`, `deno`, and `node` now require `javascript` to be defined.
 
-| v1 | v2 |
-|----|-----|
-| `node.bun` | `bun` |
-| `node.npm` | `npm` |
-| `node.pnpm` | `pnpm` |
-| `node.yarn` | `yarn` |
+**Removed settings:** `bun.packagesRoot`, `deno.depsFile`, `deno.lockfile`, `node.addEnginesConstraint`, `node.packagesRoot`
 
-**Important**: `bun`, `deno`, and `node` toolchains now **require** `javascript` to be defined.
-
-**Removed**: `bun.packagesRoot`, `deno.depsFile`, `deno.lockfile`, `node.addEnginesConstraint`, `node.packagesRoot`
-
-### Python
-Still unstable: `python.pip` → `unstable_pip`, `python.uv` → `unstable_uv`. Removed `python.rootVenvOnly`.
-
-## Project config
-
-File: `moon.*` (per-project)
+## Project Config Changes
 
 | v1 | v2 |
 |----|-----|
 | `docker.scaffold.include` | `docker.scaffold.sourcesPhaseGlobs` |
 | `project.name` | `project.title` |
-| `project.metadata` | Move custom fields to root of `project` |
+| `project.metadata` | Custom fields moved to root of `project` |
 | `type` | `layer` |
 | `toolchain` | `toolchains` |
 | `platform` | `toolchains.default` |
 
-Language is now auto-detected from toolchains. First toolchain = primary language.
+## Task Changes
 
-## Task changes
-
-### File organization
-- `.moon/tasks.yml` (single file) → `.moon/tasks/all.yml`
-- Use subdirectories/files for organization: `.moon/tasks/node.yml`, `.moon/tasks/rust.yml`
-
-### Renamed tokens
 | v1 | v2 |
 |----|-----|
+| `.moon/tasks.yml` (single file) | `.moon/tasks/all.yml` (directory-based) |
+| Complex commands in `command` | Must use `script` field |
+| `tasks.*.local` | `tasks.*.preset: 'server'` |
+| `tasks.*.platform` | `tasks.*.toolchains` |
+| `tasks.*.options.affectedPassInputs` | `tasks.*.options.affectedFiles.passInputsWhenNoMatch` |
 | `$projectName` | `$projectTitle` |
 | `$projectType` | `$projectLayer` |
 | `$taskPlatform` | `$taskToolchain` |
 
-### Renamed settings
-| v1 | v2 |
-|----|-----|
-| `tasks.*.local` | `tasks.*.preset: 'server'` |
-| `tasks.*.platform` | `tasks.*.toolchains` |
-| `tasks.*.options.affectedPassInputs` | `tasks.*.options.affectedFiles.passInputsWhenNoMatch` |
+## Changed Defaults
 
-### Changed defaults
-
-| Option | v1 default | v2 default |
-|--------|-----------|-----------|
+| Option | v1 Default | v2 Default |
+|--------|------------|------------|
 | `inferInputs` | `true` | `false` |
 | `shell` | `false` | `true` |
-| `unixShell` | — | `bash` |
-| `windowsShell` | — | `pwsh` |
+| `unixShell` | (none) | `bash` |
+| `windowsShell` | (none) | `pwsh` |
 
-### Command syntax
-Complex commands (pipes, redirects, `&&`) no longer allowed in `command`. Use `script` instead.
+## Environment Variable Changes
 
-### Dep args format
-`tasks.deps.*.args` now requires a **list of strings**, not a single string.
-
-### Removed
-- `watcher` preset
-
-## Environment variables
-
-### Substitution syntax changes
-
-| Syntax | v1 behavior | v2 behavior |
+| Syntax | v1 Behavior | v2 Behavior |
 |--------|-------------|-------------|
-| `$VAR` | Keep if empty | Empty string if empty |
+| `$VAR` | Keep literal if empty | Empty string if empty |
 | `$VAR!` | Don't substitute | Removed |
-| `$VAR?` | Empty string | Removed |
-| `${VAR?}` | Empty string | Keep literal if empty |
-| `${VAR:-default}` | Not supported | Use default if empty |
-| `${VAR+alternate}` | Not supported | Use alternate if non-empty |
+| `$VAR?` | Empty string if empty | Removed |
+| `${VAR?}` | (not available) | Keep literal if empty |
+| `${VAR:-default}` | (not available) | Use default if empty |
+| `${VAR+alternate}` | (not available) | Use alternate if non-empty |
 
-### .env file loading
-- Now loaded just before execution (was during graph creation)
-- Task `env` overrides `.env` but can no longer reference `.env` values for substitution
-- `MOON_AFFECTED_FILES` uses OS path separator (`:` on Unix, `;` on Windows) instead of comma
-
-## VCS & hooks
-
-- Hooks written to `.moon/hooks/` (not `.git/hooks/`)
-- Git configured with `core.hooksPath`
-- Hook scripts no longer end in `.sh`
-- "Touched files" → "changed files" everywhere
-- `moon query touched-files` → `moon query changed-files`
-
-## Docker
-
-- `.moon/docker/workspace` directory → `.moon/docker/configs`
-- `moon docker file` now loops through toolchains for multi-runtime images
-
-## Extensions
-
-- Moved from `extensions` in `.moon/workspace.*` to separate `.moon/extensions.*` file
-- Built-in extensions (`download`, `migrate-nx`, `migrate-turborepo`) must be explicitly enabled
-
-## Query language (MQL)
+## MQL Field Renames
 
 | v1 | v2 |
 |----|-----|
@@ -214,7 +150,16 @@ Complex commands (pipes, redirects, `&&`) no longer allowed in `command`. Use `s
 | `projectType` | `projectLayer` |
 | `taskPlatform` | `taskToolchain` |
 
-## Webhooks
+## Other Breaking Changes
 
-- Removed `tool.*` events → use `toolchain.*`
-- Removed `runtime` field from `dependencies.*` events → use `toolchain`
+- `.env` loading moved to just before execution (was during graph creation in v1)
+- `MOON_AFFECTED_FILES` uses OS path separator (`:` on Unix, `;` on Windows)
+- Docker: `.moon/docker/workspace` renamed to `.moon/docker/configs`
+- VCS hooks: `.moon/hooks/` instead of `.git/hooks/`; `core.hooksPath` used
+- Dep args: `tasks.deps.*.args` now requires a list of strings, not a single string
+- Webhooks: `tool.*` events removed (use `toolchain.*`); `runtime` field removed (use `toolchain`)
+- `watcher` preset removed
+- Task inheritance now deep merges (was shallow in v1)
+- Env `null` values can remove inherited vars
+- `...` syntax available in targets (Bazel-style)
+- Interactive prompt added for commands without identifiers

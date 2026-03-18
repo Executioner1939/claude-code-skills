@@ -1,6 +1,25 @@
-# Moon Commands Reference
+# Moon CLI Commands Reference
 
-Complete reference for all moon CLI commands.
+Complete reference for all moon v2 CLI commands, flags, and options.
+
+## Table of Contents
+- [Global options](#global-options)
+- [moon run](#moon-run)
+- [moon exec](#moon-exec)
+- [moon check](#moon-check)
+- [moon ci](#moon-ci)
+- [moon project / projects](#moon-project--projects)
+- [moon task / tasks](#moon-task--tasks)
+- [moon query](#moon-query)
+- [moon graph visualization](#moon-graph-visualization)
+- [moon docker](#moon-docker)
+- [moon generate](#moon-generate)
+- [moon sync](#moon-sync)
+- [moon toolchain](#moon-toolchain)
+- [moon extension](#moon-extension)
+- [moon utility commands](#moon-utility-commands)
+- [moonx](#moonx)
+- [Environment variables](#environment-variables)
 
 ## Global Options
 
@@ -10,18 +29,16 @@ Available on every command:
 |--------|-------------|
 | `--cache <mode>` | Cache mode: `off`, `read`, `read-write` (default), `write` |
 | `--color` | Force colored output |
-| `-c, --concurrency` | Max threads (default: CPU cores) |
+| `-c, --concurrency <n>` | Max threads (default: CPU cores) |
 | `--dump` | Dump trace profile |
 | `--log <level>` | Log level: `off`, `error`, `warn`, `info`, `debug`, `trace` |
 | `--log-file <file>` | Write logs to file |
 | `-q, --quiet` | Hide non-important output |
-| `--theme` | Terminal theme: `dark`, `light` |
+| `--theme <theme>` | Terminal theme: `dark`, `light` |
 
-## Task Execution
+## moon run
 
-### `moon run` (alias: `moon r`)
-
-Run one or many targets with caching.
+Alias: `moon r`. Run one or many targets with caching. Uses `moon exec` internally with `--on-failure=bail` and `--upstream=deep`.
 
 ```bash
 moon run <...target> [-- <args>]
@@ -29,63 +46,92 @@ moon run <...target> [-- <args>]
 
 **Examples:**
 ```bash
-moon run app:build                    # Single target
-moon run client:dev server:dev        # Multiple targets
-moon run :test                        # All projects
-moon run '#frontend:lint'             # By tag (quote for shell)
-moon run ~:build                      # Closest project
+moon run app:build                     # Single target
+moon run client:dev server:dev         # Multiple targets
+moon run :test                         # All projects
+moon run '#frontend:lint'              # By tag (quote for shell)
+moon run ~:build                       # Closest project
 moon run :build --query "language=typescript"  # With MQL filter
-moon run app:test -- --coverage       # Pass args to command
+moon run app:test -- --coverage        # Pass args through to command
 ```
 
-**Options:**
-| Option | Description |
-|--------|-------------|
-| `-f, --force` | Bypass cache, ignore changed files |
-| `-i, --interactive` | Run interactively |
-| `-s, --summary [level]` | Print action summary |
-| `--affected [by]` | Only affected tasks (`local` or `remote`) |
-| `--base <rev>` | Base revision for affected |
-| `--head <rev>` | Head revision for affected |
-| `--query <mql>` | Filter by MQL query |
-| `--downstream <depth>` | Include dependents: `none`, `direct`, `deep` |
-| `--upstream <depth>` | Include dependencies: `none`, `direct`, `deep` |
+**Options:** Inherits all `moon exec` options (see below).
 
-### `moon exec` (aliases: `moon x`, `moonx`)
+## moon exec
 
-Low-level task execution with fine-grained control.
+Aliases: `moon x`, `moonx`. Low-level task execution with full control. This is the base command that `moon run`, `moon ci`, and `moon check` all use.
 
 ```bash
 moon exec <...target> [-- <args>]
 ```
 
-Same options as `moon run` plus:
+**Core options:**
 
 | Option | Description |
 |--------|-------------|
+| `--ci` | Force CI mode |
+| `-f, --force` | Bypass cache, ignore changed files, skip affected checks |
+| `-i, --interactive` | Run pipeline and tasks interactively |
+| `-p, --plan <PATH>` | Path to execution plan JSON file (v2.1.0+) |
+| `-s, --summary [LEVEL]` | Print summary of executed actions |
+
+**Workflow options:**
+
+| Option | Description |
+|--------|-------------|
+| `--ignore-ci-checks` | Ignore "run in CI" task checks |
 | `--on-failure <action>` | On failure: `bail` or `continue` |
-| `--only-ci-tasks` | Filter to CI-only tasks |
-| `--no-actions` | Skip sync/setup actions |
-| `--job <index>` | Current job index (for parallelization) |
-| `--job-total <total>` | Total jobs |
+| `--query <mql>` | Filter tasks based on MQL query |
+| `--no-actions` | Skip sync and setup actions |
 
-### `moon check` (alias: `moon c`)
+**Affected options:**
 
-Run all build and test tasks for projects.
+| Option | Description |
+|--------|-------------|
+| `--affected [by]` | Only affected tasks (`local` or `remote`) |
+| `--base <rev>` | Base revision for comparison |
+| `--head <rev>` | Head revision for comparison |
+| `-g, --include-relations` | Include graph relations for affected checks |
+| `--status <status>` | Filter changed files by status |
+| `--stdin` | Accept changed files from stdin |
+
+**Graph options:**
+
+| Option | Description |
+|--------|-------------|
+| `--downstream <depth>` | Include dependents: `none`, `direct`, `deep` |
+| `--upstream <depth>` | Include dependencies: `none`, `direct`, `deep` |
+
+**Parallelism options:**
+
+| Option | Description |
+|--------|-------------|
+| `--job <index>` | Current job index (0-based) |
+| `--job-total <total>` | Total number of jobs |
+
+## moon check
+
+Alias: `moon c`. Run all build/test/lint tasks for projects. Uses `moon exec` internally.
 
 ```bash
 moon check [...projects]
 ```
 
-**Options:**
 | Option | Description |
 |--------|-------------|
 | `--all` | Check all projects |
 | `--closest` | Check closest project from cwd |
 
-### `moon ci`
+**Examples:**
+```bash
+moon check app                # Check specific project
+moon check --all              # Check all projects
+moon check --closest          # Check project nearest to cwd
+```
 
-Run affected tasks with `runInCI` enabled.
+## moon ci
+
+Run affected tasks in CI. Uses `moon exec` with `--affected`, `--ci`, `--on-failure=continue`, `--summary=detailed`, `--upstream=deep`, `--downstream=direct`.
 
 ```bash
 moon ci [...target]
@@ -93,24 +139,24 @@ moon ci [...target]
 
 **Examples:**
 ```bash
-moon ci                    # All affected CI tasks
-moon ci :build :lint       # Specific affected tasks
-moon ci --base main        # Compare against main
+moon ci                              # All affected CI tasks
+moon ci :build :lint                 # Specific affected tasks
+moon ci --base main                  # Compare against main
+moon ci --job 0 --job-total 4        # Shard across CI jobs
+moon ci --include-relations          # Include dependency/dependent tasks
 ```
 
-## Project & Task Information
+In v2, graph relations (dependents) are NOT included by default. Use `--include-relations` to restore v1 behavior. Also settable via `MOON_INCLUDE_RELATIONS` env var (v2.0.3+).
+
+## moon project / projects
 
 ### `moon project` (alias: `moon p`)
 
-Display project information.
+Display project information. Prompts for selection if no id provided.
 
 ```bash
-moon project [id]
+moon project [id] [--json] [--no-tasks]
 ```
-
-**Options:**
-- `--json` - Output as JSON
-- `--no-tasks` - Don't list tasks
 
 ### `moon projects`
 
@@ -120,36 +166,32 @@ List all workspace projects.
 moon projects [--json]
 ```
 
+## moon task / tasks
+
 ### `moon task` (alias: `moon t`)
 
-Display task information.
+Display task information. Prompts for selection if no target provided.
 
 ```bash
-moon task [target]
+moon task [target] [--json]
 ```
-
-**Options:**
-- `--json` - Output as JSON
 
 ### `moon tasks`
 
-List all workspace tasks.
+List all workspace tasks as a table.
 
 ```bash
 moon tasks [id] [--json]
 ```
 
-## Query Commands
+## moon query
 
 ### `moon query projects`
-
-Query project information with filtering.
 
 ```bash
 moon query projects [query]
 ```
 
-**Filter Options:**
 | Option | Description |
 |--------|-------------|
 | `--affected` | Filter affected projects |
@@ -166,21 +208,18 @@ moon query projects [query]
 **Examples:**
 ```bash
 moon query projects                      # All projects
-moon query projects --id react           # Filter by ID regex
+moon query projects --id "react"         # Filter by ID regex
 moon query projects "project~react"      # MQL query
-moon query projects --affected           # Affected only
-moon query projects --tasks "lint|build" # Has specific tasks
+moon query projects --affected           # Only affected
+moon query projects --tasks "lint|build" # Projects with specific tasks
 ```
 
 ### `moon query tasks`
-
-Query task information.
 
 ```bash
 moon query tasks [query]
 ```
 
-**Filter Options:**
 | Option | Description |
 |--------|-------------|
 | `--affected` | Filter affected tasks |
@@ -192,25 +231,16 @@ moon query tasks [query]
 
 ### `moon query affected`
 
-Query affected projects and tasks.
-
 ```bash
-moon query affected
+moon query affected [--downstream <depth>] [--upstream <depth>]
 ```
 
-**Options:**
-- `--downstream <depth>` - Include dependents: `none`, `direct`, `deep`
-- `--upstream <depth>` - Include dependencies: `none`, `direct`, `deep`
-
 ### `moon query changed-files`
-
-Query changed files from VCS.
 
 ```bash
 moon query changed-files
 ```
 
-**Options:**
 | Option | Description |
 |--------|-------------|
 | `--base <rev>` | Base revision |
@@ -219,112 +249,33 @@ moon query changed-files
 | `--remote` | Remote state |
 | `--status <type>` | Filter: `all`, `added`, `deleted`, `modified`, `staged`, `unstaged`, `untracked` |
 
-## Graph Visualization
+## Moon Graph Visualization
 
 ### `moon action-graph` (alias: `moon ag`)
 
-Visualize action graph.
-
 ```bash
-moon action-graph [target]
+moon action-graph [target] [--dot] [--json] [--dependents] [--port <port>]
 ```
-
-**Options:**
-- `--dot` - DOT format output
-- `--json` - JSON format output
-- `--dependents` - Include dependents
-- `--port <port>` - Server port
 
 ### `moon project-graph` (alias: `moon pg`)
 
-Visualize project graph.
-
 ```bash
-moon project-graph [id]
+moon project-graph [id] [--dot] [--json] [--dependents] [--port <port>]
 ```
 
 ### `moon task-graph` (alias: `moon tg`)
 
-Visualize task graph.
-
 ```bash
-moon task-graph [target]
+moon task-graph [target] [--dot] [--json] [--dependents] [--port <port>]
 ```
 
-## Code Generation
+All graph commands launch an interactive visualizer in the browser by default.
 
-### `moon generate` (alias: `moon g`)
-
-Generate code from templates.
-
-```bash
-moon generate <id> [-- <vars>]
-```
-
-**Options:**
-| Option | Description |
-|--------|-------------|
-| `--defaults` | Use defaults, skip prompts |
-| `--dry-run` | Don't write files |
-| `--force` | Overwrite existing |
-| `--template` | Create new template |
-| `--to <path>` | Destination directory |
-
-**Examples:**
-```bash
-moon generate npm-package --to ./packages/new-pkg
-moon generate react-component -- --name Button
-moon generate my-template --template  # Create template scaffold
-```
-
-### `moon template` / `moon templates`
-
-List and inspect templates.
-
-```bash
-moon templates [--json]
-moon template <id> [--json]
-```
-
-## Sync Commands
-
-### `moon sync code-owners`
-
-Generate CODEOWNERS file.
-
-```bash
-moon sync code-owners [--force] [--clean]
-```
-
-### `moon sync config-schemas`
-
-Generate JSON schemas.
-
-```bash
-moon sync config-schemas [--force]
-```
-
-### `moon sync projects`
-
-Sync all workspace projects.
-
-```bash
-moon sync projects
-```
-
-### `moon sync vcs-hooks`
-
-Sync VCS hooks.
-
-```bash
-moon sync vcs-hooks [--force] [--clean]
-```
-
-## Docker Commands
+## moon docker
 
 ### `moon docker scaffold`
 
-Create repository skeletons for Docker.
+Create minimal workspace skeleton for Docker layer caching. Output goes to `.moon/docker/` with two phases: `configs/` (workspace config files) and `sources/` (source files).
 
 ```bash
 moon docker scaffold <...projects>
@@ -332,168 +283,142 @@ moon docker scaffold <...projects>
 
 ### `moon docker file`
 
-Generate multi-stage Dockerfile.
+Generate a multi-stage Dockerfile for a project.
 
 ```bash
 moon docker file <project> [dest]
 ```
 
-**Options:**
 | Option | Description |
 |--------|-------------|
-| `--defaults` | Use defaults |
-| `--build-task` | Task to build |
-| `--start-task` | Task to start |
-| `--image` | Base Docker image |
-| `--no-prune` | Don't prune workspace |
-| `--no-toolchain` | Use system binaries |
-
-### `moon docker prune`
-
-Prune Docker environment.
-
-```bash
-moon docker prune
-```
+| `--defaults` | Use default options, skip prompts |
+| `--build-task <task>` | Task to build the project |
+| `--start-task <task>` | Task to start the project |
+| `--image <image>` | Base Docker image |
+| `--no-prune` | Skip dependency pruning |
+| `--no-setup` | Skip dependency setup (v2.0.0+) |
+| `--no-toolchain` | Use system binaries instead of toolchain |
+| `--template <path>` | Custom Tera template path for Dockerfile (v2.0.0+) |
 
 ### `moon docker setup`
 
-Install tools and dependencies in Docker.
+Install toolchain and dependencies inside container. Run after `moon docker scaffold`.
 
 ```bash
 moon docker setup
 ```
 
-## Toolchain Commands
+### `moon docker prune`
 
-### `moon toolchain add`
-
-Add toolchain to workspace.
+Remove extraneous dependencies and install production-only packages.
 
 ```bash
-moon toolchain add <id> [plugin]
+moon docker prune
 ```
 
-### `moon toolchain info`
+## moon generate
 
-Display toolchain information.
+Alias: `moon g`. Generate code from templates.
 
 ```bash
-moon toolchain info <id> [plugin]
+moon generate <id> [-- <vars>]
 ```
 
-## Utility Commands
-
-### `moon init`
-
-Initialize moon in repository.
-
-```bash
-moon init [dest] [--minimal] [--yes] [--force]
-```
-
-### `moon setup`
-
-Setup toolchain environment.
-
-```bash
-moon setup
-```
-
-### `moon clean`
-
-Clean workspace cache.
-
-```bash
-moon clean [--lifetime <duration>]
-```
+| Option | Description |
+|--------|-------------|
+| `--defaults` | Use defaults, skip prompts |
+| `--dry-run` | Preview without writing |
+| `--force` | Overwrite existing files |
+| `--template` | Create new template scaffold |
+| `--to <path>` | Destination directory |
 
 **Examples:**
 ```bash
-moon clean                    # Default 7 days
-moon clean --lifetime "24 hours"
-moon clean --lifetime "30 days"
+moon generate npm-package --to ./packages/new-pkg
+moon generate react-component -- --name Button --withTests true
+moon generate my-template --template    # Create template scaffold
+moon generate my-template --dry-run     # Preview
 ```
 
-### `moon hash`
-
-Inspect or compare hash manifests.
+### `moon template` / `moon templates`
 
 ```bash
-moon hash <hash1> [hash2] [--json]
+moon templates [--json]       # List all templates
+moon template <id> [--json]   # Show template details
 ```
 
-**Examples:**
+## moon sync
+
 ```bash
-moon hash abc123              # Inspect single hash
-moon hash abc123 def456       # Compare two hashes
-moon hash abc123 def456 --json
+moon sync code-owners [--force] [--clean]     # Generate CODEOWNERS
+moon sync config-schemas [--force]             # Generate JSON schemas
+moon sync projects                             # Sync all workspace projects
+moon sync vcs-hooks [--force] [--clean]        # Sync VCS hooks
 ```
 
-### `moon bin`
-
-Get tool binary path.
+## moon toolchain
 
 ```bash
-moon bin <toolchain>
+moon toolchain add <id> [plugin]               # Add toolchain to workspace
+moon toolchain info <id> [plugin]              # Display toolchain information
 ```
 
-### `moon upgrade`
-
-Upgrade moon binary.
+## moon extension
 
 ```bash
-moon upgrade
-```
-
-### `moon completions`
-
-Generate shell completions.
-
-```bash
-moon completions [--shell <shell>]
-```
-
-### `moon mcp`
-
-Start MCP server for AI integrations.
-
-```bash
-moon mcp
-```
-
-## Extension Commands
-
-### `moon ext`
-
-Execute WASM extension.
-
-```bash
-moon ext <id> [-- <args>]
+moon ext <id> [-- <args>]                      # Execute WASM extension
+moon extension add <id> [plugin]               # Add extension to workspace
+moon extension info <id> [plugin]              # Display extension information
 ```
 
 **Built-in extensions:**
 ```bash
-moon ext download -- --url <url> --dest <path>
-moon ext migrate-nx
-moon ext migrate-turborepo
-moon ext unpack -- --src <archive> --dest <path>
+moon ext download -- --url <url> --dest <path> [--name <name>]
+moon ext migrate-nx [-- --bun --cleanup]
+moon ext migrate-turborepo [-- --bun --cleanup]
+moon ext unpack -- --src <archive> --dest <path> [--prefix <prefix>]
 ```
 
-### `moon extension add`
-
-Add extension to workspace.
+## Moon Utility Commands
 
 ```bash
-moon extension add <id> [plugin]
+moon init [dest] [--minimal] [--yes] [--force]   # Initialize workspace
+moon setup                                         # Install toolchain + deps
+moon clean [--lifetime <duration>]                 # Clean cache (default 7 days)
+moon hash <hash1> [hash2] [--json]                # Inspect/compare hashes
+moon bin <toolchain>                               # Get tool binary path
+moon upgrade                                       # Upgrade moon binary
+moon completions [--shell <shell>]                 # Generate shell completions
+moon mcp                                           # Start MCP server for AI
+moon teardown                                      # Clean up environments
 ```
 
-### `moon extension info`
+**Installation:**
+```bash
+# Via proto (recommended)
+proto install moon 2.1.0
 
-Display extension information.
+# Unix / macOS / WSL
+curl -fsSL https://moonrepo.dev/install/moon.sh | bash
+
+# Windows PowerShell
+irm https://moonrepo.dev/install/moon.ps1 | iex
+
+# Via npm
+npm install --save-dev @moonrepo/cli
+
+# Upgrade
+moon upgrade
+```
+
+Note: `moon upgrade` does NOT work from v1 to v2 (distribution format changed). Install fresh for v1-to-v2 migration.
+
+## moonx
+
+Standalone binary, stabilized in v2. Shorthand for `moon exec`.
 
 ```bash
-moon extension info <id> [plugin]
+moonx <target> [-- <args>]
 ```
 
 ## Environment Variables
@@ -503,7 +428,15 @@ moon extension info <id> [plugin]
 | `MOON_CACHE` | Override cache mode |
 | `MOON_LOG` | Override log level |
 | `MOON_CONCURRENCY` | Thread pool size |
-| `MOON_TOOLCHAIN_FORCE_GLOBALS` | Use PATH binaries |
+| `MOON_TOOLCHAIN_FORCE_GLOBALS` | Use PATH binaries (for Docker/Alpine) |
 | `MOON_DEBUG_PROCESS_ENV` | Reveal process env vars |
 | `MOON_DEBUG_PROCESS_INPUT` | Reveal process stdin |
 | `MOON_SKIP_SETUP_TOOLCHAIN` | Skip toolchain setup |
+| `MOON_REMOTE_HOST` | Conditionally enable remote caching |
+| `MOON_INCLUDE_RELATIONS` | Include graph relations in CI (v2.0.3+) |
+| `MOON_BASE` | Override base revision for affected detection |
+| `MOON_HEAD` | Override head revision for affected detection |
+| `MOON_NODE_VERSION` | Override Node.js version |
+| `MOON_AFFECTED_FILES` | List of affected files (OS path separator) |
+| `CI` | Auto-detected; `--ci` flag to force |
+| `PROTO_OFFLINE` | Force offline mode |

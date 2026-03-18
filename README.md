@@ -4,46 +4,38 @@ Claude Code skills collection for modern development workflows.
 
 ## Available Skills
 
-### clickhouse
-**Solana DEX Analytics with ClickHouse**
-
-Design high-performance ClickHouse tables for blockchain analytics.
-
-- Table patterns for trades, pools, tokens, wallets
-- OHLCV aggregations with AggregatingMergeTree
-- Materialized views and cascaded rollups
-- Deduplication with ReplacingMergeTree
-- Skip indexes, PREWHERE, query optimization
-- Time series patterns (gap fill, trends, histograms)
-
-**Use when:** Designing ClickHouse schemas for Solana DEX data, OHLCV candles, or blockchain analytics.
-
----
-
 ### moonrepo
-**Monorepo Task Runner & Build System**
+**Monorepo Task Runner & Build System (v2.1.0)**
 
-Comprehensive documentation for [moonrepo](https://moonrepo.dev/).
+Comprehensive guide for [moonrepo](https://moonrepo.dev/) v2.1 "Phobos".
 
-- Complete command reference
-- Configuration schemas and best practices
-- CI/CD setup guides
-- Docker integration patterns
+- All CLI commands with complete flag reference
+- Workspace, toolchain, and task configuration
+- CI/CD pipelines with sharding and affected detection
+- Docker multi-stage builds and scaffolding
+- Code generation with Tera templates
+- WASM plugin toolchains and extensions
+- MQL query language
+- Remote caching
+- v1-to-v2 migration guide
 
-**Use when:** Working with `moon.yml`, `.moon/` configs, or monorepo builds.
+**Use when:** Working with `moon.yml`, `.moon/` configs, `moon run`, `moon ci`, or monorepo builds.
 
 ---
 
 ### utoipa
-**Rust OpenAPI Documentation Generator**
+**Rust OpenAPI Documentation Generator (v5.4.0)**
 
-Auto-generate OpenAPI 3.1 documentation from Rust code.
+Auto-generate OpenAPI 3.1 documentation from Rust code with [utoipa](https://github.com/juhaku/utoipa).
 
-- Complete macro reference (`#[utoipa::path]`, `ToSchema`)
-- Framework integration (Axum, Actix-web, Rocket)
-- Security scheme configuration
+- All derive macros: `ToSchema`, `OpenApi`, `IntoParams`, `IntoResponses`, `ToResponse`
+- Complete `#[utoipa::path]` attribute reference
+- Framework integrations: Axum, Actix-web, Rocket
+- UI integrations: Swagger UI, Redoc, RapiDoc, Scalar
+- Security schemes, enum handling, generics, validation
+- 25+ cargo feature flags
 
-**Use when:** Building REST APIs in Rust, documenting endpoints.
+**Use when:** Building REST APIs in Rust, documenting endpoints with OpenAPI.
 
 ---
 
@@ -52,11 +44,30 @@ Auto-generate OpenAPI 3.1 documentation from Rust code.
 
 Document and visualize event-driven architectures with [EventCatalog](https://www.eventcatalog.dev/).
 
-- Complete API reference for all resource types
-- Domain modeling and service documentation
-- Event, Command, and Query specifications
+- All 12 resource types with complete frontmatter API
+- 184+ SDK/utils functions
+- 15+ generator integrations (OpenAPI, AsyncAPI, GraphQL, Confluent, AWS)
+- MCP server with 15 tools and 12 resources
+- Visualizations: NodeGraph, flows, Mermaid, embedded diagrams
+- Schema support: JSON Schema, Avro, Protobuf
+- Authentication (GitHub, Google, Azure AD, Okta, Auth0)
 
-**Use when:** Documenting EDA systems, AsyncAPI specs, event sourcing.
+**Use when:** Documenting EDA systems, managing event schemas, visualizing service architectures.
+
+---
+
+### codebase-archaeology
+**Deep Codebase Analysis & Transformation Planning**
+
+Systematically reverse-engineer and analyze existing codebases.
+
+- Extracts business rules, maps data flows, traces dependencies
+- 7 analysis lenses: migration, architecture, decomposition, risk, documentation, testing, debt
+- Two-agent system: archaeologist (excavates) + strategist (plans)
+- Structured output templates for every finding type
+- Transformation planning with sequencing and risk registers
+
+**Use when:** Understanding inherited code, planning migrations, due diligence, assessing technical debt, building test strategies.
 
 ## Installation
 
@@ -65,10 +76,10 @@ Document and visualize event-driven architectures with [EventCatalog](https://ww
 /plugin marketplace add Executioner1939/claude-code-skills
 
 # Install specific skills
-/plugin install clickhouse@skunkworks
 /plugin install moonrepo@skunkworks
 /plugin install utoipa@skunkworks
 /plugin install eventcatalog@skunkworks
+/plugin install codebase-archaeology@skunkworks
 ```
 
 ## License

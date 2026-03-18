@@ -1,36 +1,51 @@
-# Code Generation & Templates Reference
+# Code Generation Reference
 
-moon includes a built-in code generation (scaffolding) system powered by the Tera template engine.
+Moon's code generation system uses templates to scaffold new projects, components, and files consistently.
 
 ## Table of Contents
 - [Overview](#overview)
 - [Creating templates](#creating-templates)
 - [Template configuration](#template-configuration)
 - [Tera template syntax](#tera-template-syntax)
+- [Template variables](#template-variables)
+- [Built-in variables](#built-in-variables)
+- [Tera filters](#tera-filters)
 - [File handling](#file-handling)
+- [Frontmatter in templates](#frontmatter-in-templates)
 - [Generating code](#generating-code)
-- [Sharing templates](#sharing-templates)
+- [Template sources](#template-sources)
 
 ## Overview
 
-Templates are directories containing a `template.*` config file and any number of template files. When you run `moon generate`, moon prompts for variable values and scaffolds the files into the target destination.
+```bash
+moon generate <template-id> [-- <vars>]   # Generate from template
+moon generate <id> --template             # Create a new template scaffold
+moon templates                             # List available templates
+moon template <id>                         # Show template details
+```
 
-## Creating templates
+## Creating Templates
+
+Templates live in directories registered in `.moon/workspace.yml` under `generator.templates`. Each template is a directory containing a `template.yml` config file and template files.
 
 ```bash
+# Scaffold a new template
 moon generate my-template --template
 ```
 
-This creates a template directory in the first location defined in `generator.templates` with a `template.yml` file.
+This creates a directory with a `template.yml` and example files.
 
-## Template configuration
+## Template Configuration
 
-Every template needs a `template.*` file at its root:
+The `template.yml` file defines metadata and variables:
 
 ```yaml
-# template.yml
+id: 'react-component'
 title: 'React Component'
-description: 'Scaffolds a new React component with tests and stories'
+description: 'Creates a new React component with tests'
+destination: 'src/components/[name]'           # Default destination (supports variable interpolation)
+extends:
+  - 'base-template'                            # Inherit from other templates
 
 variables:
   name:
@@ -41,16 +56,21 @@ variables:
   withTests:
     type: 'boolean'
     default: true
-    prompt: 'Include test file?'
+    prompt: 'Include tests?'
 
   style:
     type: 'enum'
-    default: 'css-modules'
-    values:
-      - 'css-modules'
-      - 'styled-components'
-      - 'tailwind'
     prompt: 'Styling approach?'
+    values:
+      - { value: 'css', label: 'CSS Modules' }
+      - { value: 'styled', label: 'Styled Components' }
+      - { value: 'tailwind', label: 'Tailwind CSS' }
+    default: 'css'
+
+  port:
+    type: 'number'
+    default: 3000
+    prompt: 'Port number?'
 ```
 
 ### Variable types
@@ -62,13 +82,11 @@ variables:
 | `boolean` | Yes/no prompt |
 | `enum` | Selection from predefined values |
 
-Each variable supports: `type`, `default`, `required`, `prompt`, and for enums, `values`.
+## Tera Template Syntax
 
-## Tera template syntax
+Moon uses the [Tera](https://keats.github.io/tera/) template engine (similar to Jinja2/Liquid).
 
-moon uses [Tera](https://keats.github.io/tera/), a Rust template engine similar to Jinja2/Twig.
-
-### Variable interpolation
+### Variable output
 
 ```
 {{ name }}
@@ -82,10 +100,12 @@ moon uses [Tera](https://keats.github.io/tera/), a Rust template engine similar 
 // test code here
 {% endif %}
 
-{% if style == "css-modules" %}
-import styles from './{{ name }}.module.css';
-{% elif style == "styled-components" %}
-import styled from 'styled-components';
+{% if style == "tailwind" %}
+import "./styles.css"
+{% elif style == "styled" %}
+import styled from "styled-components"
+{% else %}
+import styles from "./{{ name }}.module.css"
 {% endif %}
 ```
 
@@ -97,10 +117,37 @@ import styled from 'styled-components';
 {% endfor %}
 ```
 
-### Available filters
+### Comments
 
-| Filter | Example | Result |
-|--------|---------|--------|
+```
+{# This is a comment #}
+```
+
+## Template Variables
+
+Variables defined in `template.yml` are available in all template files. Pass them via CLI:
+
+```bash
+moon generate react-component -- --name Button --withTests true --style css
+```
+
+Or let the interactive prompts ask for each variable.
+
+## Built-in Variables
+
+Available in all templates without declaration:
+
+| Variable | Description |
+|----------|-------------|
+| `dest_dir` | Absolute path to destination directory |
+| `dest_rel_dir` | Relative path to destination directory |
+| `working_dir` | Current working directory |
+| `workspace_root` | Moon workspace root |
+
+## Tera Filters
+
+| Filter | Example Input | Result |
+|--------|--------------|--------|
 | `camel_case` | `my-component` | `myComponent` |
 | `pascal_case` | `my-component` | `MyComponent` |
 | `snake_case` | `my-component` | `my_component` |
@@ -109,128 +156,91 @@ import styled from 'styled-components';
 | `lower_case` | `Hello` | `hello` |
 | `upper_snake_case` | `myVar` | `MY_VAR` |
 
-### Built-in variables
+## File Handling
 
-| Variable | Description |
-|----------|-------------|
-| `dest_dir` | Absolute path to destination |
-| `dest_rel_dir` | Relative path to destination |
-| `working_dir` | Current working directory |
-| `workspace_root` | Moon workspace root |
+### Extension behavior
 
-### Built-in functions
-
-- `variables()` — returns all template variables as a map
-
-## File handling
+| Extension | Behavior |
+|-----------|----------|
+| `.tera` or `.twig` | Processed by Tera engine, extension stripped in output |
+| `.raw` | Copied as-is, bypasses Tera rendering |
+| (no special extension) | Copied as-is |
 
 ### Path interpolation
 
-Use `[varName]` in file/directory names:
+Use `[varName]` in file and directory names to substitute variables:
 
 ```
-[name]/
-├── [name].tsx
-├── [name].test.tsx
-└── [name].stories.tsx
+templates/react-component/
+  [name].tsx.tera
+  [name].test.tsx.tera
+  [name].module.css.tera
 ```
 
-With `name = "Button"` → scaffolds as `Button/Button.tsx`, etc.
+Generating with `--name Button` creates:
+```
+Button.tsx
+Button.test.tsx
+Button.module.css
+```
 
-### File extensions
+### Partial files
 
-- `.tera` or `.twig` — stripped during generation (for syntax highlighting in IDEs)
-- `.raw` — bypasses Tera rendering entirely (for files with conflicting `{{ }}` syntax)
+Files with "partial" in the path are used for `{% include %}` in other templates and are not output during generation.
 
-### Partials
+### Binary files
 
-Files with "partial" in the path are not generated — they're used for Tera `{% include %}` composition.
+Images, fonts, and other binary files are detected and copied as-is without Tera processing.
 
-### Binary assets
+## Frontmatter in Templates
 
-Images, audio, video, and other binary files are copied as-is without rendering.
-
-### Frontmatter
-
-Template files support YAML frontmatter for per-file configuration:
+Template files can include YAML frontmatter to control their behavior:
 
 ```
 ---
+to: {{ name | pascal_case }}.tsx
 skip: {{ not withTests }}
 force: true
-to: 'src/components/{{ name | pascal_case }}.tsx'
 ---
-import React from 'react';
-
-export const {{ name | pascal_case }} = () => {
-  return <div>{{ name }}</div>;
-};
+// File content here
 ```
 
-Frontmatter options:
-- `skip` — skip this file (boolean expression)
-- `force` — overwrite without prompting
-- `to` — rewrite the destination path
+| Option | Description |
+|--------|-------------|
+| `to` | Override output filename |
+| `skip` | Skip generation if truthy |
+| `force` | Overwrite existing files |
 
-## Generating code
+## Generating Code
 
 ```bash
-# Interactive (prompts for destination and variables)
-moon generate react-component
-
-# Specify destination
+# Basic generation
 moon generate react-component --to ./src/components/Button
 
-# Pre-fill variables
-moon generate react-component --to ./src/components -- --name Button --withTests true
+# With variables
+moon generate my-template -- --name Button --withTests true
 
-# Skip prompts, use defaults
-moon generate react-component --defaults
+# Skip prompts (use defaults)
+moon generate my-template --defaults
 
-# Overwrite existing files
-moon generate react-component --force
+# Overwrite existing
+moon generate my-template --force
+
+# Preview without writing
+moon generate my-template --dry-run
 ```
 
-## Sharing templates
+## Template Sources
 
-Configure template locations in `.moon/workspace.*`:
+Configure where templates are discovered in `.moon/workspace.yml`:
 
 ```yaml
 generator:
   templates:
-    - './templates'                                # local path
-    - 'file://./shared-templates'                  # explicit file path
-    - 'git://github.com/org/templates#main'        # git repo + branch/tag
-    - 'npm://@company/moon-templates#2.0.0'        # npm package + version
-    - 'https://example.com/templates.tar.gz'       # remote archive
-    - 'glob://projects/*/templates/*'              # glob pattern
+    - './templates'                                 # Local directory
+    - 'file://./shared-templates'                   # Explicit file path
+    - 'git://github.com/org/templates#v2.0.0'       # Git repo + branch/tag
+    - 'npm://@company/templates#1.0.0'              # npm package + version
+    - 'https://cdn.example.com/templates-v2.zip'    # Remote archive
+    - 'glob://projects/*/templates/*'               # Glob pattern
 ```
-
-### Git repository templates
-
-Requires explicit revision (branch, tag, or SHA):
-```yaml
-- 'git://github.com/org/templates#v2.0.0'
-```
-
-### npm package templates
-
-Requires explicit version:
-```yaml
-- 'npm://@company/templates#1.0.0'
-```
-
-### Remote archives
-
-Zip, tar, tar.gz, etc. — downloaded and unpacked into `~/.moon/templates`:
-```yaml
-- 'https://cdn.example.com/templates-v2.zip'
-```
-
-### Listing available templates
-
-```bash
-moon templates
-```
-
-Shows all templates from all configured locations.

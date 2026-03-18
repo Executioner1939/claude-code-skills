@@ -1,350 +1,125 @@
-# Advanced Moon Patterns
+# Advanced Topics Reference
 
-Advanced techniques, automation, and best practices.
+MQL queries, project/action graphs, git hooks, environment variables, token functions, MCP integration, and debugging.
 
-## Task Inheritance Patterns
+## Table of Contents
+- [MQL (Moon Query Language)](#mql-moon-query-language)
+- [Project and action graphs](#project-and-action-graphs)
+- [Git hooks](#git-hooks)
+- [Environment variables](#environment-variables)
+- [Project configuration](#project-configuration)
+- [MCP integration](#mcp-integration)
+- [Debugging](#debugging)
+- [Release history](#release-history)
 
-### Conditional Inheritance by Toolchain
+## MQL (Moon Query Language)
 
-```yaml
-# .moon/tasks/javascript.yml
-inheritedBy:
-  toolchains:
-    or: ['javascript', 'typescript']
+MQL is a query language for filtering projects and tasks.
 
-tasks:
-  lint:
-    command: 'eslint .'
-  test:
-    command: 'jest'
-```
+### Comparison operators
 
-### Conditional Inheritance by Tag
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `=` | Equals | `language=typescript` |
+| `!=` | Not equals | `language!=javascript` |
+| `~` | Like (glob) | `projectSource~packages/*` |
+| `!~` | Not like | `tag!~*-app` |
 
-```yaml
-# .moon/tasks/react.yml
-inheritedBy:
-  tags: ['react']
-
-tasks:
-  lint:
-    args:
-      - '--ext'
-      - '.tsx'
-    options:
-      mergeArgs: 'prepend'
-```
-
-### Conditional Inheritance by Layer
-
-```yaml
-# .moon/tasks/library.yml
-inheritedBy:
-  layers: ['library']
-
-tasks:
-  build:
-    command: 'tsc --build'
-    outputs:
-      - 'dist'
-```
-
-### Multi-Condition Inheritance
-
-```yaml
-# .moon/tasks/frontend-lib.yml
-inheritedBy:
-  toolchains:
-    or: ['javascript', 'typescript']
-  stacks: ['frontend']
-  layers: ['library']
-```
-
-## Dynamic Task Generation with Pkl
-
-```pkl
-# moon.pkl
-tasks {
-  // Generate OS-specific build tasks
-  for (_os in List("linux", "macos", "windows")) {
-    ["build-\(_os)"] {
-      command = "cargo"
-      args = List(
-        "build",
-        "--release",
-        "--target",
-        if (_os == "linux") "x86_64-unknown-linux-gnu"
-          else if (_os == "macos") "x86_64-apple-darwin"
-          else "x86_64-pc-windows-msvc"
-      )
-      options {
-        os = _os
-      }
-    }
-  }
-}
-```
-
-## Complex Dependency Graphs
-
-### Build Order with Dependencies
-
-```yaml
-tasks:
-  generate:
-    command: 'prisma generate'
-    outputs:
-      - 'node_modules/.prisma'
-
-  build:
-    command: 'tsc'
-    deps:
-      - '~:generate'
-      - '^:build'  # All project dependencies
-    outputs:
-      - 'dist'
-
-  test:
-    command: 'jest'
-    deps:
-      - '~:build'
-
-  deploy:
-    command: 'deploy.sh'
-    deps:
-      - '~:test'
-    options:
-      runInCI: 'only'
-```
-
-### Optional Dependencies
-
-```yaml
-tasks:
-  build:
-    deps:
-      - target: '^:build'
-        optional: true  # May not exist
-```
-
-### Passing Args to Dependencies
-
-```yaml
-tasks:
-  build:
-    deps:
-      - target: 'codegen:generate'
-        args: '--env production'
-        env:
-          TARGET_ENV: 'production'
-```
-
-## Environment Management
-
-### Per-Environment Tasks
-
-```yaml
-tasks:
-  build:
-    command: 'vite build'
-    env:
-      NODE_ENV: 'production'
-
-  build:staging:
-    extends: 'build'
-    env:
-      NODE_ENV: 'staging'
-      API_URL: 'https://staging-api.example.com'
-
-  build:dev:
-    extends: 'build'
-    env:
-      NODE_ENV: 'development'
-```
-
-### Environment Files
-
-```yaml
-tasks:
-  build:
-    command: 'vite build'
-    options:
-      # Load multiple env files (later overrides earlier)
-      envFile:
-        - '.env'
-        - '.env.local'
-        - '.env.production'
-```
-
-### Dynamic Environment Variables
-
-```yaml
-tasks:
-  deploy:
-    command: 'deploy.sh'
-    env:
-      VERSION: '$vcsRevision'
-      BRANCH: '$vcsBranch'
-      BUILD_DATE: '$datetime'
-```
-
-## Caching Strategies
-
-### Cache by Environment
-
-```yaml
-tasks:
-  build:
-    command: 'vite build'
-    options:
-      cacheKey: 'v1-$vcsBranch'  # Different cache per branch
-```
-
-### Skip Cache for Specific Tasks
-
-```yaml
-tasks:
-  deploy:
-    command: 'deploy.sh'
-    options:
-      cache: false
-```
-
-### Local-Only Caching
-
-```yaml
-tasks:
-  build:
-    options:
-      cache: 'local'  # Don't use remote cache
-```
-
-## Workspace Organization
-
-### Monorepo Structure
+### List syntax
 
 ```
-workspace/
-├── .moon/
-│   ├── workspace.yml
-│   ├── toolchains.yml
-│   └── tasks/
-│       ├── all.yml          # Universal tasks
-│       ├── javascript.yml   # JS/TS projects
-│       ├── rust.yml         # Rust projects
-│       └── react.yml        # React projects
-├── apps/
-│   ├── web/                 # Frontend app
-│   └── api/                 # Backend app
-├── packages/
-│   ├── ui/                  # Shared UI
-│   └── utils/               # Shared utilities
-└── tools/
-    └── scripts/             # Build scripts
+language=[javascript, typescript]
 ```
 
-### Project Tags Strategy
+### Logical operators
 
-```yaml
-# Use tags for:
-# - Framework: react, vue, svelte
-# - Feature: auth, payments, analytics
-# - Team: frontend, backend, platform
+| Operator | Description |
+|----------|-------------|
+| `&&` or `AND` | Logical AND |
+| `\|\|` or `OR` | Logical OR |
 
-tags:
-  - 'react'
-  - 'payments'
-  - 'frontend-team'
+Cannot mix `&&` and `||` without parentheses.
+
+### Grouping
+
+```
+(tag=react || tag=vue) && taskType=test
 ```
 
-### Running by Tags
+Groups can be nested.
+
+### Available fields
+
+| Field | Description |
+|-------|-------------|
+| `language` | Programming language |
+| `project` | Project name or alias |
+| `projectAlias` | Project alias |
+| `projectId` | Project identifier |
+| `projectLayer` | Project layer (renamed from `projectType` in v1) |
+| `projectSource` | Relative file path |
+| `projectStack` | Project stack |
+| `tag` | Project tag |
+| `task` | Task ID |
+| `taskToolchain` | Task toolchain (renamed from `taskPlatform` in v1) |
+| `taskType` | Task type (build, test, run) |
+
+### Examples
 
 ```bash
-# All frontend tasks
-moon run '#frontend-team:lint'
-
-# All React projects
-moon run '#react:test'
+moon run :build --query "language=typescript"
+moon run :test --query "projectLayer=library"
+moon run :lint --query "tag=react"
+moon run :build --query "language=typescript && projectStack=frontend"
+moon run :test --query "projectLayer=library || projectLayer=tool"
+moon run :lint --query "(tag=react || tag=vue) && taskType=test"
+moon run :build --query "projectSource~packages/*"
+moon run :test --query "project~*-app"
+moon query projects "tag=[frontend, backend]"
 ```
 
-## Code Generation
+## Project and Action Graphs
 
-### Template with Variables
+### Project graph
 
-```yaml
-# templates/component/template.yml
-title: 'React Component'
-description: 'Create a React component'
-destination: 'src/components/[name]'
-
-variables:
-  name:
-    type: 'string'
-    prompt: 'Component name?'
-    required: true
-
-  withTests:
-    type: 'boolean'
-    prompt: 'Include tests?'
-    default: true
-
-  style:
-    type: 'enum'
-    prompt: 'Styling?'
-    values: ['css', 'styled', 'tailwind']
-    default: 'css'
-```
-
-### Template Files
-
-```twig
-{# templates/component/files/[name].tsx.tera #}
----
-to: {{ name | pascal_case }}.tsx
----
-
-import styles from './{{ name | pascal_case }}.module.css';
-
-export interface {{ name | pascal_case }}Props {
-  children?: React.ReactNode;
-}
-
-export function {{ name | pascal_case }}({ children }: {{ name | pascal_case }}Props) {
-  return (
-    <div className={styles.root}>
-      {children}
-    </div>
-  );
-}
-```
-
-```twig
-{# templates/component/files/[name].test.tsx.tera #}
----
-to: {{ name | pascal_case }}.test.tsx
-skip: {{ not withTests }}
----
-
-import { render, screen } from '@testing-library/react';
-import { {{ name | pascal_case }} } from './{{ name | pascal_case }}';
-
-describe('{{ name | pascal_case }}', () => {
-  it('renders children', () => {
-    render(<{{ name | pascal_case }}>Hello</{{ name | pascal_case }}>);
-    expect(screen.getByText('Hello')).toBeInTheDocument();
-  });
-});
-```
-
-### Generate Command
+DAG of all projects and their dependencies. Used for dependency resolution and build order.
 
 ```bash
-moon generate component --to packages/ui -- --name Button --withTests
+moon project-graph                    # All projects
+moon project-graph app --dependents   # Specific project + dependents
+moon project-graph --dot              # DOT format for external tools
+moon project-graph --json             # JSON format
 ```
 
-## VCS Hooks
+### Task graph
 
-### Pre-commit Hook
+DAG of all tasks and their dependencies, derived from the project graph.
+
+```bash
+moon task-graph
+moon task-graph app:build
+```
+
+### Action graph
+
+DAG of actions executed when running tasks. Includes:
+
+1. `SyncWorkspace` -- Health checks
+2. `SetupToolchain` -- Download/install tools
+3. `InstallDeps` -- Install dependencies
+4. `SyncProject` -- Sync project state
+5. `RunTask` -- Execute task
+
+v2 applies "transitive reduction" to the graph, removing unnecessary edges for better performance.
+
+```bash
+moon action-graph
+moon action-graph app:build
+```
+
+## Git Hooks
+
+### Configuration
 
 ```yaml
 # .moon/workspace.yml
@@ -352,199 +127,128 @@ vcs:
   hooks:
     pre-commit:
       - 'moon run :lint :format --affected --status=staged'
-```
-
-### Commit Message Validation
-
-```yaml
-vcs:
-  hooks:
     commit-msg:
       - 'commitlint --edit $ARG1'
-```
-
-### Pre-push Hook
-
-```yaml
-vcs:
-  hooks:
     pre-push:
       - 'moon run :test --affected'
+  sync: true                     # Auto-generate hooks
+  hookFormat: 'native'           # 'native' or 'bash'
 ```
 
-## Remote Caching Setup
+### How it works
 
-### Self-Hosted with bazel-remote
+- Hooks generated as scripts in `.moon/hooks/`
+- Git configured with `core.hooksPath` pointing to `.moon/hooks/`
+- Unix: Bash scripts (`.sh`), Windows: PowerShell (`.ps1`)
+- Commands execute from repository root
+- Arguments: `$ARG0` (script path), `$ARG1`, `$ARG2`, etc.
+- Supports worktrees
 
-```bash
-# Start cache server
-docker run -p 9092:9092 \
-  -v /data/moon-cache:/data \
-  buchgr/bazel-remote-cache \
-  --dir=/data \
-  --max_size=50 \
-  --grpc_address=0.0.0.0:9092
-```
+### Managing hooks
+
+- **Auto-generate**: Set `vcs.sync: true` (regenerated on every task run)
+- **Manual sync**: `moon sync vcs-hooks`
+- **Disable**: `vcs.sync: false` + `moon sync vcs-hooks --clean`
+
+## Environment Variables
+
+### Moon environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `MOON_CACHE` | Override cache mode |
+| `MOON_LOG` | Override log level |
+| `MOON_CONCURRENCY` | Thread pool size |
+| `MOON_TOOLCHAIN_FORCE_GLOBALS` | Use PATH binaries (for Docker/Alpine) |
+| `MOON_DEBUG_PROCESS_ENV` | Reveal process env vars |
+| `MOON_DEBUG_PROCESS_INPUT` | Reveal process stdin |
+| `MOON_SKIP_SETUP_TOOLCHAIN` | Skip toolchain setup |
+| `MOON_REMOTE_HOST` | Conditionally enable remote caching |
+| `MOON_INCLUDE_RELATIONS` | Include graph relations (v2.0.3+) |
+| `MOON_BASE` | Override base revision for affected detection |
+| `MOON_HEAD` | Override head revision for affected detection |
+| `MOON_NODE_VERSION` | Override Node.js version |
+| `MOON_AFFECTED_FILES` | List of affected files (OS path separator) |
+| `CI` | Auto-detected; `--ci` flag to force |
+| `PROTO_OFFLINE` | Force offline mode |
+
+## Project Configuration
+
+### Core metadata
 
 ```yaml
-# .moon/workspace.yml
-remote:
-  host: 'grpc://cache.internal:9092'
+# <project>/moon.yml
+id: 'web-app'                    # Override inferred ID
+language: 'typescript'           # bash, batch, go, javascript, php, python, ruby, rust, typescript, unknown
+layer: 'application'             # application, automation, configuration, library, scaffolding, tool, unknown
+stack: 'frontend'                # backend, data (new in v2), frontend, infrastructure, systems, unknown
+
+project:
+  title: 'Web Application'      # Human-readable name (renamed from name in v1)
+  description: 'Main web app'
+  owner: '@frontend-team'
+  channel: '#web-app'
+  maintainers:
+    - 'alice'
+    - 'bob'
+  customField: 'value'          # Custom metadata (v2.0.0+)
+
+tags:
+  - 'react'
+  - 'typescript'
+  - 'frontend-team'
 ```
 
-### With Authentication
+### Dependencies
 
 ```yaml
-remote:
-  host: 'grpcs://cache.example.com:9092'
-  auth:
-    token: 'CACHE_AUTH_TOKEN'  # Env var name
-  tls:
-    cert: 'certs/ca.pem'
+dependsOn:
+  - 'shared-utils'                  # Simple reference
+  - id: 'api-client'
+    scope: 'production'             # production, development, build, peer
 ```
 
-## Webhook Integration
-
-### Slack Notifications
+### Code owners (project-level)
 
 ```yaml
-# .moon/workspace.yml
-notifier:
-  webhookUrl: 'https://hooks.slack.com/services/...'
+owners:
+  defaultOwner: '@frontend'
+  requiredApprovals: 2
+  optional: false                    # GitLab only
+  paths:
+    'src/': ['@frontend']
+    '*.config.js': ['@frontend-infra']
+  customGroups:                      # Bitbucket
+    frontend: ['user1', 'user2']
 ```
 
-### Custom Webhook Handler
+### Toolchain overrides
 
 ```yaml
-notifier:
-  webhookUrl: 'https://api.example.com/moon-webhook'
-  acknowledge: true  # Wait for response
+toolchains:
+  default: 'node'
+  node:
+    version: '20.0.0'
+  typescript:
+    syncProjectReferences: false
 ```
 
-Events sent:
-- `pipeline.started`, `pipeline.finished`, `pipeline.aborted`
-- `task.running`, `task.ran`
-- `dependencies.installing`, `dependencies.installed`
-
-## Parallelization Patterns
-
-### CI Job Distribution
+### Workspace inheritance control
 
 ```yaml
-# GitHub Actions
-jobs:
-  ci:
-    strategy:
-      matrix:
-        job: [0, 1, 2, 3]
-    steps:
-      - run: moon ci --job ${{ matrix.job }} --job-total 4
+workspace:
+  inheritedTasks:
+    include: ['lint', 'test']
+    exclude: ['deploy']
+    rename:
+      buildApplication: 'build'
 ```
 
-### Sequential Dependencies, Parallel Tasks
+## MCP Integration
 
-```yaml
-tasks:
-  build:
-    deps:
-      - '^:build'  # Wait for dependencies
-    options:
-      runDepsInParallel: true  # Run deps in parallel
-```
+Moon includes a built-in MCP (Model Context Protocol) server for AI integrations.
 
-### Mutex for Shared Resources
-
-```yaml
-tasks:
-  migrate:
-    command: 'prisma migrate deploy'
-    options:
-      mutex: 'database'  # Only one at a time
-
-  seed:
-    command: 'prisma db seed'
-    options:
-      mutex: 'database'
-```
-
-## Debugging
-
-### Inspect Task Configuration
-
-```bash
-moon task app:build --json
-```
-
-### Compare Hash Changes
-
-```bash
-# After running task, find hash in output
-moon hash abc123
-
-# Compare two runs
-moon hash abc123 def456
-```
-
-### Verbose Logging
-
-```bash
-MOON_LOG=trace moon run app:build
-MOON_DEBUG_PROCESS_ENV=true moon run app:build
-```
-
-### Query Affected
-
-```bash
-moon query affected
-moon query changed-files --status modified
-```
-
-## Extension Development
-
-### Custom Extension
-
-```rust
-// src/lib.rs
-use moon_pdk::*;
-
-#[plugin_fn]
-pub fn register_extension(
-    Json(input): Json<ExtensionMetadataInput>
-) -> FnResult<Json<ExtensionMetadataOutput>> {
-    Ok(Json(ExtensionMetadataOutput {
-        name: "my-extension".into(),
-        description: Some("Custom extension".into()),
-        ..Default::default()
-    }))
-}
-
-#[plugin_fn]
-pub fn execute_extension(
-    Json(input): Json<ExecuteExtensionInput>
-) -> FnResult<()> {
-    // Extension logic
-    Ok(())
-}
-```
-
-### Configuration
-
-```yaml
-# .moon/extensions.yml
-my-extension:
-  plugin: 'file://./extensions/my-extension.wasm'
-  customSetting: true
-```
-
-### Usage
-
-```bash
-moon ext my-extension -- --arg1 value
-```
-
-## MCP Integration for AI
-
-### Claude Code Setup
+### Setup
 
 ```bash
 claude mcp add moon -s project \
@@ -552,12 +256,86 @@ claude mcp add moon -s project \
   -- moon mcp
 ```
 
-### Available Tools
+### Available MCP tools
 
-- `get_project` - Get project details
-- `get_projects` - List all projects
-- `get_task` - Get task details
-- `get_tasks` - List all tasks
-- `get_changed_files` - Get VCS changes
-- `sync_projects` - Sync projects
-- `sync_workspace` - Sync workspace
+| Tool | Description |
+|------|-------------|
+| `get_project` | Get project details |
+| `get_projects` | List all projects (returns fragments for smaller payloads) |
+| `get_task` | Get task details |
+| `get_tasks` | List all tasks (returns fragments) |
+| `get_changed_files` | Get VCS changes |
+| `sync_projects` | Sync projects |
+| `sync_workspace` | Sync workspace |
+| `generate` | Run code generator (v2+, JSON schema fixed in v2.1.0) |
+
+## Debugging
+
+```bash
+# Verbose logging
+MOON_LOG=trace moon run app:build
+MOON_DEBUG_PROCESS_ENV=true moon run app:build
+
+# Inspect task configuration
+moon task app:build --json
+
+# Inspect hash
+moon hash abc123
+
+# Compare two hashes
+moon hash abc123 def456
+
+# Query affected
+moon query affected
+moon query changed-files --status modified
+
+# Visualize graphs
+moon action-graph app:build
+moon project-graph
+moon task-graph app:build
+```
+
+## Release History
+
+### v2.1.0 (March 16, 2026) -- Latest
+
+- Improved local/remote environment detection (GitHub Codespaces, Gitpod)
+- Duplicate project aliases no longer hard error
+- 3 new `affectedFiles` settings: `filter`, `ignoreProjectBoundary`, `passDotWhenNoResults`
+- New `runInSyncPhase` task option
+- New `inheritAliases` and `installDependencies` per-toolchain settings
+- `--plan` option for `moon exec`
+- Go: `go list --deps` for project relationships
+- Python: Normalized package names to PEP 503
+- TypeScript: `pruneProjectReferences` setting
+- Fixed JSON schema in MCP `generate` tool
+- Fixed `$projectTitle` and `$projectAliases` token substitution
+- Fixed `bash` availability fallback (falls back to `sh`)
+
+### v2.0.4 (March 6, 2026)
+
+- JavaScript: `*` version support, reworked dedup detection
+- Python: `pyproject.toml` dependency reading
+
+### v2.0.3 (February 26, 2026)
+
+- Re-release of failed v2.0.2
+- Disabled shallow checkout hard error in CI
+- Added `MOON_INCLUDE_RELATIONS` env var
+- Added `.env`/`.env.*` to default `hasher.ignoreMissingPatterns`
+
+### v2.0.1 (February 20, 2026)
+
+- Fixed `moon upgrade` to use proto if moon managed by proto
+- Fixed WASM serialization errors
+
+### v2.0.0 (February 18, 2026)
+
+- Major release "Phobos"
+- WASM plugin toolchain system
+- Multiple config format support (JSON, TOML, HCL, Pkl)
+- Task `script` field for complex commands
+- Deep merge for task inheritance
+- `utility` preset, `data` stack
+- Stabilized remote caching and `moonx`
+- Interactive prompts for commands without identifiers
