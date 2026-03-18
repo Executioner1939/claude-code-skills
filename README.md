@@ -84,10 +84,4 @@ Systematically reverse-engineer and analyze existing codebases.
 
 ## License
 
-MIT
-
----
-
-**Marketplace:** skunkworks
-**Author:** Executioner1939
-**Repository:** https://github.com/Executioner1939/claude-code-skills
+[MIT](LICENSE)
