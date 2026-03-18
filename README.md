@@ -28,7 +28,7 @@ Drop-in skills that give Claude Code deep domain expertise — complete API refe
 
 ## Skills
 
-### :crescent_moon: moonrepo `v3.0.0`
+### moonrepo `v3.0.0`
 > Monorepo Task Runner & Build System — covers moon v2.1.0
 
 Comprehensive [moonrepo](https://moonrepo.dev/) reference: all CLI commands, workspace/toolchain/task configuration, CI/CD pipelines with sharding, Docker multi-stage builds, code generation with Tera, WASM plugin toolchains, MQL queries, remote caching, and v1-to-v2 migration.
@@ -37,7 +37,7 @@ Comprehensive [moonrepo](https://moonrepo.dev/) reference: all CLI commands, wor
 
 ---
 
-### :crab: utoipa `v2.0.0`
+### utoipa `v2.0.0`
 > Rust OpenAPI Documentation Generator — covers utoipa 5.4.0
 
 Complete [utoipa](https://github.com/juhaku/utoipa) reference: all 5 derive macros (`ToSchema`, `OpenApi`, `IntoParams`, `IntoResponses`, `ToResponse`), `#[utoipa::path]` attributes, framework integrations (Axum, Actix, Rocket), UI integrations (Swagger UI, Redoc, RapiDoc, Scalar), security schemes, enum handling, generics, validation, and 25+ cargo features.
@@ -46,7 +46,7 @@ Complete [utoipa](https://github.com/juhaku/utoipa) reference: all 5 derive macr
 
 ---
 
-### :zap: eventcatalog `v2.0.0`
+### eventcatalog `v2.0.0`
 > Event-Driven Architecture Documentation
 
 Complete [EventCatalog](https://www.eventcatalog.dev/) reference: all 12 resource types, 184+ SDK functions, 15+ generator integrations (OpenAPI, AsyncAPI, GraphQL, Confluent, AWS), MCP server with 15 tools, visualizations (NodeGraph, flows, Mermaid), schema support (JSON Schema, Avro, Protobuf), and authentication.
@@ -55,7 +55,7 @@ Complete [EventCatalog](https://www.eventcatalog.dev/) reference: all 12 resourc
 
 ---
 
-### :mag: codebase-archaeology `v1.1.0`
+### codebase-archaeology `v1.1.0`
 > Deep Codebase Analysis & Transformation Planning
 
 Two-agent system that systematically reverse-engineers existing codebases: extracts business rules, maps data flows, traces dependencies, and produces transformation plans. Supports 7 analysis lenses (migration, architecture, decomposition, risk, documentation, testing, debt) with structured output templates.
