@@ -1,0 +1,23 @@
+{
+  "skill_name": "fmodel-rust",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I'm building an order management system in Rust using fmodel-rust. I need a Decider for orders that handles Create, Update, and Cancel commands. The state should track order_id, customer_name, items (Vec<String>), and whether it's cancelled. Make sure Create fails if the order already exists, Cancel fails if already cancelled, and Update fails if cancelled. Include tests using fmodel's test specification DSL.",
+      "expected_output": "A complete Decider with decide/evolve/initial_state closures, proper error handling, OrderCommand/OrderEvent/OrderState types, and DeciderTestSpecification tests covering happy paths and error cases.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "I have two separate deciders in my Rust project using fmodel-rust: a WalletDecider (commands: CreateWallet, CreditBalance, DebitBalance; events: WalletCreated, BalanceCredited, BalanceDebited) and an EscrowDecider (commands: CreateEscrow, ReleaseEscrow; events: EscrowCreated, EscrowReleased). I need to combine them into a single transactional orchestrating aggregate where releasing an escrow automatically credits the wallet. Show me the full composition: combined decider with Sum types, mapping functions to unified domain enums, the saga for cross-aggregate reactions, and wiring it all into an EventSourcedOrchestratingAggregate.",
+      "expected_output": "Complete code showing: unified Command/Event enums, bidirectional mapping functions (command_to_sum, sum_to_event, event_to_sum), error unification via map_error, Decider.combine() + map_command + map_event chain, a Saga reacting to EscrowReleased to produce CreditBalance, and EventSourcedOrchestratingAggregate wiring.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I'm using fmodel-rust and I need to set up read model projections. I have OrderEvent (Created, Updated, Cancelled) and ShipmentEvent (Created, Shipped, Delivered). I want two separate View projections - an OrderViewState and a ShipmentViewState - that both process a unified AppEvent enum. Merge them together and wire with MaterializedView. Also show me how to test the views using ViewTestSpecification.",
+      "expected_output": "Pure View definitions for both order and shipment with evolve/initial_state, View.merge() to combine them, ViewStateRepository trait implementation sketch, MaterializedView wiring, and ViewTestSpecification tests.",
+      "files": []
+    }
+  ]
+}

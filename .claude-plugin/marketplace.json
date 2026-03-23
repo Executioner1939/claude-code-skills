@@ -5,8 +5,8 @@
     "email": "executioner1939@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Claude Code skills for moonrepo, utoipa, EventCatalog, and codebase analysis",
-    "version": "3.1.0"
+    "description": "Claude Code skills for moonrepo, utoipa, EventCatalog, fmodel-rust, and codebase analysis",
+    "version": "4.0.0"
   },
   "plugins": [
     {
@@ -32,6 +32,14 @@
       "version": "2.0.0",
       "category": "development",
       "keywords": ["eventcatalog", "event-driven-architecture", "eda", "asyncapi", "openapi"]
+    },
+    {
+      "name": "fmodel-rust",
+      "source": "./skills/fmodel-rust",
+      "description": "Functional domain modeling in Rust with fmodel-rust v0.9. Decider, View, Saga domain types, algebraic composition via combine/merge/map, and application-layer wiring (aggregates, MaterializedView, SagaManager).",
+      "version": "1.0.0",
+      "category": "development",
+      "keywords": ["rust", "fmodel", "event-sourcing", "cqrs", "domain-modeling", "functional", "decider", "saga"]
     },
     {
       "name": "codebase-archaeology",
