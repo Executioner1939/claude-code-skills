@@ -1,5 +1,5 @@
 ---
-name: codebase-archaeology
+name: analysis-codebase-archaeology
 description: >
   Systematically reverse-engineers and analyzes existing codebases to extract
   business rules, map data flows, trace dependencies, assess risk, and produce

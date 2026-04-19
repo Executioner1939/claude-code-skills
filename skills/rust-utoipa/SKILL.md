@@ -1,5 +1,5 @@
 ---
-name: utoipa
+name: rust-utoipa
 description: Generates OpenAPI documentation from Rust code using utoipa derive macros and attributes. Use when adding OpenAPI/Swagger docs to Rust APIs, deriving ToSchema for types, documenting endpoints with #[utoipa::path], setting up Swagger UI or Redoc with Axum/Actix, defining IntoParams for query parameters, configuring security schemes, or handling enum serialization in OpenAPI. Triggers on "utoipa", "OpenAPI Rust", "ToSchema", "swagger Rust", "API docs Rust", "openapi derive", "IntoParams", "Redoc Rust", or "Scalar Rust".
 ---
 

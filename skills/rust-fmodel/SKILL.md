@@ -1,5 +1,5 @@
 ---
-name: fmodel-rust
+name: rust-fmodel
 description: >
   Guide for building event-sourced and CQRS systems in Rust using the fmodel-rust library
   (crate: fmodel-rust). Covers Decider, View, Saga domain types, their composition via
