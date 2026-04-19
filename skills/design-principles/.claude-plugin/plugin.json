@@ -1,7 +1,7 @@
 {
   "name": "design-principles",
   "description": "Curated reference library of canonical design principles (Dieter Rams, Joshua Porter, Bruce Tognazzini, inclusive design, Postel's law, principle of least surprise) for UI, product, and crosscutting design judgment.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "Executioner1939"
   },

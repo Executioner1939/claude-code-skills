@@ -1,7 +1,7 @@
 {
   "name": "docs-eventcatalog",
   "description": "Document event-driven architectures with EventCatalog. Covers all 13 resource types (including Data Products), the full SDK (including snapshots, DSL builders, custom docs), 15+ generator integrations, MCP server, visualizations, and schema support.",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": {
     "name": "Executioner1939"
   },

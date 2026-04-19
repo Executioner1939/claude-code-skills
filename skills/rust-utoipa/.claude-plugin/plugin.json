@@ -1,7 +1,7 @@
 {
   "name": "rust-utoipa",
   "description": "Rust OpenAPI documentation with utoipa v5.4. Complete macro reference, path attributes, security schemes, enum handling, validation, and integrations for Axum, Actix-web, Rocket.",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "author": {
     "name": "Executioner1939"
   },

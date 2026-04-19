@@ -1,7 +1,7 @@
 {
   "name": "rust-fmodel",
   "description": "Functional domain modeling in Rust with fmodel-rust v0.9. Complete reference for Decider, View, Saga domain types, algebraic composition via combine/merge/map, and application-layer wiring (EventSourcedAggregate, StateStoredAggregate, orchestrating aggregates, MaterializedView, SagaManager).",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": {
     "name": "Executioner1939"
   },

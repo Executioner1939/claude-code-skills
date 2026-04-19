@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Claude Code skills for CI/CD, Rust, documentation, code analysis, and design.",
-    "version": "5.1.0"
+    "version": "5.1.1"
   },
   "plugins": [
     {
       "name": "ci-moonrepo",
       "source": "./skills/ci-moonrepo",
       "description": "moonrepo v2.2 expert -- workspace setup, task orchestration, CI/CD pipelines, Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, v1-to-v2 migration, and a curated catalogue of real-world gotchas from production monorepos.",
-      "version": "3.1.0",
+      "version": "3.1.1",
       "category": "development",
       "keywords": ["moonrepo", "moon", "monorepo", "build-system", "task-runner", "ci-cd"],
       "author": {
@@ -27,7 +27,7 @@
       "name": "rust-utoipa",
       "source": "./skills/rust-utoipa",
       "description": "Rust OpenAPI documentation with utoipa v5.4. Complete macro reference, path attributes, security schemes, enum handling, validation, and integrations for Axum, Actix-web, Rocket.",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "category": "development",
       "keywords": ["rust", "openapi", "swagger", "utoipa", "api-documentation", "axum"],
       "author": {
@@ -41,7 +41,7 @@
       "name": "docs-eventcatalog",
       "source": "./skills/docs-eventcatalog",
       "description": "Document event-driven architectures with EventCatalog. Covers all 13 resource types (including Data Products), the full SDK (snapshots, DSL builders, custom docs), 15+ generator integrations, MCP server, visualizations, and schema support.",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "category": "development",
       "keywords": ["eventcatalog", "event-driven-architecture", "eda", "asyncapi", "openapi"],
       "author": {
@@ -55,7 +55,7 @@
       "name": "rust-fmodel",
       "source": "./skills/rust-fmodel",
       "description": "Functional domain modeling in Rust with fmodel-rust v0.9 (MSRV 1.75+, native async-fn-in-trait). Decider, View, Saga domain types, algebraic composition via combine/merge/map, and application-layer wiring (aggregates, MaterializedView, SagaManager).",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "development",
       "keywords": ["rust", "fmodel", "event-sourcing", "cqrs", "domain-modeling", "functional", "decider", "saga"],
       "author": {
@@ -69,7 +69,7 @@
       "name": "analysis-codebase-archaeology",
       "source": "./skills/analysis-codebase-archaeology",
       "description": "Deep structural analysis of any codebase -- extracts business rules, maps data flows, traces dependencies, assesses risk, and produces transformation plans. Supports 7 analysis lenses.",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "development",
       "keywords": ["code-analysis", "reverse-engineering", "business-rules", "technical-debt", "migration"],
       "author": {
@@ -83,7 +83,7 @@
       "name": "design-principles",
       "source": "./skills/design-principles",
       "description": "Curated reference library of canonical design principles (Dieter Rams, Joshua Porter, Bruce Tognazzini, inclusive design, Postel's law, principle of least surprise) for UI, product, and crosscutting design judgment.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "design",
       "keywords": ["design", "ui", "ux", "product-design", "design-principles", "dieter-rams", "design-review"],
       "author": {
