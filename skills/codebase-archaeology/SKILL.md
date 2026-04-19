@@ -13,12 +13,6 @@ description: >
   rewrite in, port to, move to hexagonal, CQRS, technical debt, due diligence,
   onboarding guide, split monolith, what does this code do, hidden complexity,
   blast radius, coupling analysis, or data lineage questions.
-license: MIT
-metadata:
-  author: codebase-archaeology
-  version: 1.1.0
-  category: code-analysis
-  tags: [reverse-engineering, business-rules, data-flows, dependencies, technical-debt, migration, architecture, refactoring, due-diligence, documentation]
 ---
 
 # Codebase Archaeology

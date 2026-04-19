@@ -1,12 +1,13 @@
 {
   "name": "moonrepo",
   "description": "moonrepo v2.1 expert -- workspace setup, task orchestration, CI/CD pipelines, Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, and v1-to-v2 migration.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": {
     "name": "Executioner1939"
   },
   "homepage": "https://github.com/Executioner1939/claude-code-skills",
   "repository": "https://github.com/Executioner1939/claude-code-skills",
   "license": "MIT",
-  "keywords": ["moonrepo", "moon", "monorepo", "build-system", "task-runner", "ci-cd"]
+  "keywords": ["moonrepo", "moon", "monorepo", "build-system", "task-runner", "ci-cd"],
+  "skills": "."
 }

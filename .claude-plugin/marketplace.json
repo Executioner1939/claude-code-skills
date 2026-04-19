@@ -5,49 +5,79 @@
     "email": "executioner1939@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Claude Code skills for moonrepo, utoipa, EventCatalog, fmodel-rust, and codebase analysis",
-    "version": "4.0.0"
+    "description": "Claude Code skills for moonrepo, utoipa, EventCatalog, fmodel-rust, and codebase analysis.",
+    "version": "4.1.0"
   },
   "plugins": [
     {
       "name": "moonrepo",
       "source": "./skills/moonrepo",
       "description": "moonrepo v2.1 expert -- workspace setup, task orchestration, CI/CD pipelines, Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, and v1-to-v2 migration.",
-      "version": "3.0.0",
+      "version": "3.0.1",
       "category": "development",
-      "keywords": ["moonrepo", "moon", "monorepo", "build-system", "task-runner", "ci-cd"]
+      "keywords": ["moonrepo", "moon", "monorepo", "build-system", "task-runner", "ci-cd"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
     },
     {
       "name": "utoipa",
       "source": "./skills/utoipa",
       "description": "Rust OpenAPI documentation with utoipa v5.4. Complete macro reference, path attributes, security schemes, enum handling, validation, and integrations for Axum, Actix-web, Rocket.",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "category": "development",
-      "keywords": ["rust", "openapi", "swagger", "utoipa", "api-documentation", "axum"]
+      "keywords": ["rust", "openapi", "swagger", "utoipa", "api-documentation", "axum"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
     },
     {
       "name": "eventcatalog",
       "source": "./skills/eventcatalog",
       "description": "Document event-driven architectures with EventCatalog. Covers all 12 resource types, 184+ SDK functions, 15+ generator integrations, MCP server, visualizations, and schema support.",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "category": "development",
-      "keywords": ["eventcatalog", "event-driven-architecture", "eda", "asyncapi", "openapi"]
+      "keywords": ["eventcatalog", "event-driven-architecture", "eda", "asyncapi", "openapi"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
     },
     {
       "name": "fmodel-rust",
       "source": "./skills/fmodel-rust",
       "description": "Functional domain modeling in Rust with fmodel-rust v0.9. Decider, View, Saga domain types, algebraic composition via combine/merge/map, and application-layer wiring (aggregates, MaterializedView, SagaManager).",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "development",
-      "keywords": ["rust", "fmodel", "event-sourcing", "cqrs", "domain-modeling", "functional", "decider", "saga"]
+      "keywords": ["rust", "fmodel", "event-sourcing", "cqrs", "domain-modeling", "functional", "decider", "saga"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
     },
     {
       "name": "codebase-archaeology",
       "source": "./skills/codebase-archaeology",
       "description": "Deep structural analysis of any codebase -- extracts business rules, maps data flows, traces dependencies, assesses risk, and produces transformation plans. Supports 7 analysis lenses.",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "development",
-      "keywords": ["code-analysis", "reverse-engineering", "business-rules", "technical-debt", "migration"]
+      "keywords": ["code-analysis", "reverse-engineering", "business-rules", "technical-debt", "migration"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
     }
   ]
 }

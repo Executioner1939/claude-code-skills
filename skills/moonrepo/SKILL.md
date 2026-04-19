@@ -1,12 +1,9 @@
 ---
-name: moonrepo-v2
+name: moonrepo
 description: |
   Guide for moonrepo (moon) v2 -- the Rust-based monorepo management, task orchestration, and build system. Covers workspace setup (.moon/workspace.yml), task configuration (moon.yml), CI/CD pipelines (moon ci), Docker integration, remote caching, code generation, WASM toolchain plugins, and v1-to-v2 migration.
   Use when user mentions: moon, moonrepo, moon.yml, .moon/workspace, moon run, moon ci, moon check, moon docker, moon generate, moon exec, moonx, moon query, moon setup, monorepo task runner, project graph, action graph, task inheritance, smart hashing, affected detection, remote caching, proto toolchain, WASM plugin toolchain, moon migrate v2.
   Also use when user describes a monorepo build tool with concepts like project graphs, task hashing, or inherited tasks, even without saying "moon" explicitly.
-metadata:
-  version: 2.1.0
-  author: skunkworks
 ---
 
 # moonrepo v2 (latest: v2.1.0)

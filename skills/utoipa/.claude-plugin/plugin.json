@@ -1,12 +1,13 @@
 {
   "name": "utoipa",
   "description": "Rust OpenAPI documentation with utoipa v5.4. Complete macro reference, path attributes, security schemes, enum handling, validation, and integrations for Axum, Actix-web, Rocket.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": {
     "name": "Executioner1939"
   },
   "homepage": "https://github.com/Executioner1939/claude-code-skills",
   "repository": "https://github.com/Executioner1939/claude-code-skills",
   "license": "MIT",
-  "keywords": ["rust", "openapi", "swagger", "utoipa", "api-documentation", "axum"]
+  "keywords": ["rust", "openapi", "swagger", "utoipa", "api-documentation", "axum"],
+  "skills": "."
 }
