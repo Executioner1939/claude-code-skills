@@ -8,6 +8,5 @@
   "homepage": "https://github.com/Executioner1939/claude-code-skills",
   "repository": "https://github.com/Executioner1939/claude-code-skills",
   "license": "MIT",
-  "keywords": ["moonrepo", "moon", "monorepo", "build-system", "task-runner", "ci-cd"],
-  "skills": ["./"]
+  "keywords": ["moonrepo", "moon", "monorepo", "build-system", "task-runner", "ci-cd"]
 }
