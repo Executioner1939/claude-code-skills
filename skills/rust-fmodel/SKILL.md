@@ -15,9 +15,14 @@ description: >
 
 # fmodel-rust -- Functional Domain Modeling in Rust
 
-fmodel-rust (v0.9.2) is a composition library for building event-sourced and CQRS systems.
-Its core idea: domain logic is expressed as pure values (Decider, View, Saga) that compose
-algebraically, then get wired to infrastructure via application-layer types.
+fmodel-rust (v0.9.x, currently 0.9.1 on crates.io) is a composition library for building
+event-sourced and CQRS systems. Its core idea: domain logic is expressed as pure values
+(Decider, View, Saga) that compose algebraically, then get wired to infrastructure via
+application-layer types.
+
+Requires Rust **1.75+** (the crate uses native async-fn-in-trait / RPIT, no `async-trait`
+crate). Application-layer trait impls should use bare `async fn` — see the repository
+example further down.
 
 ## Architecture
 
@@ -223,14 +228,20 @@ views typically subscribe to the same event stream.
 
 ### Merging Sagas
 
-`merge()` combines sagas that share the same action-result type:
+`merge()` combines sagas that share the same action-result type. Prefer `merge` over
+`Saga::combine` — the latter is deprecated for the same reason `View::combine` is.
 
 ```rust
 let merged = order_to_shipment_saga().merge(order_to_notification_saga());
 // Type: Saga<OrderEvent, Sum<NotificationCommand, ShipmentCommand>>
 ```
 
-All composition supports up to 6 types via `combine3`..`combine6` and `merge3`..`merge6`.
+Note the `Sum` ordering: `merge(self, other)` produces `Sum<OtherAction, SelfAction>`, so
+the **second** saga's action type ends up in `Sum::First`. Double-check this when pattern-
+matching on the result — it's counterintuitive.
+
+All composition supports up to 6 types via `combine3`..`combine6` and `merge3`..`merge6`,
+with companion type aliases `Sum3`..`Sum6` and `Saga3`..`Saga6` for ergonomic signatures.
 
 ### Mapping Functions
 
@@ -382,8 +393,10 @@ let new_state: Result<OrderViewState, Error> = materialized.handle(&event).await
 The repository is keyed by the event -- typically you extract an ID from the event
 to look up the current projection state:
 
+fmodel-rust uses native async-fn-in-trait (Rust 1.75+), so do **not** annotate these impls
+with `#[async_trait]` — write bare `async fn` directly:
+
 ```rust
-#[async_trait]
 impl ViewStateRepository<OrderEvent, OrderViewState, AppError> for PostgresViewRepo {
     async fn fetch_state(&self, event: &OrderEvent) -> Result<Option<OrderViewState>, AppError> {
         // Extract the key from the event
@@ -432,7 +445,6 @@ let merged = order_view().merge(shipment_view());
 // Type: View<(OrderViewState, ShipmentViewState), AppEvent>
 
 // Repository handles tuple state
-#[async_trait]
 impl ViewStateRepository<AppEvent, (OrderViewState, ShipmentViewState), AppError>
     for MergedViewRepo
 {
@@ -504,8 +516,9 @@ impl Identifier for OrderCommand {
 
 ## Concurrency
 
-By default, all closures require `Send + Sync` and use `Arc` internally (multi-threaded).
-Enable the `not-send-futures` feature for single-threaded contexts (`Rc`, no `Send` bounds):
+By default, all closures require `Send + Sync` and the crate wraps them in `Arc<Mutex<T>>`
+internally (multi-threaded). Enable the `not-send-futures` feature for single-threaded
+contexts — it switches to `Rc<RefCell<T>>` and drops the `Send` bounds:
 
 ```toml
 [dependencies]

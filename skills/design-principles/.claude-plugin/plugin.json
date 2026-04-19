@@ -1,0 +1,13 @@
+{
+  "name": "design-principles",
+  "description": "Curated reference library of canonical design principles (Dieter Rams, Joshua Porter, Bruce Tognazzini, inclusive design, Postel's law, principle of least surprise) for UI, product, and crosscutting design judgment.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Executioner1939"
+  },
+  "homepage": "https://github.com/Executioner1939/claude-code-skills",
+  "repository": "https://github.com/Executioner1939/claude-code-skills",
+  "license": "MIT",
+  "keywords": ["design", "ui", "ux", "product-design", "design-principles", "dieter-rams", "design-review"],
+  "skills": "."
+}
