@@ -9,5 +9,5 @@
   "repository": "https://github.com/Executioner1939/claude-code-skills",
   "license": "MIT",
   "keywords": ["eventcatalog", "event-driven-architecture", "eda", "asyncapi", "openapi"],
-  "skills": ["."]
+  "skills": ["./"]
 }

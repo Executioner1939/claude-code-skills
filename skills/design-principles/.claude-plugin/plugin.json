@@ -9,5 +9,5 @@
   "repository": "https://github.com/Executioner1939/claude-code-skills",
   "license": "MIT",
   "keywords": ["design", "ui", "ux", "product-design", "design-principles", "dieter-rams", "design-review"],
-  "skills": ["."]
+  "skills": ["./"]
 }

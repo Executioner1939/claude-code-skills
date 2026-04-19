@@ -9,6 +9,6 @@
   "repository": "https://github.com/Executioner1939/claude-code-skills",
   "license": "MIT",
   "keywords": ["code-analysis", "reverse-engineering", "business-rules", "technical-debt", "migration"],
-  "skills": ["."],
-  "agents": ["./agents"]
+  "skills": ["./"],
+  "agents": ["./agents/"]
 }
