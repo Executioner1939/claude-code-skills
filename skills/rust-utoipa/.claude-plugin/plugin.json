@@ -8,6 +8,5 @@
   "homepage": "https://github.com/Executioner1939/claude-code-skills",
   "repository": "https://github.com/Executioner1939/claude-code-skills",
   "license": "MIT",
-  "keywords": ["rust", "openapi", "swagger", "utoipa", "api-documentation", "axum"],
-  "skills": ["./"]
+  "keywords": ["rust", "openapi", "swagger", "utoipa", "api-documentation", "axum"]
 }

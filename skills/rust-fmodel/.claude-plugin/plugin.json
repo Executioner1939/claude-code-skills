@@ -8,6 +8,5 @@
   "homepage": "https://github.com/Executioner1939/claude-code-skills",
   "repository": "https://github.com/Executioner1939/claude-code-skills",
   "license": "MIT",
-  "keywords": ["rust", "fmodel", "event-sourcing", "cqrs", "domain-modeling", "functional", "decider", "saga", "aggregate"],
-  "skills": ["./"]
+  "keywords": ["rust", "fmodel", "event-sourcing", "cqrs", "domain-modeling", "functional", "decider", "saga", "aggregate"]
 }
