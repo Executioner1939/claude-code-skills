@@ -49,6 +49,7 @@ Each resource lives at `{type}/{Name}/index.mdx` with YAML frontmatter and MDX b
 | **Diagram** | `diagrams/{Name}/` | Standard fields | Versioned architecture diagram |
 | **User** | `users/{name}.md` | `role`, `email`, `avatarUrl` | Team member profile |
 | **Team** | `teams/{name}.mdx` | `members`, `email` | Team grouping |
+| **Data Product** | `data-products/{Name}/` | `version`, `owners`, `inputs`, `outputs`, `specifications` | Productised data asset (input/output contract around a dataset) |
 
 ## Common Frontmatter Fields
 
@@ -195,13 +196,15 @@ The SDK provides 184+ functions following a consistent pattern per resource: `ge
 
 Read these for detailed API and configuration:
 
-- `references/resources.md` — All 12 resource types with complete frontmatter and examples
-- `references/sdk-utils.md` — Complete SDK API (184+ functions organized by type)
+- `references/resources.md` — All 13 resource types with complete frontmatter and examples (Data Products added alongside the original 12)
+- `references/sdk-utils.md` — Complete SDK API organised by type, including Data Products (`getDataProduct`, `writeDataProduct`, `writeDataProductToDomain`, `versionDataProduct`, `rmDataProduct`), snapshot/snapshot-diff helpers, DSL builders (channel, container, domain, message, owner, service), and custom-docs writers
 - `references/generators.md` — All 15+ integrations: OpenAPI, AsyncAPI, Confluent, AWS, etc.
 - `references/visualizations.md` — NodeGraph, flows, Mermaid, embedded diagrams, components
-- `references/mcp-and-ai.md` — MCP server tools/resources, AI features, llms.txt
+- `references/mcp-and-ai.md` — MCP server tools/resources, AI features, llms.txt. Full built-in tool set is 15 tools including `getTeam` and `getUser` singular lookups alongside the list-style tools
 - `references/configuration.md` — eventcatalog.config.js, auth, deployment, versioning
 - `references/schemas.md` — JSON Schema, Avro, Protobuf, Schema Explorer, schema API
+
+**Tooling:** EventCatalog ships a language server and VS Code extension for authoring assistance in MDX resource files — mention these when the user is editing the catalogue interactively.
 
 ## Example: Complete Service Definition
 

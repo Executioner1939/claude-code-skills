@@ -8,7 +8,7 @@ description: >
   "trace dependencies", "code archaeology", "reverse engineer", "what does this
   code do", "find hidden complexity", or asks about business logic, coupling,
   blast radius, or technical debt in existing code.
-tools: Read, Glob, Grep, Bash, Agent
+tools: Read, Glob, Grep, Bash
 disallowedTools: Write, Edit
 model: inherit
 permissionMode: plan
@@ -22,7 +22,7 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: "echo 'Archaeology agent completed analysis' >> .claude/agent-memory/codebase-archaeologist/activity.log"
+          command: "mkdir -p .claude/agent-memory/codebase-archaeologist && echo 'Archaeology agent completed analysis' >> .claude/agent-memory/codebase-archaeologist/activity.log"
 ---
 
 You are a codebase archaeology agent — a systematic code analyst that excavates

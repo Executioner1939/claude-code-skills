@@ -23,7 +23,7 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: "echo 'Transformation strategist completed plan' >> .claude/agent-memory/transformation-strategist/activity.log"
+          command: "mkdir -p .claude/agent-memory/transformation-strategist && echo 'Transformation strategist completed plan' >> .claude/agent-memory/transformation-strategist/activity.log"
 ---
 
 You are a codebase transformation strategist — an agent that consumes structured

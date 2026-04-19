@@ -6,11 +6,13 @@ description: |
   Also use when user describes a monorepo build tool with concepts like project graphs, task hashing, or inherited tasks, even without saying "moon" explicitly.
 ---
 
-# moonrepo v2 (latest: v2.1.0)
+# moonrepo v2 (latest: v2.2.1)
 
-moon is a monorepo management, orchestration, and build system for the web ecosystem, written in Rust. It provides structure between Bazel (high complexity) and make/just (low complexity). v2.0 "Phobos" shipped February 18, 2026; v2.1.0 is the latest release (March 16, 2026).
+moon is a monorepo management, orchestration, and build system for the web ecosystem, written in Rust. It provides structure between Bazel (high complexity) and make/just (low complexity). v2.0 "Phobos" shipped February 2026; v2.2.1 is the current release (April 2026), adding an optional background daemon and async graph-building / affected-tracking experiments for significant pipeline speedups.
 
 Always target **v2 syntax** unless the user explicitly mentions v1. If you see v1-style config (e.g., `toolchain.yml` singular, `node.npm`, camelCase CLI flags, `runner` instead of `pipeline`), flag it and offer migration guidance.
+
+Before debugging a confusing moon behaviour, check `references/real-world-gotchas.md` — it catalogues known landmines (affected-detection edges, `$project` vs Cargo package name, `MOON_SKIP_SETUP_RUST` being a no-op, etc.) that cost hours the first time they're hit.
 
 For deep details on any topic, read the appropriate reference file from `references/`:
 
@@ -25,6 +27,7 @@ For deep details on any topic, read the appropriate reference file from `referen
 | Code generation | `references/codegen.md` | `moon generate`, Tera templates, variables, template sharing |
 | Migration v1 to v2 | `references/migration-v1-to-v2.md` | All breaking changes, renamed settings, `moon migrate v2` |
 | Advanced topics | `references/advanced.md` | MQL queries, graphs, git hooks, environment variables, token functions, debugging |
+| Real-world gotchas | `references/real-world-gotchas.md` | Known landmines: affected-detection edges, `$project` token pitfalls, v2 layer constraints, sccache conflicts, self-hosted cache hangs |
 
 ## Core Concepts
 
@@ -155,6 +158,16 @@ If you encounter v1-style configuration, flag these common issues:
 10. **Task `inferInputs`** defaults to `false` (was `true` in v1)
 
 Run `moon migrate v2` to automate what it can, then consult `references/migration-v1-to-v2.md` for the full list.
+
+## What's new in v2.2 (April 2026)
+
+- **Background daemon** (`unstable_daemon` workspace setting, `moon daemon {start,stop,status}`) — long-running service that keeps the project graph warm between invocations. Opt-in while unstable.
+- **Async experiments** — `experiments.asyncAffectedTracking` and `experiments.asyncGraphBuilding` (100–170% faster graph builds on large monorepos). Older `experiments.fasterGlobWalk` and `experiments.gitV2` have been stabilised and removed.
+- **New pipeline env vars** — `MOON_PIPELINE_AUTO_CLEAN_CACHE`, `MOON_PIPELINE_CACHE_LIFETIME`, `MOON_PIPELINE_KILL_PROCESS_THRESHOLD`.
+- **Graph JSON format changed** — `moon action-graph --json`, `project-graph --json`, `task-graph --json` now emit integer node IDs with a separate `data` object. Any tooling parsing the old shape needs updating.
+- **Proto 0.56.x** bundled; automatic retry on transient rate-limit errors (3x exponential backoff).
+- **PowerShell tasks** now use `-EncodedCommand` rather than `-Command` (affects special-char handling when `windowsShell: 'pwsh'`).
+- **pnpm v10 multi-document lockfile parsing** fixed in 2.2.1 — users on pnpm 10 need this version.
 
 ## Workspace Config Quick Reference
 
