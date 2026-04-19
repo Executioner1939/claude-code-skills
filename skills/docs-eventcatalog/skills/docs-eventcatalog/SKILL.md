@@ -1,6 +1,17 @@
 ---
 name: docs-eventcatalog
 description: Build and maintain EventCatalog documentation for event-driven architectures. Use when creating or editing events, commands, queries, services, domains, flows, channels, data stores, entities, or diagrams. Triggers on "EventCatalog", "event catalog", "event documentation", "service catalog", "domain model", "message flow", "bounded context", "EDA docs", "AsyncAPI catalog", "OpenAPI catalog", "schema registry docs", "architecture documentation", or "catalog generator". Also use for SDK/utils scripting, MCP server setup, or configuring generators.
+paths:
+  - "**/eventcatalog.config.*"
+  - "**/eventcatalog.auth.*"
+  - "**/eventcatalog.chat.*"
+  - "**/events/**/index.mdx"
+  - "**/commands/**/index.mdx"
+  - "**/queries/**/index.mdx"
+  - "**/services/**/index.mdx"
+  - "**/domains/**/index.mdx"
+  - "**/channels/**/index.mdx"
+  - "**/flows/**/index.mdx"
 ---
 
 # EventCatalog
