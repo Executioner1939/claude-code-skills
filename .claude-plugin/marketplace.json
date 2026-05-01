@@ -97,7 +97,7 @@
       "name": "terraform-audit",
       "source": "./skills/terraform-audit",
       "description": "Brutal, structured audit of a Terraform or OpenTofu module repository. Detects cross-module composition smells (overlap, duplication, thin wrappers, scope-discriminator primitives, copy-pasted module blocks, tier misplacement), cross-project / cross-account linking flaws, missing validations, dead code, version-pinning drift, and provider-specific landing-zone gaps (GCP, AWS, Azure, OCI). Produces an 8-section critique with per-module grades and a concrete defect list. Runnable as /terraform-audit:terraform-audit [path].",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "development",
       "keywords": ["terraform", "opentofu", "audit", "iac", "infrastructure-as-code", "code-review", "module-review", "landing-zone", "gcp", "aws", "azure"],
       "author": {
