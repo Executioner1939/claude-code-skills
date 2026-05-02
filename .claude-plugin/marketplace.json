@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code skills for CI/CD, Rust, documentation, code analysis, and design.",
-    "version": "5.3.0"
+    "version": "5.3.1"
   },
   "plugins": [
     {
@@ -111,7 +111,7 @@
       "name": "design-storybook-atomic",
       "source": "./skills/design-storybook-atomic",
       "description": "Atomic design + Storybook 9/10 expert toolkit. 7 integrated knowledge skills (atomic-design, storybook-authoring with CSF Factories, design-tokens, component-composition, accessibility-stories, storybook-atomic-integration, story-coverage-checklist), 12 Han-derived deeper-dive skills (Apache-2.0, attribution preserved), 7 slash-command workflows (audit-atomic / audit-molecules / audit-organisms / audit-tokens / add-component / merge-duplicates / coverage-report), and 10 specialized subagents (component-cartographer, atomic-auditor, ui-spec-interpreter, component-composer, story-writer, mdx-doc-writer, design-token-enforcer, accessibility-reviewer, component-deduplicator, storybook-coverage-analyst).",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "design",
       "keywords": ["atomic-design", "storybook", "csf-factories", "design-system", "design-tokens", "component-library", "accessibility", "wcag", "audit", "deduplication", "brad-frost", "han"],
       "author": {

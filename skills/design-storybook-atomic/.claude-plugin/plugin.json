@@ -1,7 +1,7 @@
 {
   "name": "design-storybook-atomic",
   "description": "Atomic design + Storybook expert toolkit. Knowledge skills (atomic design, Storybook CSF3, design tokens, composition, a11y), specialized subagents, and slash-command workflows for auditing, deduplicating, and composing components with full story coverage.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "Executioner1939"
   },
