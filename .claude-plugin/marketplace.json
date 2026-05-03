@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code skills for CI/CD, Rust, documentation, code analysis, and design.",
-    "version": "5.3.1"
+    "version": "5.4.1"
   },
   "plugins": [
     {
@@ -110,16 +110,16 @@
     {
       "name": "design-storybook-atomic",
       "source": "./skills/design-storybook-atomic",
-      "description": "Atomic design + Storybook 9/10 expert toolkit. 7 integrated knowledge skills (atomic-design, storybook-authoring with CSF Factories, design-tokens, component-composition, accessibility-stories, storybook-atomic-integration, story-coverage-checklist), 12 Han-derived deeper-dive skills (Apache-2.0, attribution preserved), 7 slash-command workflows (audit-atomic / audit-molecules / audit-organisms / audit-tokens / add-component / merge-duplicates / coverage-report), and 10 specialized subagents (component-cartographer, atomic-auditor, ui-spec-interpreter, component-composer, story-writer, mdx-doc-writer, design-token-enforcer, accessibility-reviewer, component-deduplicator, storybook-coverage-analyst).",
-      "version": "1.0.1",
+      "description": "Atomic design + Storybook 10 expert toolkit. CSF Factories only (no exceptions). TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history (mirrors terraform-audit). 8 slash-command workflows (audit-atomic / audit-molecules / audit-organisms / audit-tokens / audit-libraries / add-component / merge-duplicates / coverage-report), 11 specialized subagents.",
+      "version": "2.0.1",
       "category": "design",
-      "keywords": ["atomic-design", "storybook", "csf-factories", "design-system", "design-tokens", "component-library", "accessibility", "wcag", "audit", "deduplication", "brad-frost", "han"],
+      "keywords": ["atomic-design", "storybook", "storybook-10", "csf-factories", "design-system", "design-tokens", "tanstack", "tanstack-form", "tanstack-table", "tanstack-db", "tanstack-query", "tailwind", "nativewind", "react-native", "audit", "wcag", "brad-frost"],
       "author": {
         "name": "Executioner1939"
       },
       "homepage": "https://github.com/Executioner1939/claude-code-skills",
       "repository": "https://github.com/Executioner1939/claude-code-skills",
-      "license": "MIT (with Apache-2.0 portions adapted from TheBushidoCollective/han)"
+      "license": "MIT (with Apache-2.0 portions adapted from TheBushidoCollective/han for the 7 atomic-design methodology references)"
     }
   ]
 }

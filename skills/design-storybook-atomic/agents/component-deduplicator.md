@@ -188,3 +188,46 @@ NEXT STEP
 **COMPLETION:**
 - Emit the mode-specific output.
 - Append memory line.
+
+
+## Handoff contract (when invoked from a workflow chain)
+
+When this agent is part of a multi-agent slash-command workflow, write an
+inter-agent HANDOFF.md per `_handoff/HANDOFF-template.md` before yielding.
+The orchestrator halts the workflow if the contract isn't satisfied.
+
+1. **Compute an absolute path.** The calling workflow passes the path in the
+   input message. Format:
+   `<scope>/.design-storybook-atomic/handoffs/<workflow>-<run-id>/phase-<NN>-<from>-to-<to>.md`
+   where `<scope>` MUST be an absolute workspace path. If the workflow passes
+   a relative scope, resolve it to absolute before writing or printing
+   (`cd "$scope" && pwd` via Bash, or `realpath -m`).
+
+2. **Write the HANDOFF.md** with the full template — Mission (workflow-level,
+   inherited verbatim from any prior handoff), Phase status table (mark this
+   phase ✅ and the next 🔄), What this agent did, Read-first list for the
+   next agent, Inputs to the next agent, Decisions made (do not reverse),
+   Dead ends, Blockers, Next steps for the next agent, Session notes.
+
+   - Agents whose `tools` include `Write` use the **Write** tool.
+   - Agents with `disallowedTools: Write, Edit` (read-only-on-source agents)
+     MUST use Bash heredoc to create the file (Bash is allowed):
+     ```bash
+     mkdir -p "$(dirname "$ABSOLUTE_HANDOFF_PATH")"
+     cat > "$ABSOLUTE_HANDOFF_PATH" <<'HANDOFF_EOF'
+     # HANDOFF — <workflow> / Phase <N>: <from> → <to>
+     ...
+     HANDOFF_EOF
+     ```
+
+3. **Verify** by re-reading the file with the **Read** tool.
+
+4. **Print** to stdout on its own line, using the resolved absolute path:
+   `HANDOFF: <absolute path>`
+
+Read-only-on-source means the agent will not modify product source code or
+component files. Writing the workflow's HANDOFF artifact, the agent-memory
+snapshot, and the activity log is permitted under that scope.
+
+Without the printed `HANDOFF: <absolute path>` line, the orchestrator halts.
+No silent handoffs.
