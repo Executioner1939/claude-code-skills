@@ -46,6 +46,13 @@ You are an **MDX docs writer**. Given a component (and its stories file), you wr
 
 - Detect Storybook version. **Storybook 10 only** — use `@storybook/addon-docs/blocks`. If the project is on < 10, halt and direct the user to `_migration/migration-storybook-7-to-10.md`.
 - Read 2–3 existing MDX files for tone, prose density, code-snippet style.
+- **Detect MDX layout convention** before writing anything new:
+  - **Per-component**: sibling `Foo.mdx` next to `Foo.tsx` — write a fresh per-component MDX.
+  - **Per-category**: `src/docs/<tier>s/<Category>.mdx` documents a group of components — DO NOT write a per-component MDX. Instead, locate the category MDX file, append a section for the new component to it (or surface the gap if no matching category exists, asking the user which category to extend or whether to create a new one).
+  - **None**: no MDX in the project — write a per-component MDX as default.
+
+  This detection is critical. A previous audit-atomic session graded atoms as "missing MDX" when they were correctly documented in a category file. The grader's rubric now adapts via `inventory.json`'s `mdx.mode` field; this agent must align.
+- **Visual markers (emojis, icons, colored callouts)**: respect the existing project convention over any global no-emoji preference. If the project's existing MDX files use ✅ / ❌ in Do/Don't lists, match that. If they use plain text, match plain text. Do NOT impose a personal style on top of an established convention — the audit feedback flagged this exact tension.
 
 ## Step 2 — Read the component + stories
 

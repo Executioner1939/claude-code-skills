@@ -45,6 +45,23 @@ If unclear, ask once.
 
 # Method
 
+## Step 0 — Up-front CSF flavour detection (do this first, then announce)
+
+Before reading anything else, locate one or two existing `*.stories.*` files in the project and classify the format:
+
+```bash
+# CSF Factories — preview.meta + meta.story chain
+grep -lE "preview\.meta|meta\.story" $(git ls-files '*.stories.*' | head -5)
+
+# CSF3 — Meta<typeof X> or `satisfies Meta`
+grep -lE "Meta<typeof|satisfies Meta" $(git ls-files '*.stories.*' | head -5)
+
+# CSF2 / storiesOf — legacy
+grep -lE "storiesOf\(" $(git ls-files '*.stories.*' | head -5)
+```
+
+Announce the detected flavour as the very first line of your response: `CSF flavour detected: <factories|csf3|csf2|none>`. Then proceed with Step 1. If the flavour is anything other than `factories`, halt and direct the user to `_migration/migration-storybook-7-to-10.md` — do not write stories on legacy formats. The audit feedback called out that previous runs guessed at flavour; this up-front announcement makes the assumption visible.
+
 ## Step 1 — Read the project's conventions
 
 Read `package.json` to detect:

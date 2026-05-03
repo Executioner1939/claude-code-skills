@@ -98,7 +98,19 @@ Output: per-component score, sorted worst-first.
 
 ## Mode: apply
 
-Constraints:
+Apply mode is a deterministic-first pipeline. The LLM is only invoked when a literal has multiple plausible token mappings — for unambiguous exact-match hits, the substitution is a one-shot Edit with no judgement call.
+
+### Pipeline (in order)
+
+1. **Run `scan` first** to produce the per-hit confidence list. Cache it.
+2. **Apply HIGH-confidence exact matches in bulk.** Each Edit replaces one literal; after every Edit, re-read the file and confirm only the intended span changed. If the project has > 50 such hits, batch into chunks of 25 and confirm progress every chunk.
+3. **For each MEDIUM-confidence hit with a single closest token**, also auto-apply (still one Edit per hit) — these are within tolerance and the choice is forced.
+4. **For MEDIUM hits with multiple plausible tokens, OR all LOW hits**, halt the pipeline and emit a per-hit "candidates" list. The user (or the LLM caller) picks one per hit, then the pipeline resumes with explicit selections.
+
+This lifts ~80% of token refactors out of the LLM hot-path and only spends judgement on the genuinely ambiguous cases.
+
+### Constraints
+
 - Only HIGH-confidence exact matches are auto-applied unless `confidence-threshold` is overridden by the caller.
 - Each Edit changes exactly one literal at a time. After each edit, re-read the file and verify only the intended span changed.
 - For CSS / SCSS files, prefer `var(--token-name)` (after detecting the project's CSS-variable convention).
@@ -106,9 +118,9 @@ Constraints:
 - For Tailwind, prefer the configured theme key — `bg-action-primary` if `tailwind.config` already exposes the token.
 - Detect the project's existing convention by reading 2–3 sibling already-tokenized files. Match.
 
-Output: list of `[FIXED]` lines per replacement, plus a summary `<n> exact-match replacements applied across <m> files`.
+Output: list of `[FIXED]` lines per replacement, plus a summary `<n> exact-match replacements applied across <m> files`. For ambiguous hits: an `[AMBIGUOUS]` line per site with the candidate list.
 
-For MEDIUM / LOW hits, do NOT apply automatically. Append to a `proposed-refactors.md` file (write would be needed but you have only Edit) — instead, surface them in the report so the caller can choose.
+For LOW hits with no token at all, do NOT apply. Append to the report's "system gaps" list so the caller can choose to add a new token.
 
 > Note: `Write` is denied for this agent. To produce a refactor proposal file, the calling workflow must do that. You only edit existing files.
 

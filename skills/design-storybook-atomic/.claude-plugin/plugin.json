@@ -1,7 +1,7 @@
 {
   "name": "design-storybook-atomic",
-  "description": "Atomic design + Storybook 10 expert toolkit. CSF Factories only (no exceptions). TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history. 23 skills (7 integrated, 7 Han atomic-design references, 5 storybook deeper-dives, 1 library policy, 1 TanStack integration, 1 migration guide, 1 handoff template), 8 slash-command workflows (audit-atomic / audit-molecules / audit-organisms / audit-tokens / audit-libraries / add-component / merge-duplicates / coverage-report), 11 specialized subagents.",
-  "version": "2.0.1",
+  "description": "Atomic design + Storybook 10 expert toolkit. CSF Factories only (no exceptions). TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history. Static component-graph scanner (Python, networkx-aware) refreshed via PostToolUse hook; queryable inventory.json with reconciliation queue (misnamed/unfoldered/stray/tier-mismatch entries) + GraphViz/Mermaid/Cytoscape/GEXF exporters. 29 skills total (knowledge skills, Han atomic-design references, storybook deeper-dives, library policy, TanStack integration, migration guide, handoff template, plus 8 skill-driven workflow commands: audit-atomic / audit-molecules / audit-organisms / audit-tokens / audit-libraries / add-component / merge-duplicates / coverage-report invoked via slash-prefixed names), 11 specialized subagents.",
+  "version": "2.1.0",
   "author": {
     "name": "Executioner1939"
   },
@@ -28,6 +28,9 @@
     "accessibility",
     "wcag",
     "audit",
-    "brad-frost"
+    "brad-frost",
+    "graph",
+    "networkx",
+    "static-analysis"
   ]
 }

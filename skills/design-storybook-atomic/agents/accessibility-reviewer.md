@@ -66,11 +66,21 @@ Cross-reference the widget against the canonical pattern from `accessibility-sto
 
 ## Step 3 — Apply universal checks (every component)
 
+Before running the universal checks, read the project's motion configuration once and remember the result:
+
+```bash
+# Tailwind preset — does it apply motion-reduce automatically?
+grep -E "motion-(safe|reduce):|prefers-reduced-motion" \
+  ./tailwind.config.* ./src/**/tokens.css ./src/styles/tokens.css 2>/dev/null
+```
+
+If the project gates motion globally (a `@media (prefers-reduced-motion: reduce)` block in `tokens.css`, OR Tailwind's `motion-safe:` defaults are wired), record `MOTION_GLOBAL=true` and SKIP the per-component motion-guard check. Flagging it produces false positives — the audit-atomic feedback called out this case explicitly.
+
 - **Color contrast** — read the CSS / Tailwind classes. For each text-on-background pairing, compute the contrast ratio (use the colors in the project's tokens). Flag pairings under 4.5:1 (or 3:1 for large text / non-text indicators).
 - **Color independence** — does the component communicate any state by color *only*? (Red error border without an icon or text.) Flag.
 - **Target size** — the interactive's hit target. Flag if the rendered element is < 24×24 CSS pixels (WCAG 2.2 AA Target Size, Minimum) or `<` 44×44 if it's a primary action on a touch surface.
 - **Forced colors / High Contrast** — does the component use background-image-only icons or rely on CSS `box-shadow` for borders? Forced-colors mode strips both. Flag.
-- **Reduced motion** — does the component animate? Is it wrapped in `@media (prefers-reduced-motion: reduce)` or otherwise skippable? Flag if not.
+- **Reduced motion** — only when `MOTION_GLOBAL=false`: does the component animate? Is it wrapped in `@media (prefers-reduced-motion: reduce)` or otherwise skippable? Flag if not.
 - **Visible focus indicator** — is the `:focus-visible` style provided, with sufficient contrast?
 - **Programmatic label** — every form control with a visible label has a programmatic association (`<label htmlFor>` or `aria-labelledby`).
 - **Errors announced** — error UI uses `aria-invalid`, `aria-describedby`, and either a live region or `role="alert"`.

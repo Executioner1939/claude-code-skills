@@ -59,13 +59,33 @@ If any required input is missing, ask once before proceeding.
 
 ## Method
 
-1. **Match the spec against the inventory.** For each candidate (atom, molecule, organism whose intent or shape resembles the spec), score:
+1. **Existence pre-check (MANDATORY before any verdict).** Before any scoring, query the inventory for an existing implementation of the spec's name at any tier:
+
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/skills/audit-atomic/scripts/inventory.py" \
+     query "$scope/.design-storybook-atomic/inventory.json" \
+     contract <name>
+   ```
+
+   If the query returns a row at a higher tier than the spec proposes, halt and emit:
+
+   ```text
+   EXISTS_AT_HIGHER_TIER
+     spec proposed:   <tier>/<Name>
+     found at:        <existing-tier>/<Name>  (path)
+     reason:          this project places <Name> at <existing-tier>; building a peer at <tier> would split the implementation.
+     decision:        do NOT build new at <tier>. Recommended next step: REUSE the existing component, or open a deliberate move-tier conversation with the user.
+   ```
+
+   Stop. Do not proceed to verdict scoring unless the user explicitly overrides with `--allow-tier-duplication`. The audit-atomic feedback called out this exact failure: a previous session built `Card.tsx` and `Toast.tsx` atoms before the orchestrator's redirect arrived, wasting the work because both already existed at higher tiers.
+
+2. **Match the spec against the inventory.** For each candidate (atom, molecule, organism whose intent or shape resembles the spec), score:
    - Intent overlap (does the existing component already solve this problem?)
    - API overlap (do existing props subsume the spec's props?)
    - Visual/state overlap (do the existing variants cover the spec's states?)
    - Consumer impact (how many places use it; how big is the blast radius of any change?)
 
-2. **Pick a verdict:**
+3. **Pick a verdict:**
    - **REUSE** if intent ≥ 90% and API covers ≥ 90% of the spec's props with at most cosmetic prop-name renames.
    - **EXTEND** if intent ≥ 90% but ≤ 1 missing prop / variant / slot. Adding it is additive (no breaking API change) and the existing consumers are unaffected.
    - **COMPOSE** if no single existing component fits but the spec is assemblable from existing lower-level components without building any new primitive.

@@ -1,8 +1,42 @@
-# design-storybook-atomic v2.0.0
+# design-storybook-atomic v2.1.0
 
-> Atomic design + Storybook 10 expert toolkit for Claude Code. **CSF Factories only.** TanStack-ecosystem-centric. Web + React Native. Inter-agent HANDOFF contract. Audit-history baseline + dated history.
+> Atomic design + Storybook 10 expert toolkit for Claude Code. **CSF Factories only.** TanStack-ecosystem-centric. Web + React Native. Inter-agent HANDOFF contract. Audit-history baseline + dated history. **Static component-graph scanner with auto-refresh hook (v2.1).**
 
-A complete plugin for working on a design system: **atomic design** (Brad Frost), **Storybook 10** (CSF Factories, autodocs, addon-vitest, addon-a11y, addon-docs/blocks), **design tokens** (W3C-DTCG, Style Dictionary, Tokens Studio), **TanStack abstractions** at every atomic level (Query / DB / Form / Table / Virtual / Store / Pacer), composition patterns, and accessibility (WCAG 2.2 AA, WAI-ARIA APG) — wired together with **specialized subagents**, **inter-agent HANDOFF.md contracts**, and **slash-command workflows** for auditing, deduplicating, and composing components.
+A complete plugin for working on a design system: **atomic design** (Brad Frost), **Storybook 10** (CSF Factories, autodocs, addon-vitest, addon-a11y, addon-docs/blocks), **design tokens** (W3C-DTCG, Style Dictionary, Tokens Studio), **TanStack abstractions** at every atomic level (Query / DB / Form / Table / Virtual / Store / Pacer), composition patterns, and accessibility (WCAG 2.2 AA, WAI-ARIA APG) — wired together with **specialized subagents**, **inter-agent HANDOFF.md contracts**, **slash-command workflows**, and a **deterministic component-graph scanner** that keeps an `inventory.json` of every component, its tier, props, hardcoded literals, story coverage, mdx layout, and reconciliation queue (misnamed / unfoldered / stray / tier-mismatch entries).
+
+## What's new in v2.1.0
+
+Driven by post-deployment audit feedback:
+
+- **Static component-graph scanner** at `skills/audit-atomic/scripts/inventory.py`. Walks the project, classifies every component by tier, builds a directed graph of `composes` edges, and emits JSON conforming to `skills/audit-atomic/schemas/inventory.schema.json`. Stdlib only; uses `networkx` opportunistically for centrality / cycles / GEXF. Exports to `mermaid`, `graphviz`, `cytoscape`, `gexf`.
+- **Reconciliation queue** in every scan: `unfoldered` (atoms at tier root without a folder), `misnamed-folder` / `misnamed-file`, `folder-name-mismatch` (Foo/Bar.tsx), `stray-component` (PascalCase outside any tier folder), `tier-mismatch-by-signal` (atom imports a molecule). Each entry carries a mechanical fix. Audit reports surface them as **Section 4b — Reconciliation queue**.
+- **Auto-refresh PostToolUse hook** at `hooks/refresh-inventory.sh`. After every Edit / Write / MultiEdit on a component file, inventory rebuilds in the background (30s debounce; opt-in via the project owning a `.design-storybook-atomic/` directory).
+- **Phase 0 in `audit-atomic`** — rubric detection (MDX convention, form contract, tier placement, token convention, lint rules affecting atoms, motion-reduce defaults), baseline integrity probe quarantines pre-existing breakage, tier-aware contract resolution, mode flags (`--auto-baseline=replace|history-only|prompt`, `--static-only`, `--no-prompt`), cardinality cutoff (> 30 atoms ⇒ static-scan grading).
+- **Cartographer 90s stall fallback** to inline cartography reading `inventory.json`.
+- **Composer EXISTS_AT_HIGHER_TIER pre-check** before any BUILD-NEW. Stops the wasted-work pattern (Card / Toast atoms built when both already existed at higher tiers).
+- **A11y reviewer reads tokens.css + tailwind preset** for global motion-reduce gating before flagging per-component guards.
+- **Token enforcer apply mode is deterministic-first** — bulk-apply HIGH-confidence exact matches; only halt + ask on ambiguous cases.
+- **MDX writer detects per-component vs per-category layout** before writing.
+- **Story-writer announces detected CSF flavour** as the first line of every response.
+
+### Querying the inventory
+
+```bash
+# Initial scan (the hook handles subsequent refreshes automatically)
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/audit-atomic/scripts/inventory.py \
+  scan --root . --tier all --out .design-storybook-atomic/inventory.json
+
+# Common queries
+inventory.py query .design-storybook-atomic/inventory.json stats
+inventory.py query .design-storybook-atomic/inventory.json consumers-of atoms/Button --transitive
+inventory.py query .design-storybook-atomic/inventory.json reconciliation
+inventory.py query .design-storybook-atomic/inventory.json contract toast      # find Toast across tiers
+inventory.py query .design-storybook-atomic/inventory.json centrality          # requires `pip install networkx`
+
+# Visualize
+inventory.py export .design-storybook-atomic/inventory.json --format mermaid > graph.mmd
+inventory.py export .design-storybook-atomic/inventory.json --format gexf    > graph.gexf  # Gephi
+```
 
 ## What's new in v2.0.0
 
