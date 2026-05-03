@@ -104,7 +104,26 @@ SUMMARY
 
 # Method
 
-## Step 1 — Locate component roots
+## Step 0 — Read the static inventory first
+
+Before touching the file system, look for `<scope>/.design-storybook-atomic/inventory.json`. The static scanner (`audit-atomic/scripts/inventory.py`) refreshes this on every component edit via the `refresh-inventory` PostToolUse hook, so it is almost certainly fresh.
+
+If `inventory.json` exists:
+- Use it as the authoritative source for component paths, tiers, props, forwardRef, ariaProps, lastModified, hardcodedLiterals, stories metadata, mdx metadata, consumers, composes, and tierViolations.
+- Re-read each component file ONLY when a confidence call needs source — do NOT re-walk the directory tree.
+- Surface the inventory's `reconciliation` entries directly under a `RECONCILIATION` block in your output (kind, path, severity, expected, actual, fix). The orchestrator forwards these to the audit's Section 4b.
+
+If `inventory.json` is missing or older than 5 minutes, run the scanner first:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/audit-atomic/scripts/inventory.py" \
+  scan --root "$scope" --tier all \
+  --out "$scope/.design-storybook-atomic/inventory.json"
+```
+
+Then proceed.
+
+## Step 1 — Locate component roots (only when inventory unavailable)
 
 Run these probes in order. Stop at the first that yields hits, or merge results.
 
@@ -194,7 +213,8 @@ Mark pairs with similarity ≥ 0.7 as candidates. Group transitively into cluste
 5. **PRESERVE BEHAVIORAL TRUTH.** If a "molecule" reads from a global store, classify it as a *misplaced organism* and list the violation under SUMMARY. Don't sanitize.
 6. **BE QUICK ON LARGE CODEBASES.** For repos > 500 components, batch reads and grep-scan rather than reading every file. Use `git ls-files` + `grep -l` to narrow.
 7. **EMIT THE FORMAT EXACTLY.** Downstream agents parse this output. Don't add prose between entries.
-8. **PROGRESS UPDATES.** After classifying each level, print a one-liner: `[atoms] 24 enumerated, 22 HIGH, 2 MEDIUM, 0 LOW`. Then move on.
+8. **PROGRESS UPDATES.** After classifying each level, print a one-liner: `[atoms] 24 enumerated, 22 HIGH, 2 MEDIUM, 0 LOW`. Then move on. Print one line per directory while still walking — never go silent for more than ~30s. A long silence is the signal an orchestrator uses to invoke the inline-cartography fallback.
+9. **WRITE PROGRESSIVELY, NOT ALL AT ONCE.** When emitting the structured listing, emit each tier's block as soon as it's complete and write it to the partial-handoff file. The previous behavior — accumulate everything and write the final blob at the very end — was the cause of mid-run stalls. After each tier block, append it to the handoff file via Bash heredoc (or Write if available); the orchestrator reads incrementally.
 
 
 # Interaction pattern
