@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code skills for CI/CD, Rust, documentation, code analysis, and design.",
-    "version": "5.4.0"
+    "version": "5.4.1"
   },
   "plugins": [
     {
@@ -111,7 +111,7 @@
       "name": "design-storybook-atomic",
       "source": "./skills/design-storybook-atomic",
       "description": "Atomic design + Storybook 10 expert toolkit. CSF Factories only (no exceptions). TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history (mirrors terraform-audit). 8 slash-command workflows (audit-atomic / audit-molecules / audit-organisms / audit-tokens / audit-libraries / add-component / merge-duplicates / coverage-report), 11 specialized subagents.",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "category": "design",
       "keywords": ["atomic-design", "storybook", "storybook-10", "csf-factories", "design-system", "design-tokens", "tanstack", "tanstack-form", "tanstack-table", "tanstack-db", "tanstack-query", "tailwind", "nativewind", "react-native", "audit", "wcag", "brad-frost"],
       "author": {
