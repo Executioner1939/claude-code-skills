@@ -153,3 +153,23 @@ VERDICT: BLOCK | NEEDS-FIX | PASS
 **COMPLETION:**
 - Emit the structured review.
 - Append memory line.
+
+
+## Handoff contract (when invoked from a workflow chain)
+
+When this agent is part of a multi-agent slash-command workflow, write an
+inter-agent HANDOFF.md per `_handoff/HANDOFF-template.md` before yielding.
+The orchestrator halts the workflow if the contract isn't satisfied.
+
+1. **Compute the path.** The calling workflow passes the path in the input
+   message. Format:
+   `<scope>/.design-storybook-atomic/handoffs/<workflow>-<run-id>/phase-<NN>-<from>-to-<to>.md`
+2. **Write the HANDOFF.md** with the full template — Mission (workflow-level,
+   inherited verbatim from any prior handoff), Phase status table (mark this
+   phase ✅ and the next 🔄), What this agent did, Read-first list for the
+   next agent, Inputs to the next agent, Decisions made (do not reverse),
+   Dead ends, Blockers, Next steps for the next agent, Session notes.
+3. **Verify** by re-reading the file.
+4. **Print** to stdout on its own line: `HANDOFF: <absolute path>`.
+
+Without the printed line, the orchestrator halts. No silent handoffs.
