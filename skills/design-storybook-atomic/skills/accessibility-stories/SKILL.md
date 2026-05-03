@@ -249,7 +249,7 @@ For ship-blocking review, run a component through:
 
 ## Relationship to other skills in this plugin
 
-- **`storybook-authoring`** — for the Storybook config and CSF3 syntax this skill builds on.
+- **`storybook-authoring`** — for the Storybook config and CSF Factories syntax this skill builds on.
 - **`storybook-atomic-integration`** — for which a11y stories are required at each atomic level.
 - **`accessibility-reviewer` (subagent)** — runs the manual-check matrix and produces a defect list.
 

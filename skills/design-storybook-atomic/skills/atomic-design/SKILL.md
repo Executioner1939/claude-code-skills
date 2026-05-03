@@ -144,10 +144,28 @@ src/
 
 Each component lives in its own folder. The folder is the unit of reuse, deletion, and review.
 
+## Library obligations per atomic level
+
+Each level has obligations from the `approved-libraries` policy and `tanstack-integration` patterns:
+
+| Level | Required integrations |
+|---|---|
+| **Atom** (interactive) | Field-friendly prop shape: `value` + `onChange(value)` + `onBlur` + `aria-invalid` + `aria-describedby` + forwarded ref. Drops into a TanStack Form `field`. |
+| **Atom** (non-interactive) | Tokens-only styling. Lucide for icons. |
+| **Molecule** (form-shaped) | Accepts a TanStack Form `field` as primary prop. Renders error UI from `field.state.meta.errors` with correct ARIA wiring. |
+| **Organism** (table) | Accepts a TanStack Table `table` instance, not raw `data + columns`. Uses TanStack Virtual when row count is unbounded. |
+| **Organism** (list / grid with fetched data) | Consumes a TanStack DB collection (preferred — reactive, joinable) or a TanStack Query result (read-only). No bespoke `useState([])` for fetched data. |
+| **Organism** (animated) | Motion (web) or Reanimated (native). Respects `prefers-reduced-motion`. |
+| **Template / Page** | TanStack Router for routing (page level only). MSW handlers in stories for fetch states. |
+
+These are enforced by `audit-atomic`, `audit-molecules`, `audit-organisms`, and `audit-libraries`. Bypassing the listed integration = hygiene fail.
+
 ## Relationship to other skills in this plugin
 
 - **`storybook-atomic-integration`** — defines what stories every component must have, broken out by atomic level. Read this when writing or auditing stories.
 - **`design-tokens`** — atoms and molecules consume tokens; this skill defines the token taxonomy.
+- **`approved-libraries`** — the bouncer-list of libraries components are required to use (or forbidden from using).
+- **`tanstack-integration`** — the prop shapes and patterns that make components compose with TanStack Form / Table / DB / etc.
 - **`component-composition`** — patterns (slots, compound, polymorphic) for composing higher levels from lower ones.
 - **`story-coverage-checklist`** — the per-level rubric for "complete" Storybook coverage.
 

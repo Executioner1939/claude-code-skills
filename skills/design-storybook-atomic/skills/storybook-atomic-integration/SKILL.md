@@ -261,6 +261,6 @@ grep -RhE "title:\s*['\"]([A-Za-z]+)/" --include="*.stories.*" src/components/
 ## Relationship to other skills in this plugin
 
 - **`atomic-design`** — for the level-classification rules.
-- **`storybook-authoring`** — for *how to write* CSF3 stories.
+- **`storybook-authoring`** — for *how to write* CSF Factories stories.
 - **`story-coverage-checklist`** — formalizes the "minimum required" tables above into a graded rubric used by the audit workflows.
 - **`accessibility-stories`** — addon-a11y configuration per level.

@@ -1,25 +1,28 @@
 ---
 name: storybook-authoring
-description: Storybook 9 / 10 authoring expertise — CSF Factories (the modern preview.meta / meta.story pattern), classic CSF3 object syntax, MDX docs, autodocs, args, argTypes, controls, decorators, parameters, play functions, interaction tests, the official addon-a11y, addon-vitest browser-mode testing, and portable stories via composeStories. Load whenever editing or creating any *.stories.* or *.mdx file, configuring Storybook (.storybook/main.ts, preview.ts), upgrading Storybook major versions, writing interaction tests, or designing the story hierarchy. Covers CSF Factories as the recommended modern pattern and the still-supported CSF3 object form.
-when_to_use: Writing or auditing CSF Factories or CSF3 stories, MDX docs, configuring Storybook 9/10, addon-vitest browser-mode tests, addon-a11y configuration, portable stories, composeStories, choosing args vs argTypes, decorators/parameters, theming Storybook, organizing the sidebar.
-paths: "**/*.stories.*, **/*.mdx, **/.storybook/**, **/storybook.config.*, **/vitest.config.*"
+description: Storybook 10 authoring — CSF Factories (`preview.meta` / `meta.story`) as the only accepted format. Covers `defineMain` / `definePreview` config, framework-specific packages (`@storybook/react-vite`, `@storybook/nextjs-vite`, etc.), MDX docs with `@storybook/addon-docs/blocks`, autodocs, args, argTypes, controls, decorators, parameters, `play` and `.test()` interaction tests with `@storybook/test`, the official `@storybook/addon-a11y`, `@storybook/addon-vitest` browser-mode testing, and portable stories via `composeStories`. Load on any `*.stories.*`, `*.mdx`, or `.storybook/**` file. Projects on Storybook 7 / 8 or CSF3 — see `_migration/migration-storybook-7-to-10.md`.
+when_to_use: Writing CSF Factories stories, configuring `defineMain` / `definePreview`, addon-vitest setup, addon-a11y setup, portable stories, choosing args vs argTypes, decorators / parameters, theming the canvas, organizing the sidebar.
+paths: "**/*.stories.@(ts|tsx|js|jsx), **/*.mdx, **/.storybook/**, **/storybook.config.*, **/vitest.config.*"
 allowed-tools: Read, Grep, Glob
 ---
 
-# Storybook Authoring
+# Storybook authoring
 
-Reference for writing high-quality Storybook stories. **Storybook 10** (2026) is the current major; **Storybook 9** is widely deployed. Both support two story formats:
+**Storybook 10** with **CSF Factories** is the only accepted format under this design system. Pre-Factories formats (CSF3 object syntax, CSF2 `Template.bind`, `storiesOf`) are migration targets — see `_migration/migration-storybook-7-to-10.md`. Audits in this plugin auto-fail on CSF2; downgrade on CSF3.
 
-- **CSF Factories** (recommended for new projects on Storybook 9+, React-only at the time of writing — Vue/Angular/Web Components factories land in the 10.x line). Provides better type inference and a `.test()` method for inline component tests.
-- **CSF3 object syntax** (default export `meta` + named export stories). Fully supported on 9/10. Still the most universal form across frameworks.
+This skill is the overview. Five depth references live in this same plugin and load alongside on the right files:
 
-Both formats coexist in the same project. **`storiesOf` and CSF2 `Template.bind()` are removed/discouraged** — migrate.
+- **`storybook-story-writing`** — factory-chain patterns, `.test()`, extension, loaders, decorator stacks, sidebar conventions.
+- **`storybook-args-controls`** — argTypes, Controls, Actions, conditional controls, table grouping, `fn()` spies.
+- **`storybook-component-documentation`** — MDX with `@storybook/addon-docs/blocks`, per-atomic-level templates.
+- **`storybook-play-functions`** — interaction tests with the SB 9+ pre-bound `canvas`.
+- **`storybook-configuration`** — `defineMain` / `definePreview`, addon registration, MSW, manager UI.
 
-## CSF Factories (modern — Storybook 9+, React)
+## CSF Factories — the format
 
-A factory chain of three functions: `definePreview` → `preview.meta` → `meta.story`. Each step has full type safety; you don't repeat the component type.
+Three function calls form the chain: `definePreview` (in `.storybook/preview.ts`) → `preview.meta(...)` (per stories file) → `meta.story(...)` (per story).
 
-```ts
+```tsx
 // .storybook/preview.ts
 import { definePreview } from '@storybook/react-vite';
 import * as a11yAddon from '@storybook/addon-a11y/preview';
@@ -51,31 +54,37 @@ const meta = preview.meta({
   },
 });
 
-export const Primary    = meta.story({ args: { variant: 'primary' } });
+export const Default    = meta.story({ args: { variant: 'primary' } });
 export const Secondary  = meta.story({ args: { variant: 'secondary' } });
 export const Loading    = meta.story({ args: { loading: true } });
 export const Disabled   = meta.story({ args: { disabled: true } });
 ```
 
-### Inline tests with `.test()`
+`Default` is the first export, by convention.
+
+## Inline tests with `.test()`
 
 A factory story can attach a Vitest browser-mode test directly:
 
-```ts
-import { expect, userEvent, within } from '@storybook/test';
+```tsx
+import { userEvent, expect, fn } from '@storybook/test';
 
 export const SubmitsForm = meta.story({
   args: { onSubmit: fn() },
-}).test(async ({ canvas, args }) => {
-  await userEvent.type(canvas.getByLabelText(/email/i), 'a@b.co');
-  await userEvent.click(canvas.getByRole('button', { name: /sign in/i }));
+}).test(async ({ canvas, args, step }) => {
+  await step('fill the form', async () => {
+    await userEvent.type(canvas.getByLabelText(/email/i), 'a@b.co');
+  });
+  await step('submit', async () => {
+    await userEvent.click(canvas.getByRole('button', { name: /submit/i }));
+  });
   await expect(args.onSubmit).toHaveBeenCalledOnce();
 });
 ```
 
-Equivalent to a `play` function but runs natively under `addon-vitest`.
+Use `.test()` when the story exists primarily to verify behavior; use `play` when the story is a normal demo with an interaction. Both work in factories.
 
-### `.storybook/main.ts` with `defineMain`
+## `.storybook/main.ts` with `defineMain`
 
 ```ts
 import { defineMain } from '@storybook/react-vite';
@@ -87,84 +96,52 @@ export default defineMain({
 });
 ```
 
-The `framework` field is **mandatory** in 9/10. Pick the framework package that matches your bundler:
+`framework` is mandatory. Pick the framework package matching the bundler:
 
-- React + Vite → `@storybook/react-vite`
-- React + Webpack5 → `@storybook/react-webpack5` (legacy path)
-- Next.js → `@storybook/nextjs-vite` (Vite preset; legacy `@storybook/nextjs` for Webpack)
-- Vue + Vite → `@storybook/vue3-vite`
-- Svelte + Vite → `@storybook/sveltekit` or `@storybook/svelte-vite`
-- Angular → `@storybook/angular`
+| Bundler / runtime | Framework package |
+|---|---|
+| React + Vite | `@storybook/react-vite` |
+| Next.js (modern) | `@storybook/nextjs-vite` |
+| Vue 3 + Vite | `@storybook/vue3-vite` |
+| Svelte + Vite | `@storybook/svelte-vite` |
+| SvelteKit | `@storybook/sveltekit` |
+| Angular | `@storybook/angular` |
+| Web Components + Vite | `@storybook/web-components-vite` |
 
-## CSF3 object syntax (universal — works on all frameworks, 7+)
+Type imports come from this same package: `import type { Meta, StoryObj } from '@storybook/react-vite'` (or your framework). **Never** import from generic `@storybook/react`.
 
-CSF3 is **a default export with `meta`** describing the component, plus **named exports** that are stories. Each story is a plain object — no functions required for the simple case.
-
-```tsx
-// Button.stories.tsx
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Button } from './Button';
-
-const meta: Meta<typeof Button> = {
-  title: 'Atoms/Button',
-  component: Button,
-  tags: ['autodocs'],
-  args: {
-    children: 'Click me',
-    variant: 'primary',
-  },
-  argTypes: {
-    variant: { control: 'select', options: ['primary', 'secondary', 'ghost'] },
-    size:    { control: 'radio',  options: ['sm', 'md', 'lg'] },
-    onClick: { action: 'clicked' },
-  },
-};
-export default meta;
-
-type Story = StoryObj<typeof Button>;
-
-export const Primary: Story = { args: { variant: 'primary' } };
-export const Secondary: Story = { args: { variant: 'secondary' } };
-export const Loading: Story = { args: { loading: true } };
-export const Disabled: Story = { args: { disabled: true } };
-```
-
-That's the whole shape.
-
-> **Type imports** in Storybook 9/10 come from your **framework package**, not the generic `@storybook/react`. Use `@storybook/react-vite`, `@storybook/nextjs-vite`, `@storybook/vue3-vite`, etc. — matching the `framework` field in `main.ts`.
-
-## The `meta` object — what each field does
+## meta fields
 
 | Field | Purpose |
 |---|---|
-| `title` | Sidebar path. `Atoms/Button` puts the component under "Atoms". Omit to let CSF infer from filesystem (with `storyStoreV7`). |
-| `component` | The component under test. Powers autodocs args table and `StoryObj<typeof X>`. |
-| `subcomponents` | A map of related components rendered in the same docs page. |
-| `tags` | `['autodocs']` enables auto-generated docs. Custom tags can be filtered in the sidebar. |
-| `args` | Default args inherited by every story. Stories can override per-story. |
-| `argTypes` | Argument metadata — `control`, `options`, `description`, `table`, `if`. Drives the Controls addon. |
-| `parameters` | Addon configuration — backgrounds, viewports, layout, a11y, docs. |
-| `decorators` | Wrappers applied to every story. Provider, theme, router, locale, etc. |
-| `play` | A function run after render — interactions, assertions. Inherited unless overridden. |
-| `loaders` | Async data loaders. Result available via `loaded` in `play`. |
-| `render` | Custom render function. Use when you can't drive the component purely with `args`. |
+| `title` | Sidebar path, slash-separated. `Atoms/Button` puts it under "Atoms". |
+| `component` | The component under test. Powers autodocs args table and type inference for `meta.story`. |
+| `subcomponents` | Map of related components rendered on the same docs page. |
+| `tags` | `['autodocs']` enables auto-generated docs. `['!autodocs']` excludes. `['test']` / `['!test']` filter test runs. |
+| `args` | Default args inherited by every story. Stories override per-story. |
+| `argTypes` | Argument metadata — `control`, `options`, `description`, `table`, `if`. Drives Controls. |
+| `parameters` | Addon configuration — backgrounds, viewports, layout, a11y, docs, msw. |
+| `decorators` | Wrappers applied to every story. Provider, theme, router, locale. |
+| `play` | Function run after render — runs as a Vitest browser-mode test. |
+| `loaders` | Async data loaders. Output available via `loaded`. |
+| `render` | Custom render function. Use sparingly — prefer args. |
 
-## Story object — what each field does
+## story object fields
 
 | Field | Purpose |
 |---|---|
-| `args` | Per-story args. Merged on top of `meta.args`. |
+| `args` | Per-story args, merged on top of `meta.args`. |
 | `argTypes` | Per-story argTypes overrides. |
 | `parameters` | Per-story parameter overrides. |
-| `decorators` | Per-story decorators (run inside the meta decorators). |
-| `play` | Per-story interaction. Receives `{ canvas, canvasElement, args, step }`. (Storybook 9+ adds `canvas` — a pre-bound `within(canvasElement)`.) |
-| `render` | Per-story custom render. Use sparingly. |
-| `name` | Story display name. Defaults to the export name, prettified. |
-| `tags` | Per-story tags. Common: `['!autodocs']` excludes from docs · `['test']` includes in test runs · `['!test']` excludes from test runs · `['stable']` / custom tags filter the sidebar. |
+| `decorators` | Per-story decorators (run inside meta decorators). |
+| `play` | Per-story interaction. Receives `{ canvas, canvasElement, args, step, loaded }`. |
+| `render` | Per-story custom render. |
+| `name` | Display name. Defaults to the export name, prettified. |
+| `tags` | Per-story tags. |
 
-## `argTypes` — controls and tables
+`canvas` is pre-bound in Storybook 9+ — equivalent to `within(canvasElement)`. Use it.
 
-Common controls:
+## argTypes — controls and tables
 
 ```ts
 argTypes: {
@@ -173,49 +150,56 @@ argTypes: {
   disabled: { control: 'boolean' },
   count:    { control: { type: 'number', min: 0, max: 100, step: 1 } },
   color:    { control: 'color' },
-  date:     { control: 'date' },
-  onClick:  { action: 'clicked' },     // logs to Actions panel
-  onClick:  { table: { disable: true } }, // hide from controls
-  className:{ table: { category: 'HTML' } }, // group in the table
-  size:     { description: 'Visual size of the button' },
+  onClick:  { action: 'clicked' },
+  data:     { control: false },              // hidden from Controls
+  className:{ table: { disable: true } },    // hidden from Controls AND props table
 }
 ```
 
-Use `if` for conditional controls (e.g. `loading` only if `disabled` is false):
+Conditional controls:
+
 ```ts
 spinner: { control: 'boolean', if: { arg: 'loading' } }
 ```
 
+See `storybook-args-controls` for the full reference.
+
 ## Decorators
 
-Decorators wrap every story. Use them to provide context, apply themes, set up routers, mock data, force layout.
+Wrap every story. Use for theme / router / store / locale.
 
 ```tsx
-// at meta level
-decorators: [
-  (Story, ctx) => (
-    <ThemeProvider theme={ctx.globals.theme === 'dark' ? darkTheme : lightTheme}>
-      <Story />
-    </ThemeProvider>
-  ),
-],
+const meta = preview.meta({
+  // ...
+  decorators: [
+    (Story, ctx) => (
+      <ThemeProvider theme={ctx.globals.theme === 'dark' ? darkTheme : lightTheme}>
+        <Story />
+      </ThemeProvider>
+    ),
+  ],
+});
 ```
 
-Globals (set in `.storybook/preview.tsx`) let users toggle theme/locale/etc. from the toolbar:
+Globals live in `.storybook/preview.ts`:
 
-```tsx
-// .storybook/preview.tsx
-export const globalTypes = {
-  theme: {
-    name: 'Theme',
-    toolbar: { icon: 'circlehollow', items: ['light', 'dark'], dynamicTitle: true },
+```ts
+export default definePreview({
+  initialGlobals: { theme: 'light' },
+  globalTypes: {
+    theme: {
+      description: 'Theme',
+      toolbar: {
+        title: 'Theme',
+        items: [{ value: 'light', title: 'Light' }, { value: 'dark', title: 'Dark' }],
+        dynamicTitle: true,
+      },
+    },
   },
-};
+});
 ```
 
 ## Parameters
-
-Common parameters:
 
 ```ts
 parameters: {
@@ -227,29 +211,31 @@ parameters: {
   viewport: {
     defaultViewport: 'mobile1',
   },
-  a11y: { /* see accessibility-stories skill */ },
+  a11y: { test: 'error' },                          // see accessibility-stories
   docs: {
     description: { story: 'Use the **primary** variant for the main action.' },
-    source: { type: 'code' },           // show source as JSX code (not dynamic)
+  },
+  msw: {                                            // see storybook-configuration
+    handlers: [/* msw handlers */],
   },
 }
 ```
 
 ## Autodocs
 
-Add `tags: ['autodocs']` at the meta level to generate a Docs page automatically. Storybook reads:
+Add `tags: ['autodocs']` at the meta level. Storybook reads:
 
 - The component's prop types (TypeScript / PropTypes / JSDoc)
 - The `argTypes` you declare
-- JSDoc comments above props
-- The `parameters.docs.description.component` for the component overview
+- JSDoc above props
+- `parameters.docs.description.component` for the overview
 - Each story (rendered in the docs page in declaration order)
 
-Override autodocs with an MDX file (see below) when you need long-form docs.
+Override the auto-page with custom MDX (see `storybook-component-documentation`).
 
 ## MDX docs pages
 
-For richer documentation, write an MDX file alongside the stories. **In Storybook 9/10**, Doc Blocks ship with `@storybook/addon-docs` (the legacy `@storybook/blocks` package was folded in). Import from `@storybook/addon-docs/blocks`:
+Imports come from `@storybook/addon-docs/blocks`:
 
 ```mdx
 {/* Button.mdx */}
@@ -263,66 +249,35 @@ import * as ButtonStories from './Button.stories';
 <Description of={ButtonStories} />
 
 ## Anatomy
-
-A button is a single `<button>` element with optional leading icon, text, and trailing icon.
+A single `<button>` with optional leading icon, label, and trailing icon.
 
 ## Usage
-
-<Canvas of={ButtonStories.Primary} />
-<Controls of={ButtonStories.Primary} />
+<Canvas of={ButtonStories.Default} />
+<Controls of={ButtonStories.Default} />
 
 ## All stories
+<Stories includePrimary={false} />
 
-<Stories />
+## Props
+<ArgTypes of={ButtonStories} />
+
+## Design tokens
+- `--color-action-primary`
+- `--space-button-padding-x`
+
+## Accessibility
+- Native `<button>`. Visible focus ring. `aria-pressed` when toggleable.
 
 ## Do / Don't
-
 - ✅ One primary button per surface.
-- ✅ Use sentence case for labels.
-- ❌ Don't use a button for navigation. Use a Link.
-- ❌ Don't use color alone to communicate state.
+- ❌ Don't use a button for navigation.
 ```
 
-`@storybook/addon-docs/blocks` exposes the Doc Blocks. Common ones:
-- `<Meta of={...}/>` — connect docs page to a CSF file
-- `<Primary />` / `<Stories />` / `<Story of={...}/>` — render stories
-- `<Canvas of={...}/>` / `<Controls of={...}/>` / `<ArgTypes of={...}/>`
-- `<Source of={...}/>` — code block of a story
-- `<Markdown>...</Markdown>` for raw markdown.
+Per-atomic-level MDX templates live in `storybook-component-documentation`.
 
-> Migration note: any existing imports from `@storybook/blocks` keep working through a re-export shim, but the canonical import in 9/10 is `@storybook/addon-docs/blocks`.
+## Play / `.test()` and Vitest browser-mode
 
-## Play functions and interaction tests
-
-`play` runs after render. Use it for interactions and assertions. **Storybook 9+ passes a pre-bound `canvas`** (equivalent to `within(canvasElement)`) so you don't have to `within()` yourself.
-
-```tsx
-import { userEvent, expect } from '@storybook/test';
-
-export const SubmitsForm: Story = {
-  args: { /* ... */ },
-  play: async ({ canvas, step }) => {
-    await step('fill the form', async () => {
-      await userEvent.type(canvas.getByLabelText(/email/i), 'user@example.com');
-      await userEvent.type(canvas.getByLabelText(/password/i), 'hunter2');
-    });
-
-    await step('submit', async () => {
-      await userEvent.click(canvas.getByRole('button', { name: /sign in/i }));
-    });
-
-    await expect(canvas.getByText(/welcome/i)).toBeInTheDocument();
-  },
-};
-```
-
-`@storybook/test` exposes `userEvent`, `within`, `expect`, `fn` (spy mocks), `waitFor`, `screen`. It's a Storybook-instrumented wrapper around Testing Library and Vitest's `expect` — uses `@vitest/expect` under the hood.
-
-## Vitest browser-mode (Storybook 9 / 10)
-
-Storybook 9 graduated the experimental Vitest integration into the official **`@storybook/addon-vitest`**. (`@storybook/experimental-addon-test` is the older 8.x name — migrate.)
-
-Setup:
+Storybook 9 graduated the experimental Vitest integration into the official `@storybook/addon-vitest`. Setup:
 
 ```ts
 // vitest.config.ts
@@ -350,23 +305,35 @@ import { setProjectAnnotations } from '@storybook/react-vite';
 import * as previewAnnotations from './preview';
 
 const project = setProjectAnnotations([previewAnnotations]);
-
 beforeAll(project.beforeAll);
 ```
 
-Every story with a `play` (or a CSF-Factory `.test()`) becomes a Vitest test. Stories without `play` become smoke tests (render-only). Story-level `tags: ['!test']` excludes a story from the test run.
+Run: `pnpm vitest --project=storybook`.
 
-Run them like any other Vitest suite:
-```bash
-pnpm vitest --project=storybook
+Story-level `tags: ['!test']` excludes a story from the test run.
+
+## addon-a11y
+
+Runs axe-core against every story. With `parameters.a11y.test === 'error'` and `@storybook/addon-vitest`, axe violations fail the test run.
+
+Minimum config (set in `definePreview`):
+
+```ts
+parameters: {
+  a11y: {
+    test: 'error',
+    options: { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag22aa'] } },
+  },
+}
 ```
+
+The full a11y playbook lives in `accessibility-stories`.
 
 ## Portable stories — `composeStories`
 
-You can import a story directly into any test runner (Vitest, Jest, Playwright Test) by composing it. **In Storybook 9/10, `composeStories` is exported from your framework package**, not a separate `@storybook/testing-react`.
+Import stories into any test runner. **`composeStories` is exported from your framework package**, not a separate `@storybook/testing-react`:
 
 ```ts
-// Button.test.tsx
 import { composeStories } from '@storybook/react-vite';
 import * as stories from './Button.stories';
 import { render, screen } from '@testing-library/react';
@@ -379,134 +346,64 @@ test('Primary renders text', () => {
 });
 ```
 
-`composeStories` runs all decorators, args, loaders, and play functions exactly as they run in Storybook itself — so the test exercises the same surface as the canvas.
+`composeStories` runs all decorators, args, loaders, and play / `.test()` exactly as they run in Storybook.
 
-## addon-a11y
+## Sidebar organization
 
-The official accessibility addon runs `axe-core` against every story. **In Storybook 9/10, `parameters.a11y.test` (`'off' | 'todo' | 'error'`) integrates with `@storybook/addon-vitest` to fail the test run on violations.** See the **`accessibility-stories`** skill for the full playbook. Minimum:
-
-```ts
-// per-story or per-meta
-parameters: {
-  a11y: {
-    config: { rules: [/* axe rule overrides */] },
-    options: { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag22aa'] } },
-    test: 'error', // 'off' | 'todo' | 'error'
-  },
-}
-```
-
-## Sidebar organization (`title`)
-
-The `title` field is `/`-separated and produces nested sidebar entries.
-
-Recommended convention for atomic design:
+Use the atomic level as the first segment of `title`:
 
 ```
 Atoms/Button
-Atoms/Input
-Atoms/Icon
+Atoms/Form/Input            # 2nd-level grouping when an atomic level is busy
 Molecules/SearchBar
-Molecules/FormField
-Organisms/Header
 Organisms/DataTable
 Templates/DashboardTemplate
 Pages/UserDashboard
 ```
 
-Capitalize each segment. Keep depth ≤ 3 levels (Level/Component or Level/Subgroup/Component).
+Cap at 3 segments. Capitalize each. Pluralize the atomic-level segment.
 
-## Naming conventions
+## Story naming
 
-- Story export name = PascalCase, describes the **state or scenario**: `Default`, `Primary`, `Loading`, `Disabled`, `WithIcon`, `LongText`, `EmptyState`, `ErrorState`, `RTL`.
-- Story display name (auto-derived) becomes "Default", "With Icon", "Empty State" — readable in the sidebar.
-- Reserve `Default` for the canonical example, listed first.
-- Prefix interaction-only stories with a verb: `Submits`, `OpensMenu`, `CancelsConfirmation`.
+| Pattern | Example | When |
+|---|---|---|
+| Canonical | `Default` | First export. Always. |
+| Variant | `Primary`, `Secondary`, `Ghost` | One per `variant` value. |
+| Size | `Small`, `Medium`, `Large` | One per `size` value. |
+| State | `Disabled`, `Loading`, `Empty`, `Error` | Per discrete state. |
+| Slot | `WithIcon`, `WithCaption` | Demonstrates a filled slot. |
+| Stress | `LongText`, `LongLabel`, `ManyItems`, `Truncated`, `RTL` | Robustness. |
+| Interaction | `SubmitsForm`, `OpensMenu`, `Cancels` | Verb-prefixed. Has `.test()` or `play`. |
 
-## Common pitfalls
+PascalCase. No `Story1` / `Test`.
 
-- **`render` everywhere.** If you have `render` in every story, your component probably shouldn't be CSF3 yet — fix the API or use composition. CSF3 should rely on `args`.
-- **Hardcoded children in stories.** Drives Controls useless. Put text in `args` so it's editable.
-- **Decorators inside `render`.** Put providers in `decorators`, not `render`. Otherwise they're invisible to addons.
-- **Stories that only differ in `parameters.docs`.** Combine them; use docs blocks instead.
-- **`storiesOf` API.** Removed in Storybook 8+. Migrate to CSF3 or CSF Factories.
-- **One story per file with `Default`.** If a component has variants, write a story per variant. The Controls addon does not substitute for variant stories.
-- **Mocking via decorator with no cleanup.** Side-effects in decorators leak across stories. Reset in `parameters.beforeEach` or use loaders.
-- **Importing types from `@storybook/react`** in a Vite project on 9/10. Use the framework package — `@storybook/react-vite` (etc.). Same for `@storybook/blocks` → `@storybook/addon-docs/blocks`.
-- **`@storybook/experimental-addon-test`** still in `vitest.config`. Migrate to `@storybook/addon-vitest`.
-- **Mixing CSF Factories and CSF3 in the same file.** Pick one form per file. They can coexist file-to-file.
+## Anti-patterns
 
-## Migration cheatsheet
-
-### CSF2 → CSF3
-
-```diff
-- export const Primary = Template.bind({});
-- Primary.args = { variant: 'primary' };
-+ export const Primary: Story = { args: { variant: 'primary' } };
-```
-
-```diff
-- import { ComponentStory, ComponentMeta } from '@storybook/react';
-+ import type { Meta, StoryObj } from '@storybook/react-vite';
-```
-
-```diff
-- export default { title: 'Button', component: Button } as ComponentMeta<typeof Button>;
-+ const meta: Meta<typeof Button> = { title: 'Atoms/Button', component: Button, tags: ['autodocs'] };
-+ export default meta;
-+ type Story = StoryObj<typeof Button>;
-```
-
-### Storybook 8 → 9 / 10
-
-```diff
-- import { Meta, StoryObj } from '@storybook/react';
-+ import { Meta, StoryObj } from '@storybook/react-vite';
-
-- import { Meta, Story } from '@storybook/blocks';
-+ import { Meta, Story } from '@storybook/addon-docs/blocks';
-
-- import { storybookTest } from '@storybook/experimental-addon-test/vitest-plugin';
-+ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
-
-- import { composeStories } from '@storybook/testing-react';
-+ import { composeStories } from '@storybook/react-vite';
-```
-
-`main.ts` / `preview.ts` should adopt `defineMain` / `definePreview` for typed config. `framework` becomes mandatory.
-
-### CSF3 → CSF Factories (React, opt-in)
-
-```diff
-- import type { Meta, StoryObj } from '@storybook/react-vite';
-- import { Button } from './Button';
--
-- const meta: Meta<typeof Button> = { component: Button, tags: ['autodocs'] };
-- export default meta;
-- type Story = StoryObj<typeof Button>;
-- export const Primary: Story = { args: { variant: 'primary' } };
-+ import preview from '../.storybook/preview';
-+ import { Button } from './Button';
-+
-+ const meta = preview.meta({ component: Button, tags: ['autodocs'] });
-+ export const Primary = meta.story({ args: { variant: 'primary' } });
-```
+- **`render` everywhere.** If every story needs `render`, your component isn't args-driven. Fix the component.
+- **Hardcoded children in stories.** Drives Controls useless. Put text in `args`.
+- **Decorators inside `render`.** Put providers in `decorators`. Otherwise they're invisible to addons.
+- **`@storybook/react`** type imports. Use the framework package.
+- **`@storybook/blocks`** in MDX. Use `@storybook/addon-docs/blocks`.
+- **`@storybook/experimental-addon-test`** in `vitest.config`. Use `@storybook/addon-vitest`.
+- **CSF3 object syntax in new files.** Use Factories. (Existing CSF3 files: see `_migration/migration-storybook-7-to-10.md`.)
+- **`storiesOf`** anywhere. Removed in 8+; auto-fail in audits.
 
 ## Relationship to other skills in this plugin
 
-- **`atomic-design`** — for *where* a component sits and what its `title` should be.
-- **`storybook-atomic-integration`** — for *what stories every component must have*, broken out by level.
-- **`accessibility-stories`** — for the addon-a11y configuration playbook and per-story a11y patterns.
-- **`story-coverage-checklist`** — the per-level coverage rubric.
+- **`storybook-story-writing`** — depth on factory-chain patterns.
+- **`storybook-args-controls`** — depth on argTypes and Controls.
+- **`storybook-component-documentation`** — MDX in depth.
+- **`storybook-play-functions`** — interaction-test patterns.
+- **`storybook-configuration`** — `.storybook/main.ts` / preview / addons.
+- **`storybook-atomic-integration`** — required-stories table per atomic level.
+- **`accessibility-stories`** — addon-a11y configuration.
+- **`tanstack-integration`** — how stories integrate with TanStack Form / Table / DB.
+- **`_migration/migration-storybook-7-to-10`** — upgrade procedure for legacy projects.
 
 ## Further reading
 
-- Storybook docs — https://storybook.js.org/docs
 - Storybook 10 release — https://storybook.js.org/blog/storybook-10/
 - Storybook 9 release — https://storybook.js.org/blog/storybook-9/
 - CSF Factories (CSF Next) — https://storybook.js.org/docs/api/csf/csf-next
-- CSF3 RFC (legacy reading) — https://storybook.js.org/blog/component-story-format-3-0/
 - Vitest addon — https://storybook.js.org/docs/writing-tests/integrations/vitest-addon
-- Portable stories (Vitest) — https://storybook.js.org/docs/api/portable-stories/portable-stories-vitest
-- Component Driven UI — https://www.componentdriven.org/
+- Portable stories — https://storybook.js.org/docs/api/portable-stories/portable-stories-vitest
