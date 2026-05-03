@@ -13,9 +13,9 @@ This skill defines: sidebar layout, the minimum required story set per atomic le
 
 ## Sidebar layout
 
-Use the atomic level as the **first segment** of `title`. Capitalize and pluralize.
+Use the atomic level as the **first segment** of `title`. Capitalize that level segment and pluralize it (`Atoms` not `Atom`; `Molecules` not `Molecule`). The component-name segment that follows is **not** pluralized — it's the component's class name (`Button`, `SearchBar`).
 
-```
+```text
 Atoms/Button
 Atoms/Icon
 Atoms/Input
@@ -29,7 +29,7 @@ Pages/UserDashboard
 
 Group sub-categories with a second segment when an atomic level has many items:
 
-```
+```text
 Atoms/Form/Input
 Atoms/Form/Checkbox
 Atoms/Form/Radio
@@ -261,6 +261,6 @@ grep -RhE "title:\s*['\"]([A-Za-z]+)/" --include="*.stories.*" src/components/
 ## Relationship to other skills in this plugin
 
 - **`atomic-design`** — for the level-classification rules.
-- **`storybook-authoring`** — for *how to write* CSF3 stories.
+- **`storybook-authoring`** — for *how to write* CSF Factories stories.
 - **`story-coverage-checklist`** — formalizes the "minimum required" tables above into a graded rubric used by the audit workflows.
 - **`accessibility-stories`** — addon-a11y configuration per level.

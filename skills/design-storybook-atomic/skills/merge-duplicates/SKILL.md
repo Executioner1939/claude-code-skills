@@ -1,116 +1,140 @@
 ---
 name: merge-duplicates
-description: Find near-duplicate components across the codebase, score their similarity, propose a single canonical version, and produce a safe migration plan to merge them. Handles the "we have three Tag-like atoms" / "two Card components" / "every team built their own Modal" situation. Invoke as `/design-storybook-atomic:merge-duplicates`.
+description: Find near-duplicate components across the codebase, score similarity, propose a single canonical version, produce a safe migration plan, and (after user approval) apply the merge. Handles the "we have three Tag-like atoms" / "two Card components" / "every team built their own Modal" situations. Inter-agent HANDOFF contract. Invoke as `/design-storybook-atomic:merge-duplicates`.
 disable-model-invocation: true
 argument-hint: "[level] [path]"
 arguments: level scope_path
-allowed-tools: Read, Grep, Glob, Bash, Agent
+allowed-tools: Read, Grep, Glob, Bash, Agent, Write, Edit
 ---
 
 # Merge Duplicates
-
-You are finding and merging near-duplicate components — the most common drift in any non-trivial design system.
 
 Arguments:
 - `$level` — `atoms` | `molecules` | `organisms` | `all` (default `all`)
 - `$scope_path` — defaults to `src/components/`
 
-## Pipeline
+## Step 0 — Load context
 
-### Phase 1 — Inventory + similarity scoring
+Read `atomic-design`, `component-composition`, `tanstack-integration`, `approved-libraries` (auto-preloaded into chained subagents). Read `<scope>/.design-storybook-atomic.yml` for any pre-deferred clusters (`merge.deferred[]`).
 
-Spawn `component-cartographer` to get the inventory, then spawn `component-deduplicator` to score similarity across the inventory.
+## Step 1 — Cartography
 
-Similarity dimensions (weighted):
-- **Prop signature similarity** (40%) — overlapping prop names + types.
-- **Render output similarity** (25%) — same root element + similar markup tree.
-- **Visual similarity** (20%) — same / overlapping CSS / token usage.
-- **Name semantic similarity** (10%) — `Tag` vs `Pill` vs `Chip`, `Modal` vs `Dialog` vs `Popup`.
-- **Story signature similarity** (5%) — same variant names, same states.
+Spawn `component-cartographer`. HANDOFF: `<scope>/.design-storybook-atomic/handoffs/merge-duplicates-<run>/phase-01-cartography-to-dedup.md`.
 
-Output: clusters of components with similarity ≥ 0.75 within each cluster.
+## Step 2 — Cluster detection
 
-### Phase 2 — Per-cluster analysis (parallel, batched 4–6)
+Spawn `component-deduplicator` (mode `cluster`, scoped to `$level`). Computes pairwise similarity (prop signature 40% + render shape 25% + visual style 20% + name semantics 10% + story signature 5%); groups pairs with similarity ≥ 0.75 into clusters.
 
-For each cluster, spawn `component-deduplicator --mode=analyze --cluster=<n>`. It returns:
+HANDOFF: `<scope>/.design-storybook-atomic/handoffs/merge-duplicates-<run>/phase-02-clusters-to-analysis.md`.
 
-- **Members** — paths + prop signatures.
-- **Differences** — every meaningful diff between members (different prop names for the same concept, different state machines, different a11y behavior, divergent token usage).
-- **Canonical proposal** — which member should be the survivor (highest test coverage, broadest prop API, cleanest implementation, fewest hardcoded values, most usage sites). Ties broken by name preference (most generic name wins).
-- **Unification API** — the merged prop surface (rename collisions, add `variant` for visual differences, add slots for layout differences).
-- **Migration plan** — for each non-canonical member: usage sites grep, codemod plan (rename imports, rewrite props), a deprecation path.
-- **Risk** — call sites count, public API surface impact, story / test impact, visual regression risk.
+Print: `Found <n> clusters.`
 
-### Phase 3 — Synthesis + proposal
+## Step 3 — Per-cluster analysis (parallel, batched 4–6)
 
-Print, per cluster:
+For each cluster, spawn `component-deduplicator` (mode `analyze --cluster=<n>`). Returns:
 
-```text
-CLUSTER 1 — "Tag-like atoms" (similarity 0.91)
-  Members:
-    src/components/atoms/Tag/Tag.tsx        (canonical proposal, 47 usages)
-    src/components/atoms/Pill/Pill.tsx      (12 usages)
-    src/components/atoms/Chip/Chip.tsx      (8 usages)
+- Members (paths + prop signatures).
+- Differences (prop renames, additive props, divergent state machines, divergent a11y, divergent token usage).
+- Canonical proposal (highest test/story coverage; cleanest implementation; broadest API; most usage; most generic name).
+- Unification API (resolved renames, new `variant` prop for visual differences, new slots for layout differences).
+- Migration plan (additive change to canonical + codemod for non-canonical members + deprecation cycle).
+- Risk (call sites count, public API impact, visual regression, semver impact).
 
-  Key differences:
-    - Tag uses `variant: 'default' | 'success' | 'danger'`; Pill uses `tone: 'neutral' | 'green' | 'red'` (rename)
-    - Chip has a `removable` prop with `onRemove`; Tag does not (additive)
-    - Pill has rounded edges by default; the others are square (variant)
+Each cluster gets its own HANDOFF: `<scope>/.design-storybook-atomic/handoffs/merge-duplicates-<run>/phase-03-cluster-<n>-analysis.md`.
 
-  Proposed canonical: src/components/atoms/Tag/Tag.tsx
-  Proposed merged API:
-    variant: 'tag' | 'pill' | 'chip'
-    color: 'default' | 'success' | 'danger' | 'warning' | 'info'  // rename 'tone' values to 'color'
-    removable?: boolean
-    onRemove?: () => void
-
-  Migration plan:
-    1. Extend Tag.tsx with `variant` and `removable` props (additive — no breaking change yet).
-    2. Codemod 1: replace imports of Pill with Tag, mapping tone→color, adding variant='pill'.
-    3. Codemod 2: replace imports of Chip with Tag, adding variant='chip', preserving removable.
-    4. Mark Pill and Chip @deprecated in their files; add console.warn dev-only.
-    5. Update stories: keep best existing stories from each, dedupe variants.
-    6. Wait one release cycle; then delete Pill and Chip.
-
-  Risk: MEDIUM
-    - 20 usage sites need codemod
-    - 3 places use `Pill` ref directly via querySelector — manual review
-    - Visual diff expected — capture Chromatic baseline before merging
-
-CLUSTER 2 — "Modal-like organisms" (similarity 0.83)
-  …
-```
-
-### Phase 4 — Confirmation + execution
+## Step 4 — User decision per cluster
 
 For each cluster, ask the user one of:
 
-1. **Apply** — run the codemod, write the unified component, mark deprecated. (Spawn `component-composer --mode=merge --cluster=<n>` to do the writes; spawn `story-writer` to consolidate stories.)
-2. **Defer** — skip this cluster, log to `.claude/agent-memory/merge-duplicates/deferred.md` with reasoning.
-3. **Override canonical** — user picks a different survivor; redo Phase 3 for that cluster.
+1. **Apply** — run the codemod, write the unified component, mark deprecated.
+2. **Defer** — skip, log to `<scope>/.design-storybook-atomic.yml` `merge.deferred[]` with reasoning.
+3. **Override canonical** — user picks a different survivor; redo Step 3 for that cluster.
 
-After applying: spawn `accessibility-reviewer` against the unified component to ensure no a11y regressed.
+## Step 5 — Apply (per-cluster, after approval)
 
-### Phase 5 — Post-merge audit
+For each `Apply`-approved cluster:
 
-For each merged cluster, run a quick `audit-<level>` pass on the canonical component to confirm coverage hasn't regressed.
+### 5a — Merge implementation
+
+Spawn `component-composer` (mode `merge`, cluster=`<n>`). Applies the unified API to the canonical (additive); writes deprecation markers + dev-only `console.warn` re-exports on non-canonical members; updates barrel exports.
+
+HANDOFF: `<scope>/.design-storybook-atomic/handoffs/merge-duplicates-<run>/phase-05a-merge-cluster-<n>.md`.
+
+### 5b — Codemod consumer sites
+
+Spawn `component-composer` (mode `codemod`, cluster=`<n>`) to rewrite import + prop usages at every consumer site (paths from the cartographer's `importedBy` data). One file per pass; verify after each.
+
+HANDOFF: `<scope>/.design-storybook-atomic/handoffs/merge-duplicates-<run>/phase-05b-codemod-cluster-<n>.md`.
+
+### 5c — Story consolidation
+
+Spawn `story-writer` (mode `merge-stories`) to consolidate the cluster's stories: keep every named state from every member, rename collisions to `<Variant><State>`, drop true duplicates.
+
+HANDOFF: `<scope>/.design-storybook-atomic/handoffs/merge-duplicates-<run>/phase-05c-stories-cluster-<n>.md`.
+
+### 5d — Verify
+
+Spawn `accessibility-reviewer` against the unified component to ensure no a11y regressed during the merge. Spawn `library-policy-enforcer` to confirm the unified component satisfies the level's TanStack contract.
+
+HANDOFF: `<scope>/.design-storybook-atomic/handoffs/merge-duplicates-<run>/phase-05d-verify-cluster-<n>.md`.
+
+## Step 6 — Post-merge audit
+
+Run a quick `audit-<level>` pass on the unified component to confirm coverage hasn't regressed. Print delta vs the pre-merge graded score.
+
+## Step 7 — Synthesis
+
+```text
+MERGE REPORT — <scope> (level: <level>)
+Date     : <ISO 8601>
+Run-id   : <run-id>
+
+CLUSTERS DETECTED   : <n>
+APPLIED             : <n>
+DEFERRED            : <n>
+CANONICAL OVERRIDDEN: <n>
+
+PER-APPLIED CLUSTER:
+  Cluster 1 — "Tag-like atoms"
+    Canonical: atoms/Tag
+    Merged-out (deprecated): atoms/Pill, atoms/Chip
+    Consumer sites updated: 20
+    Files written: 4 (Tag.tsx, Tag.stories.tsx, Tag.mdx, atoms/index.ts)
+    Risk: MEDIUM (visual diff expected; capture Chromatic baseline before pushing)
+
+PUBLIC API IMPACT
+  semver: MAJOR (Pill, Chip exported from packages/ui/index.ts)
+
+VISUAL REGRESSION
+  Recommend Chromatic baseline before merging this PR.
+
+DEFERRED CLUSTERS (logged to .design-storybook-atomic.yml):
+  Cluster N — "Modal vs Dialog vs Popup"
+    reason: <user-provided>
+
+NEXT
+  - Capture Chromatic baseline.
+  - Open PR with the merge commits.
+  - Schedule deletion of deprecated members in next major release.
+```
 
 ## Operating rules
 
-1. **No silent merges.** Every cluster is shown with members, diffs, canonical proposal, and migration plan before any code is written.
-2. **Additive first, breaking second.** Add the merged API to the canonical, codemod the others, deprecate, then delete in a later release.
-3. **Preserve the best stories.** When merging stories, keep every named state from every member; rename collisions to `<Variant><State>`.
+1. **No silent merges.** Every cluster shown with members + diffs + canonical proposal + migration plan before any code is written.
+2. **Additive first, breaking second.** Add the merged API to canonical (non-breaking); codemod consumers; deprecate; delete in a later release.
+3. **Preserve the best stories.** Keep every named state from every member; rename collisions.
 4. **Verify usage counts before deletion.** Every "delete" step requires a `grep` showing zero remaining imports.
-5. **Public API impact** — if any member is exported from `package.json`, treat as a major version bump and surface that loudly.
-6. **One cluster at a time** unless the user opts in to batch mode. Easier to review.
+5. **Public API impact** is mandatory in the report.
+6. **One cluster at a time** unless the user opts in to batch.
+7. **HANDOFF contract** — every subagent prints `HANDOFF: <path>`.
 
 ## Failure modes
 
-- **The "duplicates" are intentional product variations.** Two `Card` components for two products. Defer the cluster; log the rationale.
-- **The "canonical" has worst test coverage.** Either pick a different canonical or first port the better tests over before merging.
-- **A member is in legacy code paths still being deprecated.** Defer until that path is gone; don't merge into a moving target.
+- **The "duplicates" are intentional product variations.** Defer the cluster; log the rationale.
+- **The "canonical" has worst test coverage.** Either pick a different canonical or first port the better tests over.
+- **A member is in legacy code paths still being deprecated.** Defer — don't merge into a moving target.
 - **Theming divergence.** Two members because two themes need different defaults. Solution is per-theme tokens, not duplicate components — recommend `/design-storybook-atomic:audit-tokens` first.
 
 ## Memory
 
-Append summary to `.claude/agent-memory/merge-duplicates/history.log`. Track deferred clusters so subsequent runs surface them again.
+`.claude/agent-memory/merge-duplicates/history.log`. Track deferred clusters so subsequent runs surface them again.

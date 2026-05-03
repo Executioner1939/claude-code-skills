@@ -17,7 +17,7 @@ A robust token system has **three layers**. Atoms and molecules consume only the
 
 The full palette of values, named by **what they are**. No meaning, no context.
 
-```
+```text
 color.blue.500     = #3B82F6
 color.gray.900     = #0F172A
 space.4            = 16px
@@ -36,7 +36,7 @@ You **never** consume primitives directly in components. They exist for semantic
 
 Named by **what they mean** in your interface.
 
-```
+```text
 color.text.primary           → color.gray.900
 color.text.secondary         → color.gray.600
 color.text.inverse           → color.white
@@ -64,7 +64,7 @@ When you switch to dark mode, only this layer's mappings change. Components don'
 
 For components with unique surface area, you can publish a third layer scoped per component.
 
-```
+```text
 button.bg.primary            → color.action.primary
 button.bg.primary.hover      → color.action.primary.hover
 button.text.primary          → color.text.inverse

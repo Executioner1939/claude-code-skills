@@ -106,8 +106,10 @@ Cap: 100. Components without applicable props get those points redistributed eve
 Score 1 point per item present. Cap at 100.
 
 ### File-level (worth 30)
-- [ ] Modern story format — **CSF Factories** (`preview.meta` / `meta.story`) on Storybook 9+ React, or **CSF3** object syntax (`Meta`/`StoryObj`). Never CSF2 `Template.bind({})` or `storiesOf` (removed in 8+).
-- [ ] Type imports come from the **framework package** (`@storybook/react-vite`, `@storybook/nextjs-vite`, `@storybook/vue3-vite`, etc.), not the generic `@storybook/react`.
+- [ ] **CSF Factories format only** (`preview.meta` / `meta.story`). CSF3 object syntax, CSF2 `Template.bind({})`, or `storiesOf` = **auto-fail** (hygiene FAIL). Migration path: `_migration/migration-storybook-7-to-10.md`.
+- [ ] Type imports come from the **framework package** (`@storybook/react-vite`, `@storybook/nextjs-vite`, `@storybook/vue3-vite`, etc.), not the generic `@storybook/react`. (Generic `@storybook/react` import = auto-fail.)
+- [ ] MDX Doc Block imports come from `@storybook/addon-docs/blocks`, not the deprecated `@storybook/blocks` shim.
+- [ ] Vitest setup uses `@storybook/addon-vitest`, not `@storybook/experimental-addon-test`.
 - [ ] `meta.title` matches folder structure (level segment correct).
 - [ ] `meta.component` set.
 - [ ] `tags: ['autodocs']` present.
@@ -122,7 +124,7 @@ Score 1 point per item present. Cap at 100.
 - [ ] Stories use `args` only — no inline children unless required.
 - [ ] No `render` overrides except where strictly necessary.
 - [ ] `play` functions (or CSF-Factory `.test()`) use `@storybook/test` (`userEvent`, `expect`, `fn`, `within`).
-- [ ] `play` functions take the pre-bound `canvas` (Storybook 9+) or use `within(canvasElement)` consistently.
+- [ ] `play` functions take the pre-bound `canvas` or use `within(canvasElement)` consistently.
 - [ ] `play` functions use `step()` to label phases.
 - [ ] Tests can be excluded from the run with `tags: ['!test']` where appropriate (e.g. intentionally-broken demo stories).
 - [ ] No console errors / warnings during render.
@@ -149,11 +151,33 @@ Score 1 point per item present. Cap at 100.
 
 ## Hygiene checks (binary — any failure = 0)
 
+### Atomic-design discipline
 - [ ] Folder atomic level matches `meta.title` first segment.
 - [ ] Component name is unique within its level (no near-duplicates).
-- [ ] No hardcoded colors / spacing / fonts / radii — all values are tokens (see `design-tokens` skill).
 - [ ] No imports from a higher atomic level (atom doesn't import a molecule, etc.).
-- [ ] Component has at least one stable named export — no default-only exports for components in a library.
+- [ ] No imports from a sibling at the same level except utility atoms (Icon-like).
+
+### Storybook discipline (latest-only)
+- [ ] **CSF Factories** — CSF3 / CSF2 / `storiesOf` = auto-fail.
+- [ ] Framework package import — `@storybook/react` (generic) = auto-fail.
+- [ ] MDX uses `@storybook/addon-docs/blocks` — `@storybook/blocks` = auto-fail.
+- [ ] Vitest setup uses `@storybook/addon-vitest` — `@storybook/experimental-addon-test` = auto-fail.
+
+### Token discipline (see `design-tokens`)
+- [ ] No hardcoded colors / spacing / fonts / radii / shadows / motion — all values are semantic tokens.
+
+### Approved-libraries discipline (see `approved-libraries`)
+- [ ] No forbidden libraries imported from this component (e.g. `react-hook-form`, `lodash` debounce, `moment`, `date-fns`, `react-dnd`).
+
+### TanStack-integration discipline (see `tanstack-integration`)
+- [ ] **Atom (interactive)** — exposes `value` + `onChange(value)` (NOT `onChange(event)`) + `onBlur` + `aria-invalid` + `aria-describedby`. Forwards refs.
+- [ ] **Molecule (form-shaped)** — accepts a TanStack Form `field` as primary prop OR composes only field-friendly atoms (above).
+- [ ] **Organism (table-shaped)** — accepts a TanStack Table `table` instance, not raw `data + columns`.
+- [ ] **Organism (list / grid with fetched data)** — consumes a TanStack DB collection or a TanStack Query result. No `useState([])` for fetched data.
+- [ ] **Animated** — uses Motion (web) or Reanimated (native). Honors `prefers-reduced-motion`.
+
+### Code health
+- [ ] Component has at least one stable named export — no default-only exports.
 - [ ] No `// TODO` or `// FIXME` comments in the component or its stories.
 - [ ] Component is not marked `@deprecated` (if it is, it shouldn't be in the live library).
 - [ ] `package.json` exports include this component (if applicable).
@@ -207,3 +231,6 @@ exclude:
 - **`storybook-authoring`** — for the syntax and structure quality items reference.
 - **`accessibility-stories`** — for the a11y items.
 - **`design-tokens`** — for the hygiene "no hardcoded values" check.
+- **`approved-libraries`** — for the forbidden-library hygiene checks.
+- **`tanstack-integration`** — for the atom-prop-shape, molecule-field, organism-table, organism-collection rules.
+- **`_migration/migration-storybook-7-to-10.md`** — when CSF3 / CSF2 / `storiesOf` are detected, the audit links to this guide.

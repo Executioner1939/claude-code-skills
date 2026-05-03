@@ -222,8 +222,22 @@ When a parent renders an organism deep through layers, and a leaf needs a value,
 - Compound components need a story that uses *all* sub-components, and one that uses *only some* (omits panels, etc.) to prove the API isn't load-bearing on full use.
 - Headless components need stories that demonstrate at least two visually different skins.
 
+## Composition + TanStack abstractions
+
+Composition patterns and TanStack abstractions stack rather than compete. The `tanstack-integration` skill specifies the prop shapes; the patterns here say *how* a component exposes those props through composition:
+
+- A **field-friendly atom** (Input / Checkbox / Select / Slider) uses **plain props + forwarded refs** — the simplest pattern. Its `value` / `onChange` / `onBlur` props match TanStack Form's `field`.
+- A **`FormField` molecule** uses **named slots** (`label`, `helper`, error rendering) and accepts a TanStack Form `field` as its primary prop. Its `as` prop is **polymorphic** (defaulting to `Input`) so the same molecule wraps different field-friendly atoms.
+- A **`DataTable` organism** uses **plain props** to receive a TanStack Table `table` instance — never raw `data + columns`. The columns themselves use **render props** for cell content (TanStack Table's `flexRender`).
+- A **list / grid organism** uses **plain props** to receive a TanStack DB collection's live-query result. Pagination / virtualization wrap with **compound components** (`<List.Header />`, `<List.Empty />`, `<List.Row />`).
+- A **headless wrapper** for behavior (e.g. drag + drop with @dnd-kit) uses **render props or compound components** so consumers own the visual layer.
+
+The audit workflows verify the composition pattern matches the TanStack abstraction at the right level.
+
 ## Relationship to other skills in this plugin
 
 - **`atomic-design`** — the level boundaries this skill respects.
 - **`storybook-atomic-integration`** — the story coverage that *demonstrates* each composition.
 - **`design-tokens`** — the styling layer composition routes around.
+- **`approved-libraries`** — the bouncer-list of libraries the composition routes around.
+- **`tanstack-integration`** — the prop shapes that make composition compose with TanStack Form / Table / DB.
