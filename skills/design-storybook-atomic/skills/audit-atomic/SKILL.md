@@ -36,7 +36,7 @@ Spawn `component-cartographer` to inventory every atom.
 
 The agent writes a HANDOFF.md to:
 
-```
+```text
 <scope>/.design-storybook-atomic/handoffs/audit-atomic-<run>/phase-01-cartographer-to-auditors.md
 ```
 
@@ -59,7 +59,7 @@ For each atom in the inventory, spawn `atomic-auditor` **in parallel** (multiple
 
 Each auditor writes its own per-atom HANDOFF.md (when chained — for parallel batch this is consolidated):
 
-```
+```text
 <scope>/.design-storybook-atomic/handoffs/audit-atomic-<run>/phase-02-auditor-batch-<k>-to-cross-cutting.md
 ```
 
@@ -76,7 +76,7 @@ Spawn four agents in parallel — they share the inventory but score different a
 
 Each writes a HANDOFF.md to:
 
-```
+```text
 <scope>/.design-storybook-atomic/handoffs/audit-atomic-<run>/phase-03-<agent>-to-orchestrator.md
 ```
 
@@ -174,8 +174,10 @@ NEXT
 
 After printing the report, **write** it to:
 
-1. **Baseline (replaces previous)** — `<scope>/.design-storybook-atomic/baseline-atoms.md`
-2. **Dated history (additive)** — `<scope>/.design-storybook-atomic/history/atoms-<YYYY-MM-DD>.md`
+1. **Baseline** — `<scope>/.design-storybook-atomic/baseline-atoms.md`
+   - **First run** (Step 0c reported `BASELINE: not present`): write without prompting.
+   - **Subsequent runs** (Step 0c reported `BASELINE: present`): explicitly prompt the user — *"Replace baseline-atoms.md with this run's report? (y / n / save-as-history-only)"*. Do not silently overwrite. The user may opt out of replacing the baseline (history-only mode still writes to step 2).
+2. **Dated history (additive, never overwritten)** — `<scope>/.design-storybook-atomic/history/atoms-<YYYY-MM-DD>.md`. Always written, even when the user declined to update the baseline.
 
 Both contain the synthesis report.
 
@@ -200,10 +202,10 @@ Both contain the synthesis report.
 
 ## Memory
 
-Append a one-liner to `.claude/agent-memory/audit-atomic/history.log`:
+Append a one-liner to `.claude/agent-memory/audit-atomic/history.log` using a generated timestamp (e.g. `date -Iseconds` via Bash) and the actual counts from this run. The shape:
 
-```
-2026-05-03T17:42 audit-atomic scope=src/components/atoms run=20260503-1742 graded=24 A=12 B=6 C=4 F=2 hygiene_fail=3
+```text
+<timestamp> audit-atomic scope=<scope> run=<run-id> graded=<n> A=<n> B=<n> C=<n> D=<n> F=<n> hygiene_fail=<n>
 ```
 
-Subsequent runs can compare deltas without re-reading baselines.
+The values must be computed from the run, not copied from this template. Subsequent runs can compare deltas without re-reading baselines.

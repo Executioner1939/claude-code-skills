@@ -139,7 +139,7 @@ Type imports come from this same package: `import type { Meta, StoryObj } from '
 | `name` | Display name. Defaults to the export name, prettified. |
 | `tags` | Per-story tags. |
 
-`canvas` is pre-bound in Storybook 9+ — equivalent to `within(canvasElement)`. Use it.
+`canvas` is pre-bound — equivalent to `within(canvasElement)`. Use it.
 
 ## argTypes — controls and tables
 
@@ -352,7 +352,7 @@ test('Primary renders text', () => {
 
 Use the atomic level as the first segment of `title`:
 
-```
+```text
 Atoms/Button
 Atoms/Form/Input            # 2nd-level grouping when an atomic level is busy
 Molecules/SearchBar

@@ -217,15 +217,36 @@ const project = setProjectAnnotations([previewAnnotations]);
 beforeAll(project.beforeAll);
 ```
 
-## Step 9 — `@storybook/testing-react` `composeStories` → framework package
+## Step 9 — `composeStories` (portable stories)
 
-If you import `composeStories` for portable-stories testing:
-```diff
-- import { composeStories } from '@storybook/testing-react';
-+ import { composeStories } from '@storybook/react-vite';
+Two paths in Storybook 10 depending on the target story format:
+
+### CSF Factories (preferred)
+
+CSF Factories **don't need `composeStories`**. Each factory story exposes the composed behavior directly:
+
+```ts
+import { Primary } from './Button.stories';
+
+// Run the story's interactions / play / .test() in any test runner:
+await Primary.run();
+
+// Render the composed component (with decorators, args, loaders applied):
+render(<Primary.Component />);
 ```
 
-`@storybook/testing-react` is dead. The framework package owns the API now.
+If you're already on factories, drop `composeStories` from your test files entirely.
+
+### Legacy CSF3 (during migration)
+
+For CSF3 files not yet migrated to factories, `composeStories` is exported from the **framework package** (e.g. `@storybook/react`), not the variant package:
+
+```diff
+- import { composeStories } from '@storybook/testing-react';
++ import { composeStories } from '@storybook/react';
+```
+
+`@storybook/testing-react` is dead. The framework package owns the API now. Once the file moves to CSF Factories, replace `composeStories(...)` with the per-story `Primary.run()` / `Primary.Component` shape above.
 
 ## Step 10 — Remove `storiesOf`
 

@@ -31,7 +31,7 @@ The interpreter writes a HANDOFF.md to:
 
 **Validation contract**: do not proceed until `HANDOFF: <path>` is printed.
 
-Show the SPEC to the user; ask "Does this match your intent? (y / n / edit)". Don't proceed until confirmed.
+Show the SPEC to the user; ask "Does this match your intent? (y / n / edit)". **Do not proceed to Step 1 (cartography) until the user replies `y`.** The HANDOFF.md being on disk is necessary but not sufficient — user confirmation gates the cartography phase.
 
 ## Step 1 — Inventory (cartography)
 
@@ -100,7 +100,13 @@ Spawn two subagents:
 
 If defects exist:
 - **Critical** → fix before merge. Spawn `component-composer` (mode `fix`) with the defect list.
-- **High** → fix or open follow-ups; surface to user.
+  - The fix invocation MUST write a HANDOFF.md and print `HANDOFF: <abs path>` like every other phase.
+  - After the fix HANDOFF lands, **re-run the dependent phases in order**:
+    1. **4b** — token-correctness (the fix may have introduced new literals).
+    2. **4c** — stories + MDX (the prop API or behavior may have changed).
+    3. **4d** — review (policy + a11y) on the regenerated artifacts.
+  - Only after the second 4d pass clears all Critical findings does the workflow proceed to Step 5.
+- **High** → fix or open follow-ups; surface to user. Re-run is optional per user decision.
 - **Medium / Low** → log; user decides.
 
 HANDOFF: `<scope>/.design-storybook-atomic/handoffs/add-component-<run>/phase-04d-review-to-final.md`.
@@ -144,7 +150,7 @@ NEXT
 
 1. **Always inventory first.** Never propose new code before Step 1 completes.
 2. **REUSE is the best outcome.** If REUSE is viable, championing it is correct even if the user pushed for new code.
-3. **No auto-write before Step 4 confirmation.** The user must confirm verdict + level before any file is written.
+3. **No auto-write of component / story / MDX files before Step 4 confirmation.** The user must confirm verdict + level before any *implementation* file is written. Exception: HANDOFF.md phase artifacts under `.design-storybook-atomic/handoffs/` and agent-memory snapshots are allowed throughout (Steps 0–3) — these are workflow artifacts, not implementation.
 4. **Each subagent gets minimum context.** Pass only the inventory slice + spec slice the agent needs.
 5. **Token-enforce before stories.** Stories rendered against hardcoded values pollute MDX too.
 6. **Surface dependencies.** If BUILD-NEW requires a missing token (e.g. `motion.feedback`), pause and ask whether to add the token first (run `/design-storybook-atomic:audit-tokens` Block 1).

@@ -11,7 +11,7 @@ Reference for **accessibility-focused Storybook authoring** — the addon-a11y c
 
 ## The official a11y addon — `@storybook/addon-a11y`
 
-Runs `axe-core` against every story and reports violations in the a11y panel. **In Storybook 9 / 10, paired with `@storybook/addon-vitest`, axe violations fail Vitest browser-mode tests when `parameters.a11y.test === 'error'`.**
+Runs `axe-core` against every story and reports violations in the a11y panel. **In Storybook 10, paired with `@storybook/addon-vitest`, axe violations fail Vitest browser-mode tests when `parameters.a11y.test === 'error'`.**
 
 ### Install
 
@@ -194,7 +194,7 @@ The full reference is the **WAI-ARIA Authoring Practices Guide** — https://www
 
 ## Vitest browser-mode integration
 
-In Storybook 9 / 10, `@storybook/addon-vitest` and `@storybook/addon-a11y` integrate by default. Each story becomes a Vitest browser-mode test; axe violations fail the test if `parameters.a11y.test === 'error'`.
+In Storybook 10, `@storybook/addon-vitest` and `@storybook/addon-a11y` integrate by default. Each story becomes a Vitest browser-mode test; axe violations fail the test if `parameters.a11y.test === 'error'`.
 
 ```ts
 // vitest.config.ts

@@ -172,7 +172,7 @@ Every entry has a one-line **why** explaining the choice. If you disagree with a
 
 | Pick | Role | Why |
 |---|---|---|
-| **@storybook/test** | Primary | Storybook 9/10 unifies on this — pre-bound `canvas`, `userEvent`, `expect`, `fn`, `waitFor`. |
+| **@storybook/test** | Primary | Storybook 10 unifies on this — pre-bound `canvas`, `userEvent`, `expect`, `fn`, `waitFor`. |
 | **Testing Library** | Primary | The semantic-query layer @storybook/test wraps. |
 | **Vitest** | Primary | ESM-native, browser-mode integrates with `@storybook/addon-vitest`. |
 | **Playwright** | Primary | E2E, also browser provider for Vitest browser mode. |

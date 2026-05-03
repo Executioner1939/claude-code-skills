@@ -1,20 +1,20 @@
 ---
 name: storybook-story-writing
 user-invocable: false
-description: Deeper-dive companion to `storybook-authoring`. Patterns for writing CSF Factories stories at depth — `preview.meta` / `meta.story` factory chain, `.test()` inline tests, story extension patterns, `loaders` for async setup, default vs per-story decorators, render-fn escape hatches, naming for sidebar scannability, and the anti-patterns that make stories drift over time. Storybook 9+ (React) and Storybook 10. CSF3 patterns are not in this skill; see `_migration/migration-storybook-7-to-10.md` for upgrades. Auto-loads on `*.stories.*` files.
+description: Deeper-dive companion to `storybook-authoring`. Patterns for writing CSF Factories stories at depth — `preview.meta` / `meta.story` factory chain, `.test()` inline tests, story extension patterns, `loaders` for async setup, default vs per-story decorators, render-fn escape hatches, naming for sidebar scannability, and the anti-patterns that make stories drift over time. Storybook 10 (React). CSF3 patterns are not in this skill; see `_migration/migration-storybook-7-to-10.md` for upgrades. Auto-loads on `*.stories.*` files.
 when_to_use: Writing CSF Factories stories at depth, refactoring CSF3 to Factories, deciding when to use `.test()` vs `play`, structuring story extensions, applying decorators per-story, naming conventions.
 paths: "**/*.stories.@(ts|tsx|js|jsx)"
 ---
 
 # Storybook story writing (CSF Factories)
 
-Storybook 9+ on React. Vue / Angular / Web Components factories follow in 10.x. This skill covers the patterns deeper than the overview in `storybook-authoring`.
+Storybook 10 on React. (Vue / Angular / Web Components factories rolled out across the 10.x line.) This skill covers the patterns deeper than the overview in `storybook-authoring`.
 
 ## The factory chain
 
 CSF Factories is a chain of three function calls:
 
-```
+```text
 definePreview  →  preview.meta  →  meta.story
 ```
 

@@ -66,7 +66,7 @@ For every organism, list the molecules and atoms it composes. Verify:
 - No level-skipping (organism going straight to atoms when a molecule wrapper exists).
 - No duplicated logic vs another organism (e.g. two table-like organisms each building their own pagination).
 
-HANDOFF.md: `<scope>/.design-storybook-atomic/handoffs/audit-organisms-<run>/phase-04-composition-down.md`.
+HANDOFF.md: `<scope>/.design-storybook-atomic/handoffs/audit-organisms-<run>/phase-04-composition-to-synthesizer.md`.
 
 ## Step 5 — Synthesis
 

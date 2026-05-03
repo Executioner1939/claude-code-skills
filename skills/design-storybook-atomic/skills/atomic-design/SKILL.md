@@ -156,7 +156,7 @@ Each level has obligations from the `approved-libraries` policy and `tanstack-in
 | **Organism** (table) | Accepts a TanStack Table `table` instance, not raw `data + columns`. Uses TanStack Virtual when row count is unbounded. |
 | **Organism** (list / grid with fetched data) | Consumes a TanStack DB collection (preferred — reactive, joinable) or a TanStack Query result (read-only). No bespoke `useState([])` for fetched data. |
 | **Organism** (animated) | Motion (web) or Reanimated (native). Respects `prefers-reduced-motion`. |
-| **Template / Page** | TanStack Router for routing (page level only). MSW handlers in stories for fetch states. |
+| **Template / Page** | Routing is page-level only: TanStack Router (web) or Expo Router (React Native / native). MSW handlers in stories for fetch states. |
 
 These are enforced by `audit-atomic`, `audit-molecules`, `audit-organisms`, and `audit-libraries`. Bypassing the listed integration = hygiene fail.
 

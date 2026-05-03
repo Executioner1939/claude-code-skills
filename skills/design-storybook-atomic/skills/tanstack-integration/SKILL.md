@@ -73,6 +73,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
 ### Native example — Input atom
 
+React Native's `TextInput` doesn't yet support `aria-invalid` (the PR is pending). Map the DOM-style `aria-invalid` to RN's native a11y API: `accessibilityState.invalid`. Destructure DOM aria props out of `...rest` so they aren't silently passed to `TextInput`.
+
 ```tsx
 import { forwardRef } from 'react';
 import { TextInput, type TextInput as TextInputRef } from 'react-native';
@@ -84,15 +86,27 @@ type InputProps = {
   name?: string;
   editable?: boolean;
   'aria-invalid'?: boolean;
+  'aria-describedby'?: string;
 };
 
 export const Input = forwardRef<TextInputRef, InputProps>(
-  ({ value, onChange, onBlur, ...rest }, ref) => (
+  (
+    {
+      value,
+      onChange,
+      onBlur,
+      'aria-invalid': ariaInvalid,
+      'aria-describedby': _describedBy, // RN has no equivalent; surface the message via accessibilityHint upstream
+      ...rest                            // safe to spread — DOM aria-* removed
+    },
+    ref,
+  ) => (
     <TextInput
       ref={ref}
       value={value}
-      onChangeText={onChange}                // RN already passes value-first
+      onChangeText={onChange}            // RN already passes value-first
       onBlur={onBlur}
+      accessibilityState={{ invalid: !!ariaInvalid }}
       className="h-10 rounded-md border bg-background px-3 …"  // NativeWind
       {...rest}
     />
@@ -430,7 +444,7 @@ const onSearch = useDebouncedCallback(
 
 A component that targets web AND native splits at the file level, not at the prop level:
 
-```
+```text
 src/components/atoms/Input/
 ├── Input.tsx          # web
 ├── Input.native.tsx   # RN (auto-resolved by Metro)

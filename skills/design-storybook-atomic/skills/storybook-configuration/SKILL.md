@@ -1,14 +1,14 @@
 ---
 name: storybook-configuration
 user-invocable: false
-description: `.storybook/main.ts` and `.storybook/preview.ts` configuration for Storybook 9 / 10. `defineMain` and `definePreview` factories, framework-specific packages (`@storybook/react-vite`, `@storybook/nextjs-vite`, `@storybook/vue3-vite`, etc.), addon registration (`@storybook/addon-a11y`, `@storybook/addon-vitest`, `@storybook/addon-docs`), `globalTypes` and `initialGlobals` for toolbar globals, decorator stacks, viewport configuration, theme switching, MSW integration, custom builders. Auto-loads on `.storybook/**`.
+description: `.storybook/main.ts` and `.storybook/preview.ts` configuration for Storybook 10. `defineMain` and `definePreview` factories, framework-specific packages (`@storybook/react-vite`, `@storybook/nextjs-vite`, `@storybook/vue3-vite`, etc.), addon registration (`@storybook/addon-a11y`, `@storybook/addon-vitest`, `@storybook/addon-docs`), `globalTypes` and `initialGlobals` for toolbar globals, decorator stacks, viewport configuration, theme switching, MSW integration, custom builders. Auto-loads on `.storybook/**`.
 when_to_use: Setting up Storybook on a new project, upgrading config to 9 / 10 conventions, registering addons, wiring theme switching, configuring viewports / backgrounds, integrating MSW, customizing the builder.
 paths: "**/.storybook/**, **/storybook.config.*"
 ---
 
 # Storybook configuration
 
-Storybook 9 / 10 uses **factory functions** (`defineMain` / `definePreview`) for typed config. The framework field is mandatory; the framework package determines bundler, type imports, and CSF Factories support.
+Storybook 10 uses **factory functions** (`defineMain` / `definePreview`) for typed config. The framework field is mandatory; the framework package determines bundler, type imports, and CSF Factories support.
 
 ## `.storybook/main.ts`
 
@@ -164,7 +164,7 @@ export default definePreview({
 });
 ```
 
-> **`globalTypes` vs `initialGlobals`** (Storybook 9+): `globalTypes` describes the toolbar (title, icon, options); `initialGlobals` sets the default value. Older configs put defaults in `globalTypes.<name>.defaultValue` — that's deprecated.
+> **`globalTypes` vs `initialGlobals`** (Storybook 10): `globalTypes` describes the toolbar (title, icon, options); `initialGlobals` sets the default value. Older configs put defaults in `globalTypes.<name>.defaultValue` — that's deprecated.
 
 ## Decorators
 
@@ -195,19 +195,22 @@ Most TanStack abstractions are framework-level (set up at the consumer / page le
 
 ### `QueryClientProvider` decorator
 
+Create a **fresh `QueryClient` per story** so cache state from one story doesn't leak into another (cross-story cache pollution makes Empty/Loading/Error stories flaky and Vitest browser-mode tests non-deterministic). TanStack Query's official testing guidance is per-test isolation; the same applies to per-story isolation.
+
 ```tsx
 import type { Decorator } from '@storybook/react-vite';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false, staleTime: Infinity } },
-});
-
-export const QueryDecorator: Decorator = (Story) => (
-  <QueryClientProvider client={queryClient}>
-    <Story />
-  </QueryClientProvider>
-);
+export const QueryDecorator: Decorator = (Story) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+  });
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Story />
+    </QueryClientProvider>
+  );
+};
 ```
 
 ### `RouterProvider` decorator (TanStack Router)
@@ -310,7 +313,7 @@ addons.setConfig({
 });
 ```
 
-## Storybook 9 / 10 import path map
+## Storybook 10 import path map
 
 | Old (7 / 8) | New (9 / 10) |
 |---|---|

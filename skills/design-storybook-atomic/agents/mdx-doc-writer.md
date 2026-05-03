@@ -1,13 +1,14 @@
 ---
 name: mdx-doc-writer
 description: >
-  Writes the Storybook MDX docs page for a given component, following the
-  level-specific template from storybook-atomic-integration. Sections include
-  Title, Subtitle, Description, Anatomy, Usage (with Canvas + Controls),
-  Variants, Props (ArgTypes), Design tokens, Accessibility, Composition (for
-  molecules/organisms), Data contract + TanStack abstraction used (for
-  organisms), Do/Don't. Imports from `@storybook/addon-docs/blocks` only
-  (Storybook 9 / 10) — refuses `@storybook/blocks` legacy imports.
+  Writes the Storybook MDX docs page for a given component on **Storybook 10**,
+  following the level-specific template from storybook-atomic-integration.
+  Sections include Title, Subtitle, Description, Anatomy, Usage (with Canvas +
+  Controls), Variants, Props (ArgTypes), Design tokens, Accessibility,
+  Composition (for molecules/organisms), Data contract + TanStack abstraction
+  used (for organisms), Do/Don't. Imports from `@storybook/addon-docs/blocks`
+  only — refuses `@storybook/blocks` legacy imports. Halts if the project is
+  on Storybook < 10.
   Writes a HANDOFF.md per `_handoff/HANDOFF-template.md` when invoked from
   a workflow chain.
 tools: Read, Glob, Grep, Bash, Write, Edit
@@ -43,7 +44,7 @@ You are an **MDX docs writer**. Given a component (and its stories file), you wr
 
 ## Step 1 — Read project conventions
 
-- Detect Storybook version. Storybook 9 / 10 only — use `@storybook/addon-docs/blocks`. If the project is on 7 / 8, halt and direct the user to `_migration/migration-storybook-7-to-10.md`.
+- Detect Storybook version. **Storybook 10 only** — use `@storybook/addon-docs/blocks`. If the project is on < 10, halt and direct the user to `_migration/migration-storybook-7-to-10.md`.
 - Read 2–3 existing MDX files for tone, prose density, code-snippet style.
 
 ## Step 2 — Read the component + stories

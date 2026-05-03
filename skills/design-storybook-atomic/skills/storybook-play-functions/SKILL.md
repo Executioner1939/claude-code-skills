@@ -1,14 +1,14 @@
 ---
 name: storybook-play-functions
 user-invocable: false
-description: Interaction tests in CSF Factories — `play` functions and `.test()` inline tests, the pre-bound `canvas` (Storybook 9+), `userEvent` / `expect` / `fn` / `waitFor` from `@storybook/test`, `step()` for labelled phases, async / loading / error patterns, keyboard navigation tests, drag-and-drop, file uploads, multi-step forms, and how every story becomes a Vitest browser-mode test under `@storybook/addon-vitest`. Auto-loads on `*.stories.*`.
+description: Interaction tests in CSF Factories — `play` functions and `.test()` inline tests, the pre-bound `canvas`, `userEvent` / `expect` / `fn` / `waitFor` from `@storybook/test`, `step()` for labelled phases, async / loading / error patterns, keyboard navigation tests, drag-and-drop, file uploads, multi-step forms, and how every story becomes a Vitest browser-mode test under `@storybook/addon-vitest`. Auto-loads on `*.stories.*`.
 when_to_use: Writing interaction tests, deciding `play` vs `.test()`, asserting against `fn()` spies, simulating keyboard / pointer / drag, testing async loading states, testing focus / a11y interactions, debugging flaky interaction tests.
 paths: "**/*.stories.@(ts|tsx|js|jsx)"
 ---
 
 # Storybook play functions and interaction tests
 
-Storybook 9 / 10 with `@storybook/addon-vitest`. Every story with a `play` or `.test()` runs as a Vitest browser-mode test against a real headless browser (Playwright provider).
+Storybook 10 with `@storybook/addon-vitest`. Every story with a `play` or `.test()` runs as a Vitest browser-mode test against a real headless browser (Playwright provider).
 
 ## Anatomy
 
@@ -40,7 +40,7 @@ Both run after render. Both have the same signature and access to `canvas` / `ar
 |---|---|---|
 | **Purpose** | The story is primarily a test. | The story is a demo with an interaction. |
 | **Vitest behavior** | Treated as a test case (named like the story). | Treated as a "play" (still runs as a test, but reported as a playback). |
-| **Idiomatic** | Storybook 9+ Factories. | Inherited from CSF3. |
+| **Idiomatic** | Modern Factories. | Inherited from CSF3. |
 
 In Factories, prefer `.test()` for tests-as-tests; `play` for "show the user how the interaction looks".
 
@@ -52,7 +52,7 @@ In Factories, prefer `.test()` for tests-as-tests; `play` for "show the user how
 
 | Field | Description |
 |---|---|
-| `canvas` | A pre-bound `within(canvasElement)`. Use this. **Storybook 9+ only.** |
+| `canvas` | A pre-bound `within(canvasElement)`. Use this. **Available in Storybook 10.** |
 | `canvasElement` | The HTMLElement root of the rendered story. Use only when you need raw DOM. |
 | `args` | The story's args, including `fn()` spies you can assert on. |
 | `step` | `step(name, fn)` — labels a phase in the trace. Use generously. |
@@ -291,7 +291,7 @@ userEvent.click(canvas.getByRole('button'));
 await expect(canvas.getByText(/clicked/i)).toBeInTheDocument();
 ```
 
-Every `userEvent.*`, `expect`, and `waitFor` is async. `await` all of them.
+`userEvent.*` calls and `waitFor` are async — `await` them. Most `expect(...).to*` matchers are synchronous and don't strictly require `await` (it's harmless if you do). The bug above is missing `await` on the click; the assertion ran before the click resolved.
 
 ### ❌ Brittle text selectors
 
@@ -325,7 +325,7 @@ await waitFor(() => expect(canvas.getByText(/loaded/i)).toBeInTheDocument());
 
 ### ❌ Calling `within(canvasElement)` everywhere instead of using the pre-bound `canvas`
 
-Storybook 9+ provides `canvas` already bound. Use it.
+The pre-bound canvas (introduced in Storybook 9, current in 10) provides `canvas` already bound. Use it.
 
 ## What the audit checks
 

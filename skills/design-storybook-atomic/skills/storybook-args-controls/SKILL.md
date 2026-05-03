@@ -1,7 +1,7 @@
 ---
 name: storybook-args-controls
 user-invocable: false
-description: argTypes, Controls, Actions, and arg inheritance in CSF Factories on Storybook 9 / 10. Auto-loads on `*.stories.*` files. Covers control-type selection, conditional controls (`if: { arg: ... }`), table grouping, action wiring (`{ action: 'clicked' }`) vs `fn()` spies from `@storybook/test`, dynamic argTypes, and the patterns that make Controls the most useful debug surface in the dev loop.
+description: argTypes, Controls, Actions, and arg inheritance in CSF Factories on Storybook 10. Auto-loads on `*.stories.*` files. Covers control-type selection, conditional controls (`if: { arg: ... }`), table grouping, action wiring (`{ action: 'clicked' }`) vs `fn()` spies from `@storybook/test`, dynamic argTypes, and the patterns that make Controls the most useful debug surface in the dev loop.
 when_to_use: Choosing control types, configuring argTypes, wiring action callbacks, grouping props in the Controls table, debouncing expensive arg changes, deciding `fn()` vs `action()`.
 paths: "**/*.stories.@(ts|tsx|js|jsx)"
 ---

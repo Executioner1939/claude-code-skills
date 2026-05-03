@@ -52,7 +52,7 @@ Spawn `library-policy-enforcer` in `default` mode. It runs:
 
 The agent writes a HANDOFF.md to:
 
-```
+```text
 <scope>/.design-storybook-atomic/handoffs/audit-libraries-<run>/phase-01-cartographer-to-policy.md
 <scope>/.design-storybook-atomic/handoffs/audit-libraries-<run>/phase-02-policy-to-orchestrator.md
 ```

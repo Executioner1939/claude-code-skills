@@ -1,14 +1,14 @@
 ---
 name: storybook-component-documentation
 user-invocable: false
-description: MDX docs pages with `@storybook/addon-docs/blocks` (Storybook 9 / 10 import path). Doc Block reference (Meta, Title, Subtitle, Description, Primary, Stories, Canvas, Controls, ArgTypes, Source, Markdown, ColorPalette, Typeset). Per-atomic-level MDX templates. Auto-generated docs vs custom MDX. Inline rich-text patterns for usage, anatomy, do/don't, design-tokens, accessibility, composition. Auto-loads on `*.mdx`.
+description: MDX docs pages with `@storybook/addon-docs/blocks` (Storybook 10 import path). Doc Block reference (Meta, Title, Subtitle, Description, Primary, Stories, Canvas, Controls, ArgTypes, Source, Markdown, ColorPalette, Typeset). Per-atomic-level MDX templates. Auto-generated docs vs custom MDX. Inline rich-text patterns for usage, anatomy, do/don't, design-tokens, accessibility, composition. Auto-loads on `*.mdx`.
 when_to_use: Writing or auditing MDX docs pages, choosing between autodocs and custom MDX, structuring docs sections per atomic level, embedding usage examples, documenting design tokens consumed by a component.
 paths: "**/*.mdx"
 ---
 
 # Storybook component documentation (MDX)
 
-Storybook 9 / 10 ships docs as MDX with Doc Blocks imported from `@storybook/addon-docs/blocks`. The legacy `@storybook/blocks` path still works as a re-export shim but is deprecated — use the new path in all new files.
+Storybook 10 ships docs as MDX with Doc Blocks imported from `@storybook/addon-docs/blocks`. The legacy `@storybook/blocks` path still works as a re-export shim but is deprecated — use the new path in all new files.
 
 ## Two paths: autodocs or custom MDX
 
@@ -288,9 +288,11 @@ import { Meta } from '@storybook/blocks';
 import { Meta } from '@storybook/addon-docs/blocks';
 ```
 
-### ❌ MDX without `<Meta of={Stories}/>`
+### ❌ Component MDX without `<Meta of={Stories}/>`
 
-The Meta block connects the MDX to the CSF file. Without it, the docs page is orphaned and doesn't show up in the sidebar correctly.
+For component MDX paired with a CSF stories file, `<Meta of={Stories}/>` is mandatory — it connects the MDX to the CSF file so `<Canvas of={Stories.X}/>` and `<ArgTypes/>` resolve correctly. Without it, the docs page is orphaned.
+
+**Exception**: docs-only pages (Migration guides, Color palette, Type scale) use `<Meta title="Design system/Colors"/>` instead — see the "Design-system-wide MDX" pattern above. Those pages have no CSF file, so `of=` doesn't apply.
 
 ### ❌ Out-of-date hand-written code samples
 

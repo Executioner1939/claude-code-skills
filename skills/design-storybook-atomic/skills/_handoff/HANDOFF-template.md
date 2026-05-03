@@ -11,9 +11,11 @@ caller.
 
 ## Storage path convention
 
-```
+```text
 <scope>/.design-storybook-atomic/handoffs/<workflow>-<run-id>/phase-<N>-<from>-to-<to>.md
 ```
+
+`<scope>` MUST be an absolute workspace path. If a workflow passes a relative scope, resolve it before writing or printing (`cd "$scope" && pwd` via Bash, or `realpath -m`).
 
 Where:
 - `<scope>` — the audited project root (the path the slash command was invoked against).
@@ -56,7 +58,7 @@ phase. Inherit verbatim from prior handoff if one exists.
 
 | # | Phase                  | Agent                     | Status | Output artifact                          |
 |---|------------------------|---------------------------|--------|------------------------------------------|
-| 1 | Cartography            | component-cartographer    | ✅     | .design-storybook-atomic/handoffs/<run>/phase-01-cartographer-to-auditor.md |
+| 1 | Cartography            | component-cartographer    | ✅     | <scope>/.design-storybook-atomic/handoffs/<workflow>-<run-id>/phase-01-cartographer-to-auditor.md |
 | 2 | Per-component audit    | atomic-auditor (×N)       | 🔄     | (this handoff)                           |
 | 3 | Cross-cutting          | dedup + tokens + a11y     | ⏳     | —                                        |
 | 4 | Synthesis              | (orchestrator)            | ⏳     | —                                        |
@@ -146,7 +148,6 @@ Gotchas, repo-specific quirks, useful greps, environment caveats.
 ```bash
 # greps that worked well for this scope
 grep -RnE 'var\(--color-' src/components/atoms
-```
 ```
 
 ## Conventions

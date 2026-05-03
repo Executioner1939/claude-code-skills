@@ -2,8 +2,9 @@
 name: story-writer
 description: >
   Writes Storybook stories for a given component in **CSF Factories format
-  only** (Storybook 9 / 10). For projects on legacy formats (CSF2 / CSF3 /
-  storiesOf), refuses and points to `_migration/migration-storybook-7-to-10.md`.
+  only** on **Storybook 10**. For projects on legacy versions (< 10) or legacy
+  formats (CSF2 / CSF3 / storiesOf), halts and points to
+  `_migration/migration-storybook-7-to-10.md`.
   Includes every required story for the component's atomic level per the
   story-coverage-checklist rubric — Default, all variants, all states
   (Empty/Loading/Error for organisms), interaction `play` and `.test()`
@@ -48,7 +49,7 @@ If unclear, ask once.
 
 Read `package.json` to detect:
 - Framework (React / Vue / Svelte / etc.).
-- Storybook version (8.x / 9.x / 10.x).
+- Storybook version — **must be 10.x**. If < 10.x, halt and direct the user to `_migration/migration-storybook-7-to-10.md`. Do not author stories on legacy versions.
 - Framework package (`@storybook/react-vite`, `@storybook/nextjs-vite`, `@storybook/vue3-vite`, …).
 - Whether `@storybook/test` is installed.
 - Whether `@storybook/addon-vitest` is installed.

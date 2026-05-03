@@ -96,7 +96,7 @@ Each agent has tight scope, constrained tools, and **preloads the right knowledg
 
 ## How a workflow composes
 
-```
+```text
 USER: /design-storybook-atomic:audit-atomic
   │
   ▼
@@ -123,7 +123,7 @@ Every Agent prints `HANDOFF: <abs path>` on its own line; the orchestrator halts
 
 ## Storage at the audited project
 
-```
+```text
 <scope>/
 └── .design-storybook-atomic/
     ├── baseline-atoms.md             ← Tier-1 (replaces previous on each run)

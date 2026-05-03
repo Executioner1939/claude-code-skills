@@ -28,10 +28,10 @@ Spawn `component-cartographer`. HANDOFF: `<scope>/.design-storybook-atomic/hando
 Spawn `storybook-coverage-analyst` per atomic level. Each one:
 
 - Builds the coverage matrix row per component (required stories present / missing per `story-coverage-checklist`; MDX sections present / missing; a11y artifacts).
-- Computes the file-level / story-level / MDX / a11y quality scores.
-- Computes the TanStack-integration compliance per the level's contract.
-- Computes the token-compliance score.
-- Computes composite + letter grade.
+- Derives the file-level / story-level / MDX / a11y quality scores.
+- Grades the TanStack-integration compliance per the level's contract.
+- Calculates the token-compliance score.
+- Combines the above into a composite + letter grade.
 
 HANDOFF: `<scope>/.design-storybook-atomic/handoffs/coverage-report-<run>/phase-02-analysts-to-orchestrator.md`.
 

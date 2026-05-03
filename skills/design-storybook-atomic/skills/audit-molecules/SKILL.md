@@ -29,7 +29,7 @@ Spawn `atomic-auditor` per molecule with the **molecule rubric**. Additional che
 
 - **Composition correctness**: every atom in the molecule is imported from the `atoms/` directory. No molecule imports another molecule (level violation — flag).
 - **No domain-state leakage**: molecules must not read from a global store (Redux / Zustand / Pinia / Recoil / TanStack Store). Grep store usage; flag with `path:line`. (Stores are organism / page concern.)
-- **Required `play` story**: at least one interaction story exercising the primary interaction. Missing = quality penalty.
+- **Required interaction story (`.test()` or `play`)**: at least one interaction story exercising the primary interaction (either form is accepted — they're functionally equivalent). Missing = quality penalty.
 - **`KeyboardFlow` story**: mandatory for any molecule with > 1 focusable element.
 - **Error UI a11y**: if molecule renders error state, must use `aria-invalid` + `aria-describedby` + `role="alert"` (or live region) correctly.
 - **FormField-shape molecules** (detected by name pattern): must accept a TanStack Form `field` as primary prop. Scattered `label + value + onChange + error` props = TanStack-contract violation.
