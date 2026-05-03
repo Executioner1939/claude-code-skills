@@ -8,7 +8,7 @@ A complete plugin for working on a design system: **atomic design** (Brad Frost)
 
 Breaking changes vs v1.x:
 
-- **CSF Factories is the only accepted format.** CSF3 = downgrade in audits; CSF2 / `storiesOf` = auto-fail. `story-writer` and `mdx-doc-writer` agents refuse to generate legacy formats. Project on legacy? See `_migration/migration-storybook-7-to-10.md`.
+- **CSF Factories is the only accepted format.** CSF3 / CSF2 / `storiesOf` = auto-fail in audits. `story-writer` and `mdx-doc-writer` agents refuse to generate legacy formats. Project on legacy? See `_migration/migration-storybook-7-to-10.md`.
 - **TanStack ecosystem mandated by atomic level.** Atoms must expose value-first `onChange` + `onBlur` + aria + forwardRef. Molecules wrap a TanStack Form `field`. Organism tables accept a TanStack Table instance (not raw `data + columns`). Organism lists / grids consume TanStack DB collections (or Query results). Animations use Motion (web) / Reanimated (native) with mandatory `prefers-reduced-motion`.
 - **Approved-libraries policy.** Tailwind 4 + Radix + TanStack ecosystem + Zod + Day.js + Motion + Lucide on web; Expo + NativeWind + Reanimated + FlashList + @gorhom/bottom-sheet on native. Forbidden libs (RHF, lodash debounce, moment, date-fns, react-dnd, etc.) blocked by `library-policy-enforcer`.
 - **Inter-agent HANDOFF.md contract.** Every multi-agent workflow now writes a HANDOFF.md per phase boundary at `<scope>/.design-storybook-atomic/handoffs/<workflow>-<run>/`; orchestrator halts if any subagent skips printing `HANDOFF: <path>`.
@@ -29,7 +29,7 @@ These auto-load when you're working on relevant files. Modern Storybook 10 conve
 | `design-tokens` | `tokens.json`, Style Dictionary, Tailwind config, theme files — three-tier model, W3C-DTCG, taxonomy, refactor heuristics |
 | `component-composition` | components — slot / compound / polymorphic / `asChild` / render-props / headless-and-skin patterns + composition-with-TanStack mapping |
 | `accessibility-stories` | a11y configuration, story a11y patterns — addon-a11y + WAI-ARIA APG cheatsheet + manual-check matrix |
-| `story-coverage-checklist` | story files — graded rubric. CSF Factories required at file level; CSF3 = −15; CSF2 / `storiesOf` = auto-fail. Per-level required stories, MDX sections, a11y artifacts, hygiene checks (token / library / TanStack / atomic-design discipline) |
+| `story-coverage-checklist` | story files — graded rubric. CSF Factories required at file level; CSF3 / CSF2 / `storiesOf` = auto-fail. Per-level required stories, MDX sections, a11y artifacts, hygiene checks (token / library / TanStack / atomic-design discipline) |
 
 ## Layer 2 — Storybook deeper-dive skills (5, originals at SB 10)
 
@@ -40,7 +40,7 @@ Each loads alongside `storybook-authoring` for depth on a specific concern. Mode
 | `storybook-story-writing` | factory-chain patterns, `.test()` inline tests, story extension, loaders, decorator stacks, sidebar conventions, naming |
 | `storybook-args-controls` | argTypes / Controls / Actions / `fn()` spies / conditional controls / table grouping |
 | `storybook-component-documentation` | MDX with `@storybook/addon-docs/blocks`, per-atomic-level templates, Doc Block reference |
-| `storybook-play-functions` | interaction tests with the SB 9+ pre-bound `canvas`, `step()`-labelled phases, async / loading / error / drag-drop / file-upload / focus-management patterns |
+| `storybook-play-functions` | interaction tests with the pre-bound `canvas`, `step()`-labelled phases, async / loading / error / drag-drop / file-upload / focus-management patterns |
 | `storybook-configuration` | `defineMain` / `definePreview`, framework packages, addon registration, MSW integration, manager UI, SB 7→10 import path map |
 
 ## Layer 3 — Approved-libraries policy + TanStack integration (3 skills)

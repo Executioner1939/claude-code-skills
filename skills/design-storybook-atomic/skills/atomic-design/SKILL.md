@@ -118,7 +118,7 @@ If something feels like it sits between two levels:
 
 A working atomic-design layout for a component library:
 
-```
+```text
 src/
 └── components/
     ├── atoms/

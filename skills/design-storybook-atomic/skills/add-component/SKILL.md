@@ -25,7 +25,7 @@ Spawn `ui-spec-interpreter` with `$component_name` and `$brief`. The interpreter
 
 The interpreter writes a HANDOFF.md to:
 
-```
+```text
 <scope>/.design-storybook-atomic/handoffs/add-component-<run>/phase-00-spec-to-cartography.md
 ```
 

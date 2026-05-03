@@ -73,7 +73,7 @@ Output: a structured report following the format in `audit-tokens` skill's TOKEN
 4. Group by file; group within file by category (color, space, font, radius, shadow, motion, z).
 
 Output:
-```
+```text
 src/components/atoms/Button/Button.css
   COLOR
     line 12  background: #3B82F6      → color.action.primary       [HIGH, exact]

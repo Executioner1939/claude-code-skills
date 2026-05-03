@@ -177,7 +177,7 @@ This mirrors the audit-history pattern from `terraform-audit`'s `$repo_path/.ter
 
 Append a one-line summary to `.claude/agent-memory/audit-libraries/history.log`:
 
-```
+```text
 2026-05-03T17:42 audit-libraries scope=. score=71 status=BLOCKED defects={deps:3,imports:24,atoms:5,molecules:1,organisms:9,motion:4}
 ```
 

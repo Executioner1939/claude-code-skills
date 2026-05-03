@@ -15,7 +15,7 @@ This skill defines: sidebar layout, the minimum required story set per atomic le
 
 Use the atomic level as the **first segment** of `title`. Capitalize that level segment and pluralize it (`Atoms` not `Atom`; `Molecules` not `Molecule`). The component-name segment that follows is **not** pluralized — it's the component's class name (`Button`, `SearchBar`).
 
-```
+```text
 Atoms/Button
 Atoms/Icon
 Atoms/Input
@@ -29,7 +29,7 @@ Pages/UserDashboard
 
 Group sub-categories with a second segment when an atomic level has many items:
 
-```
+```text
 Atoms/Form/Input
 Atoms/Form/Checkbox
 Atoms/Form/Radio
