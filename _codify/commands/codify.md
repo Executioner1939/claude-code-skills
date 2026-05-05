@@ -287,7 +287,7 @@ markdown per ~/.claude/templates/codify-report.md
 
 Per-subagent reference_paths to substitute:
 
-- **envelope-proposer**: just the candidate_schema_path (already specified above) plus the existing handoff template at `<REPO_ROOT>/plugins/design-storybook-atomic/skills/_handoff/HANDOFF-template.md`.
+- **envelope-proposer**: just the candidate_schema_path (already specified above) plus the existing handoff template at `<REPO_ROOT>/plugins/anvil/skills/_handoff/HANDOFF-template.md`.
 - **skill-author**:
   - `~/.claude/plugins/cache/claude-plugins-official/plugin-dev/unknown/skills/skill-development/SKILL.md`
   - `~/.claude/plugins/cache/claude-plugins-official/plugin-dev/unknown/skills/plugin-structure/SKILL.md`

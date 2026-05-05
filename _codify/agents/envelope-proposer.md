@@ -40,7 +40,7 @@ Validate before proceeding.
 2. Read each breakdown finding in `inputs.breakdown_findings`. For each one, determine which envelope field would have prevented or detected it (`out_of_scope`? `inputs[].type: path` with existence check? explicit `acceptance` predicate?).
 3. Aggregate: which envelope fields are pulling weight against THIS user's breakdowns? Which are over-engineered for these breakdowns? Are there fields missing that would have helped?
 4. Read the dependency map. Enumerate every subagent definition file under `<repo>/plugins/*/agents/*.md` and every workflow command under `<repo>/plugins/*/commands/*.md`. The migration plan lists each file by its required intake-section update.
-5. Read `<repo>/plugins/design-storybook-atomic/skills/_handoff/HANDOFF-template.md` to confirm the existing handoff contract you must integrate with (do not collide).
+5. Read `<repo>/plugins/anvil/skills/_handoff/HANDOFF-template.md` to confirm the existing handoff contract you must integrate with (do not collide).
 6. Fill the report template at `inputs.template_path` and write to `inputs.output_path`.
 
 ## Report contract
@@ -57,7 +57,7 @@ The report MUST follow `~/.claude/templates/codify-report.md` exactly. Sections:
   - [ ] `<repo>/_envelope/envelope-v1.md` exists and contains all required field definitions
   - [ ] every command-file dispatch uses the envelope format (no free-form Task prompts that bypass the schema)
   - [ ] every agent-file Inputs section declares which envelope fields it consumes
-  - [ ] the handoff field in the envelope writes to the path the existing `<repo>/plugins/design-storybook-atomic/skills/_handoff/HANDOFF-template.md` contract expects (no collision)
+  - [ ] the handoff field in the envelope writes to the path the existing `<repo>/plugins/anvil/skills/_handoff/HANDOFF-template.md` contract expects (no collision)
   - [ ] a sample dispatch from one updated command resolves all 10 validation rules without aborting (rules 1-10 from research stream 4)
 - **Out of scope:** changing the agent's system-prompt analytical framework; renaming agents; adding new agents.
 

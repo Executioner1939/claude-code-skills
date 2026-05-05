@@ -99,7 +99,7 @@ cp ~/.claude/codify/codify-stop.sh      _codify/hooks/
 3. Restructuring the Stop hook to live in `<plugin>/hooks/hooks.json` — but the hook needs to read state from `~/.claude/codify/.codify-active-<session>` regardless, so plugin-scoping it doesn't help.
 4. Namespacing the slash command as `/codify:codify` or similar — worse UX than the bare `/codify` user-scope form.
 
-The underscore prefix matches the convention already used inside `plugins/design-storybook-atomic/skills/_handoff/`, `_han-license/`, `_migration/` — "asset-like, not part of the published surface."
+The underscore prefix matches the convention already used inside `plugins/anvil/skills/_handoff/`, `_han-license/`, `_migration/` — "asset-like, not part of the published surface."
 
 ## Runtime artifacts (not committed)
 

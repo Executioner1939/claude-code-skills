@@ -3,7 +3,7 @@
 A personal marketplace of Claude Code plugins for CI/CD, Rust, documentation, code analysis, design systems, and infrastructure-as-code review. Eight plugins, sharing conventions, kept in sync.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) (with bundled Apache-2.0 portions — see [Attribution](#attribution))
-[![Marketplace version](https://img.shields.io/badge/marketplace-v5.8.0-green.svg)](.claude-plugin/marketplace.json)
+[![Marketplace version](https://img.shields.io/badge/marketplace-v5.9.0-green.svg)](.claude-plugin/marketplace.json)
 [![Plugins](https://img.shields.io/badge/plugins-8-green.svg)](#plugins)
 
 ---
@@ -24,7 +24,7 @@ Then install the plugins you want:
 /plugin install design-principles@skunkworks
 /plugin install analysis-codebase-archaeology@skunkworks
 /plugin install terraform-audit@skunkworks
-/plugin install design-storybook-atomic@skunkworks
+/plugin install anvil@skunkworks
 ```
 
 The plugins are independent. Install only what you need.
@@ -53,11 +53,11 @@ Brutal, structured audit of a Terraform / OpenTofu module repository. Detects cr
 - Auto-triggers on: "audit terraform", "review terraform", "tear apart terraform", "tech-debt audit terraform".
 - Output: `<repo>/.terraform-audit/audit-<date>.md` plus optional baseline at `baseline.md`. Section 9 baseline-diff (Fixed / Regressed / New) when the baseline exists.
 
-#### `design-storybook-atomic` — v2.2.0
+#### `anvil` — v3.0.0
 
 The largest plugin in the marketplace. Atomic design (Brad Frost) + Storybook 10 expert toolkit. CSF Factories only. TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history.
 
-- 8 slash-command workflows: `audit-atomic`, `audit-molecules`, `audit-organisms`, `audit-tokens`, `audit-libraries`, `add-component`, `merge-duplicates`, `coverage-report`.
+- 8 slash-command workflows: `audit-atoms`, `audit-molecules`, `audit-organisms`, `audit-tokens`, `audit-libraries`, `add-component`, `merge-duplicates`, `coverage-report`.
 - 11 specialized subagents: `accessibility-reviewer`, `atomic-auditor`, `component-cartographer`, `component-composer`, `component-deduplicator`, `design-token-enforcer`, `library-policy-enforcer`, `mdx-doc-writer`, `story-writer`, `storybook-coverage-analyst`, `ui-spec-interpreter`.
 - ~20 knowledge skills + a static component-graph scanner (`scripts/inventory.py`) refreshed automatically by a `PostToolUse` hook on edits.
 - Bundles 7 Apache-2.0 atomic-design methodology references adapted from `TheBushidoCollective/han`.
@@ -138,7 +138,7 @@ These are not enforced by the spec — they're patterns that have proven useful 
 
 - **Workflows in `commands/`**, knowledge in `skills/`. Workflows are flat `.md` files with `disable-model-invocation: true` + `argument-hint`. Knowledge skills are directories with `SKILL.md` + sibling `references/`.
 - **Agent ↔ skill linkage** declared via the agent's `skills:` frontmatter. The skill's content auto-loads into the subagent at dispatch.
-- **Inter-agent HANDOFF contract** (used in `design-storybook-atomic`). Every agent in a chain ends its output with `HANDOFF: <path>` pointing to a phase-boundary file. The orchestrator halts if any agent skips the handoff.
+- **Inter-agent HANDOFF contract** (used in `anvil`). Every agent in a chain ends its output with `HANDOFF: <path>` pointing to a phase-boundary file. The orchestrator halts if any agent skips the handoff.
 - **Tier-1 baseline + Tier-2 dated history.** Audit-style outputs write a static "current state" baseline plus an append-only dated history dir. Diff-friendly, blame-friendly.
 - **agent-memory activity logs.** Subagents declare a `Stop` hook that appends to `.claude/agent-memory/<agent>/activity.log`. Telemetry-by-default for cross-session continuity.
 - **`file:line` discipline.** Every audit / archaeology finding traces to `file:line`. Unanchored claims are not allowed in output.
@@ -154,9 +154,9 @@ The marketplace is **MIT** for original content. Two plugins bundle Apache-2.0 t
 
 Anton Babenko's [terraform-skill](https://github.com/antonbabenko/terraform-skill) v1.6.0 — `terraform-best-practices.com`. Verbatim copy under `plugins/terraform-audit/skills/terraform-skill/`. License preserved at `plugins/terraform-audit/skills/_terraform-skill-license/LICENSE-Apache-2.0`. Frontmatter retains author + version metadata. No modifications.
 
-### `design-storybook-atomic` bundles `han` atomic-design references
+### `anvil` bundles `han` atomic-design references
 
-Seven atomic-design methodology references adapted from [TheBushidoCollective/han](https://github.com/TheBushidoCollective/han). Apache-2.0 license preserved at `plugins/design-storybook-atomic/skills/_han-license/LICENSE-Apache-2.0`. Adapted to the plugin's structure; original content authorship credited.
+Seven atomic-design methodology references adapted from [TheBushidoCollective/han](https://github.com/TheBushidoCollective/han). Apache-2.0 license preserved at `plugins/anvil/skills/_han-license/LICENSE-Apache-2.0`. Adapted to the plugin's structure; original content authorship credited.
 
 ---
 

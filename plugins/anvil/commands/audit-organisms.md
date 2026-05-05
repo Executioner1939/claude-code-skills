@@ -1,0 +1,207 @@
+---
+name: audit-organisms
+description: Systematically audit every organism. Same rigor as molecule audit, plus mandatory Empty/Loading/Error story coverage, mandatory data-contract MDX section, organism-table-must-accept-Table-instance enforcement, organism-list-must-consume-DB-collection-or-Query enforcement, no-routing-coupling rule (organisms emit events; pages route), domain-state-management discipline (organisms may own state but cleanly), end-to-end keyboard-flow `play` test. Library-policy + token + a11y cross-cutting passes. Tier-1 baseline (`<scope>/.anvil/baseline-organisms.md`) + Tier-2 dated history. Inter-agent HANDOFF contract. Invoke as `/anvil:audit-organisms`.
+disable-model-invocation: true
+argument-hint: "[path]"
+arguments: scope_path
+allowed-tools: Read, Grep, Glob, Bash, Agent, Write
+---
+
+# Audit: Organisms
+
+Same shape as `audit-molecules`. Differences are scoped to the organism rubric.
+
+Argument: `$scope_path` — defaults to `src/components/organisms/`.
+
+## Step 0 — Load context + baseline
+
+Same. Baseline at `<scope>/.anvil/baseline-organisms.md`.
+
+## Step 1 — Cartography
+
+Spawn `component-cartographer`. Extra metadata: composed-molecules list, data-fetching detection (any `useQuery` / `useLiveQuery` / `useEffect + fetch`), routing coupling (any `useNavigate` / `useRouter` / `useLocation`), table-shape detection (renders `<table>` or wraps `<DataTable>`), list-shape detection (renders mapped collection).
+
+HANDOFF.md: `<scope>/.anvil/handoffs/audit-organisms-<run>/phase-01-cartographer-to-auditors.md`.
+
+## Step 2 — Per-organism audit (parallel, batched 4–6)
+
+`atomic-auditor` with **organism rubric**.
+
+**Mandatory stories (each missing = blocker):**
+- `Empty` — gracefully renders no-data; announces emptiness to screen readers.
+- `Loading` — `aria-busy="true"` or live-region "Loading…" announcement.
+- `Error` — `role="alert"` or equivalent + recovery affordance.
+
+**Required additional stories:**
+- `Default` (with realistic data — fixtures preferred over Lorem)
+- `Partial` (some-but-not-all data — robustness)
+- `LongData` / `ManyItems` (stress test)
+- One per state-machine state (if applicable)
+- One per role / permission (if applicable)
+- `KeyboardOperated` `play` — primary task with keyboard only.
+
+**Additional structural checks:**
+- **Data contract documented**: organism's MDX has a "Data contract" table (props × shape × required × notes).
+- **State management discipline**: organism owns state cleanly; no prop-drilling artifacts (`setX` reaching into atoms).
+- **No routing**: organisms must not call `useNavigate` / `useRouter`. They emit events; pages route. Flag violations (hygiene fail).
+- **TanStack-Table contract** (table-shaped organisms only): accepts a `Table` instance, not raw `data + columns`.
+- **TanStack-DB / Query contract** (list-shaped organisms with fetched data): consumes a DB collection (preferred) or a Query result. No `useState([])` for fetched data (hygiene fail).
+
+## Step 3 — Cross-cutting (parallel — six agents)
+
+Same five as `audit-atoms`/`audit-molecules`, plus the organism coverage analyst:
+
+1. `component-deduplicator` (scoped to organisms)
+2. `design-token-enforcer` (mode `scan`, scoped to organisms)
+3. `accessibility-reviewer` (scoped to organisms)
+4. `library-policy-enforcer` (mode `audit-imports + audit-integrations`)
+5. `atomic-auditor` (mode `genericness-only`, scoped to organisms) — per-organism genericness verdict in batch (KEEP / DELETE-wrapper / RENAME-AND-SLOT / MERGE-INTO-PRIMITIVE / PROMOTE-TO-PRIMITIVE). For organisms, the typical defects are domain-named shells that should become primitive compositions (e.g. `BookingWizard` → `<Wizard><Step>...`, `KYCStatus` → `<StatusPanel>...`, `HeroGlobe` → wrapper-of-`Hero` to DELETE) and structural-duplicate clusters that share a single canonical primitive (e.g. Cards-of-5 → `<Card>` variants).
+6. `storybook-coverage-analyst` — organism-specific coverage matrix (component × story-type × MDX section). Promoted from "additional pass" to first-class cross-cutting agent so all six dispatch in one parallel batch.
+
+All six write HANDOFF.md.
+
+## Step 4 — Composition-down audit
+
+For every organism, list the molecules and atoms it composes. Verify:
+- No level-skipping (organism going straight to atoms when a molecule wrapper exists).
+- No duplicated logic vs another organism (e.g. two table-like organisms each building their own pagination).
+
+HANDOFF.md: `<scope>/.anvil/handoffs/audit-organisms-<run>/phase-04-composition-to-synthesizer.md`.
+
+## Step 5 — Synthesis
+
+9-section report:
+
+```text
+ORGANISMS AUDIT — <scope>
+Date     : <ISO 8601>
+Run-id   : <run-id>
+Baseline : present | not present
+
+SECTION 1 — SUMMARY
+  Organisms scanned             : <n>
+  Ship-ready / Solid / Needs work / Blocked.
+  Domain-named shells            : <n>
+  Wrapper-of-primitive (DELETE)  : <n>
+  Structural-duplicate clusters  : <n>
+  Missing E/L/E story sets      : <n>  (block-merge per organism)
+  Routing-coupled organisms     : <n>
+  Direct-atom-imports (skipped molecule layer) : <n>
+  Data-contract MDX missing     : <n>
+  TanStack Table violations     : <n>
+  TanStack DB/Query violations  : <n>
+  A11y defects (Critical/High)  : <n>/<n>
+
+SECTION 2 — PER-ORGANISM GRADES
+  ❌ F   organisms/UserTable        no Empty story, no Error story, calls useNavigate()
+  ⚠️  C   organisms/CommentThread   missing Loading story, hardcoded #1F2937 in 3 places
+  ✅ A   organisms/Header
+  …
+
+SECTION 3 — DOMAIN-COUPLING / GENERICNESS DEFECTS
+  (from atomic-auditor mode=genericness-only HANDOFF; joined with component-deduplicator clusters for MERGE rows)
+
+  DELETE candidates (pure wrappers — component is just <Primitive ... /> with no behavior of its own):
+    - organisms/HeroGlobe  →  use <Hero variant="globe" />  directly.
+    - <other DELETEs from this run>
+
+  RENAME-AND-SLOT (domain-named shells whose body is a primitive shape; rename to <Primitive><Slot> and expose slot props):
+    - organisms/BookingWizard      →  rename to <Wizard><Step>...; required slots: header, body, footer; canonical name: Wizard.
+    - organisms/LicenceApplication →  rename to <FormFlow><Section>...; required slots: title, fields, submit; canonical name: FormFlow.
+    - organisms/KYCStatus          →  rename to <StatusPanel>; required slots: icon, headline, detail, action; canonical name: StatusPanel.
+    - organisms/CheckoutShell      →  rename to <PageShell><Section>...; required slots: header, primary, sidebar; canonical name: PageShell.
+    - organisms/HeroSimple         →  rename to <Hero variant="simple">; required slots: heading, body, action.
+    - organisms/BrandHero          →  rename to <Hero variant="brand">; required slots: brand, heading, body, action.
+
+  MERGE-INTO-PRIMITIVE (cross-reference component-deduplicator structural clusters):
+    - cluster Cards-of-5: { ... }  →  canonical: <Card>; merge plan: collapse into <Card> with variant + slot props.
+    - cluster Strips-of-3: { ... }  →  canonical: <LogoStrip>
+    - cluster ListItems-of-6: { ... }  →  canonical: <ListItem>
+    - cluster Pickers-of-4: { ... }  →  canonical: <OptionPicker>
+
+  PROMOTE-TO-PRIMITIVE (right shape, wrong name):
+    - organisms/<DomainName>  →  promote to organisms/<Primitive>; rename consumers.
+
+SECTION 4 — EMPTY/LOADING/ERROR COMPLETENESS MATRIX
+  Component         Empty  Loading  Error
+  UserTable         ❌     ✅      ❌
+  CommentThread     ✅     ❌      ✅
+  ProductCard       ✅     ✅      ✅
+  …
+
+SECTION 5 — DATA CONTRACTS
+  Documented (MDX): UserTable, ProductCard
+  Missing         : CommentThread, Header, FilterPanel, …
+
+SECTION 6 — ROUTING VIOLATIONS
+  organisms/UserTable/UserTable.tsx:47 calls useNavigate()
+    → fix: emit onSelect event; lift navigation to caller (page).
+  organisms/CommentThread/CommentThread.tsx:12 imports `@/api/comments`
+    → fix: receive data via props (or via a TanStack DB collection / Query result).
+
+SECTION 7 — TANSTACK-CONTRACT VIOLATIONS
+  Table-shape:
+    organisms/UserTable/UserTable.tsx
+      currently: takes data: User[] + columns: ColumnDef<User>[]
+      → fix: accept a TanStack Table `table` instance; lift useReactTable to caller.
+
+  List-shape:
+    organisms/CommentThread/CommentThread.tsx
+      uses useState([]) + useEffect + fetch
+      → fix: consume a TanStack DB collection (preferred) or a useQuery result.
+
+SECTION 8 — ACCESSIBILITY DEFECTS
+  Critical:
+    UserTable: no Empty announcement (aria-busy or role="status").
+    CommentThread: focus management on new-message scroll-into-view incorrect.
+  High:
+    Modal: focus trap escapes on Tab from last focusable.
+  …
+
+SECTION 9 — PRIORITIZED ACTION PLAN
+  Block 0 — Surface reduction (do these FIRST; they reduce the surface before any per-organism fix work is meaningful):
+    0a. DELETE wrapper organisms (Section 3 DELETE candidates).
+        Example: delete organisms/HeroGlobe; replace usages with <Hero variant="globe" />.
+    0b. RENAME-AND-SLOT domain-named shells (Section 3 RENAME-AND-SLOT).
+        Example: rename BookingWizard → Wizard, LicenceApplication → FormFlow, KYCStatus → StatusPanel, CheckoutShell → PageShell, HeroSimple → Hero variant=simple, BrandHero → Hero variant=brand.
+  Block 1 — Block-merge fixes:
+    1. Add Empty + Error stories to UserTable.
+    2. Decouple useNavigate from UserTable; emit onSelect event.
+    3. Refactor UserTable to accept Table instance.
+    4. Refactor CommentThread to consume TanStack DB / Query.
+  Block 2 — Coverage:
+    5. Add KeyboardOperated play stories to ProductCard, FilterPanel.
+  Block 3 — Consolidation + documentation:
+    6. Merge structural-duplicate clusters (Section 3 MERGE-INTO-PRIMITIVE).
+    7. Add Data contract MDX section for 5 organisms.
+
+SECTION 10 — DIFF VS BASELINE  (only if baseline existed)
+
+NEXT
+  - Apply Block 1 auto-fixes (where unambiguous)?
+  - Save as new baseline?
+```
+
+## Step 6 — Write outputs
+
+- Baseline: `<scope>/.anvil/baseline-organisms.md`
+- Dated history: `<scope>/.anvil/history/organisms-<YYYY-MM-DD>.md`
+
+## Operating rules
+
+Same as `audit-molecules`. Plus:
+
+- **Genericness is a hygiene axis.** A domain-named shell that exposes no slot props is a hygiene fail. A pure wrapper-of-primitive (DELETE verdict) is a hygiene fail. Both force the organism to BLOCKED.
+- **Empty/Loading/Error are non-negotiable.** Any organism missing one is BLOCKED.
+- **Routing in organisms is forbidden.** Hygiene fail.
+- **Data fetching is allowed only at the organism level, not below.** Grep for fetch usage in atoms/molecules separately and flag.
+- **Direct-atom imports** (skipping the molecule layer): flag, recommend extracting molecules.
+- **HANDOFF contract** — every subagent prints `HANDOFF: <path>`.
+
+## Failure modes
+
+- **No organism directory exists** — common when teams skip this level. Surface as a top finding: codebase has no organism layer; pages do organism work; recommend extracting organisms.
+
+## Memory
+
+`.claude/agent-memory/audit-organisms/history.log`.
