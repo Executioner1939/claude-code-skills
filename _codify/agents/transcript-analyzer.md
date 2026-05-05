@@ -123,11 +123,11 @@ Field rules:
     { "turn": 47, "role": "tool_result", "excerpt": "Component grading complete. Returning summary above." }
   ],
   "definition_paths": [
-    "/Users/.../plugins/design-storybook-atomic/agents/atomic-auditor.md",
-    "/Users/.../plugins/design-storybook-atomic/commands/audit-atomic.md"
+    "/Users/.../plugins/anvil/agents/atomic-auditor.md",
+    "/Users/.../plugins/anvil/commands/audit-atoms.md"
   ],
   "derived_from": [],
-  "target": { "plugin": "design-storybook-atomic", "component": "agent", "name": "atomic-auditor" },
+  "target": { "plugin": "anvil", "component": "agent", "name": "atomic-auditor" },
   "summary": "atomic-auditor's system prompt mentions HANDOFF.md as a contract but does not declare it in an `acceptance` clause that the calling command can verify. The agent returned grading output without writing handoff, and the command did not detect the omission. Tighten the agent's Inputs/Acceptance sections AND the command's post-dispatch validation."
 }
 ```
