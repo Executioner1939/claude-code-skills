@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Executioner1939/claude-code-skills/blob/main/skills/design-storybook-atomic/skills/audit-atomic/schemas/inventory.schema.json",
+  "$id": "https://github.com/Executioner1939/claude-code-skills/blob/main/plugins/design-storybook-atomic/schemas/inventory.schema.json",
   "title": "Design-System Component Inventory",
   "description": "Queryable graph of every UI component in a project, classified by atomic-design tier. Emitted by scan-components.sh and consumed by all audit-* workflows. Components are nodes; composes/consumers are directed edges. Designed to be diffable, jq-queryable, and convertible to Mermaid/GraphViz/Cytoscape with simple transforms.",
   "type": "object",

@@ -87,7 +87,7 @@ The probe runs in < 60s typically. If a project has no `pnpm` script, fall throu
 For each contract found in Phase 0a, scan every consumer package across all tiers (atoms, molecules, organisms) for a same-name implementation. A contract is **satisfied** if any tier implements it — it does NOT need to live at the atom tier.
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/audit-atomic/scripts/inventory.py" \
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/inventory.py" \
   query "$scope_path/.design-storybook-atomic/inventory.json" \
   contract <contract-name>
 ```
@@ -108,11 +108,11 @@ If the user passed `--no-prompt` in a chained workflow (e.g. inside `/coverage-r
 Refresh the static inventory before any LLM agents are spawned:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/audit-atomic/scripts/inventory.py" \
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/inventory.py" \
   scan --root "$scope_path" --tier atom \
   --out "$scope_path/.design-storybook-atomic/inventory.json"
 
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/audit-atomic/scripts/inventory.py" \
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/inventory.py" \
   stats "$scope_path/.design-storybook-atomic/inventory.json"
 ```
 

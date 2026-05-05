@@ -75,7 +75,7 @@ echo "$now" > "$LAST"
 PY="$(command -v python3 || command -v python || true)"
 [[ -z "$PY" ]] && exit 0
 
-SCAN="$PLUGIN_ROOT/skills/audit-atomic/scripts/inventory.py"
+SCAN="$PLUGIN_ROOT/scripts/inventory.py"
 [[ -f "$SCAN" ]] || exit 0
 
 # Run detached. Don't block the user; don't surface scan errors in chat.

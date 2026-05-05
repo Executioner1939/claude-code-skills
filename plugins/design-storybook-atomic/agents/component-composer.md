@@ -62,7 +62,7 @@ If any required input is missing, ask once before proceeding.
 1. **Existence pre-check (MANDATORY before any verdict).** Before any scoring, query the inventory for an existing implementation of the spec's name at any tier:
 
    ```bash
-   python3 "${CLAUDE_PLUGIN_ROOT}/skills/audit-atomic/scripts/inventory.py" \
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/inventory.py" \
      query "$scope/.design-storybook-atomic/inventory.json" \
      contract <name>
    ```
