@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, and design.",
-    "version": "5.6.0",
+    "version": "5.7.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
