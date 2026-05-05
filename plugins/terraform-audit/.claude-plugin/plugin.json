@@ -1,13 +1,13 @@
 {
   "name": "terraform-audit",
-  "description": "Brutal, structured audit of a Terraform or OpenTofu module repository. Detects cross-module composition smells (overlap, duplication, thin wrappers, scope-discriminator primitives, copy-pasted module blocks, tier misplacement), cross-project / cross-account linking flaws, missing validations, dead code, version-pinning drift, and provider-specific landing-zone gaps (GCP, AWS, Azure, OCI). Produces an 8-section critique with per-module grades and a concrete defect list. Runnable as /terraform-audit:terraform-audit [path].",
-  "version": "1.0.1",
+  "description": "Brutal, structured audit of a Terraform or OpenTofu module repository. Detects cross-module composition smells (overlap, duplication, thin wrappers, scope-discriminator primitives, copy-pasted module blocks, tier misplacement), cross-project / cross-account linking flaws, missing validations, dead code, version-pinning drift, and provider-specific landing-zone gaps (GCP, AWS, Azure, OCI). Produces an 8-section critique with per-module grades and a concrete defect list, with optional baseline diff. Workflow at /terraform-audit:audit [path]. Bundles Anton Babenko's terraform-skill v1.6.0 (Apache-2.0) for canonical Terraform best-practices context.",
+  "version": "1.1.0",
   "category": "development",
   "author": {
     "name": "Executioner1939"
   },
   "homepage": "https://github.com/Executioner1939/claude-code-skills",
   "repository": "https://github.com/Executioner1939/claude-code-skills",
-  "license": "MIT",
+  "license": "MIT (with bundled Apache-2.0 terraform-skill by Anton Babenko at skills/terraform-skill/)",
   "keywords": ["terraform", "opentofu", "audit", "iac", "infrastructure-as-code", "code-review", "module-review", "landing-zone", "gcp", "aws", "azure"]
 }
