@@ -216,6 +216,83 @@ When a parent renders an organism deep through layers, and a leaf needs a value,
 - **`<Card><CardHeader/><CardBody/><CardFooter/></Card>` where every consumer always uses all three in order.** That's named slots, not compound. Switch.
 - **Polymorphic `as` used to render a `<div>` as a `<button>`.** Use `asChild` and pass a real `<button>`, or accept the `as` and ensure semantic + a11y attributes follow.
 
+## Generic primitive registry
+
+The design system ships a **fixed set of generic primitives**. Before any agent or human concludes "this is a new component," they must check this registry. A candidate whose root element + tree-shape signature matches an entry below is **not** a new component — it is a `variant` of, a composition of, or a domain-named misnomer for, the existing primitive.
+
+The registry is consumed by the `component-composer` agent's "decide" step and by the audit pipeline (`/audit-organisms`, `/audit-molecules`). It is the single source of truth for the question "does a primitive with this shape already exist?"
+
+| Primitive | Tier | Required slots | Variant axis | Tells you to NEW only when… |
+|---|---|---|---|---|
+| `Text` | atom | (children) | `as` (h1..h6 / p / span), `tone`, `size` | the candidate is not text. |
+| `Icon` | atom | (name) | `name`, `size`, `tone` | the candidate is not a single glyph. |
+| `Button` | atom | `children` | `variant` (primary / secondary / ghost / destructive), `size`, `asChild` | the candidate is not click-to-act. |
+| `IconButton` | atom | `icon` | `variant`, `size`, `aria-label` (required) | the candidate has a text label as well — that's `Button` with `iconBefore`. |
+| `Link` | atom | `children` | `variant`, `as`/`asChild` | the candidate is not navigation. |
+| `Chip` | atom | `children` | `variant` (filled / outline / soft), `tone`, `removable` | the candidate has interactive sub-regions beyond label + dismiss — that's `ChipBar` row. |
+| `Badge` | atom | `children` | `variant`, `tone` | never — `Badge` covers all status pills. |
+| `Pip` | atom | — | `tone`, `size` | never — `Pip` covers all single-color status dots. |
+| `Divider` | atom | — | `orientation`, `tone` | never. |
+| `ListItem` | molecule | `leading`, `body`, `trailing` | `variant` (default / compact / dense), `as` | the candidate is not a row in a vertical list of like items. |
+| `MediaCard` | molecule | `media`, `body`, `footer` | `variant` (filled / outline / ghost), `orientation` (vertical / horizontal), `aspect` | the candidate is not a media-plus-text card. **All `*Card`-suffixed candidates (BrandCard, LicenceCard, PricingTier, MarketingFeatureTile, PlatformCard, etc.) collapse here.** |
+| `SummaryCard` | molecule | `title`, `body`, `actions` | `variant`, `tone` | the candidate is not a labelled summary block. |
+| `LineItemList` | molecule | `items[]` (each with `label`, `value`) | `variant`, `dense` | the candidate is not a label-value table-like list. |
+| `TotalRow` | molecule | `label`, `value` | `variant` (subtotal / total / discount), `tone` | never — every total/subtotal/footer-row is this. |
+| `OptionPicker` | molecule | `options[]` (each with `value`, `label`, optional `icon`/`description`) | `variant` (segmented / radio-card / chip-grid), `multiple` | the candidate is not "pick 1+ from N visible options." **All `*Picker` and visible-radio-set candidates collapse here.** |
+| `LogoStrip` | molecule | `items[]` (each: `src`/`logo`, optional `href`) | `variant` (rail / wall / scroll), `density` | the candidate is not a row of logos. **`BrandStrip`, `EcosystemRail`, `TrustStrip` all collapse here.** |
+| `ChipBar` | molecule | `chips[]` | `variant`, `scrollable` | the candidate is not a horizontal row of `Chip`s. |
+| `FilterPanel` | organism | `filters[]`, `actions` | `variant` (sidebar / drawer / popover), `collapsible` | the candidate is not a group of filter controls. |
+| `Card` | molecule | `header`, `body`, `footer` | `variant`, `tone`, `interactive` | the candidate is not a bounded content surface. Prefer `MediaCard` / `SummaryCard` first. |
+| `Hero` | organism | `eyebrow`, `headline`, `body`, `media`, `actions` | `variant` (centered / split / stacked), `tone` | the candidate is not a top-of-page banner. |
+| `Stepper` | molecule | `steps[]` | `variant` (numbered / dotted / progress), `orientation` | the candidate is not "show ordered progress through N steps." |
+| `Wizard` | organism | `Stepper`, `Panel` (current step body), `actions` | `variant`, `linear` (boolean) | the candidate is not "multi-step form/flow with navigation." |
+| `Modal` | organism | `header`, `body`, `footer` | `size`, `dismissible` | the candidate is not a focus-trapped centered overlay. |
+| `Drawer` | organism | `header`, `body`, `footer` | `side` (left / right / top / bottom), `size` | the candidate is not an edge-anchored overlay. |
+| `Sheet` | organism | `header`, `body`, `footer` | `variant` (bottom / side), `snapPoints` | the candidate is not a draggable/snappable surface (mobile-leaning). Prefer `Drawer` on web. |
+
+**Naming rule that follows from the registry:** primitives are domain-agnostic nouns (`Card`, `LogoStrip`, `OptionPicker`). A name like `BrandCard`, `PricingTier`, or `LicenceCard` encodes a **domain** in the component identifier and is therefore a smell — see the pre-flight below.
+
+## REUSE-vs-EXTEND-vs-NEW pre-flight
+
+Before any agent or human concludes verdict `BUILD-NEW`, run this rubric. The `component-composer` agent applies it as a hard gate: a `BUILD-NEW` verdict that did not pass all four checks is rejected.
+
+### (a) Structural-shape lookup
+
+Compute the candidate's structural signature: `{ root_element, ordered_child_kinds, slot_count, has_media, has_actions, repetition_axis }`.
+
+Match against every row of the **Generic primitive registry** above. If the signature matches an entry's `Required slots` + `Variant axis` envelope, the registry entry **owns that shape**.
+
+### (b) If shape matches → EXTEND or COMPOSE
+
+When the lookup hits an existing primitive:
+
+- If the candidate differs from the matched primitive only in **one bounded dimension** (visual variant, density, orientation, tone) → verdict is **EXTEND** the matched primitive with a new value on its `variant` (or other variant-axis) prop. Adding the value must be additive — no rename of existing values, no breaking signature change.
+- If the candidate differs by **populating slots with specific children** (e.g., a media block + a body block + an actions block) → verdict is **COMPOSE**: instantiate the matched primitive with those slots filled. Do not create a new component; create a **story** (or, if the composition is reused ≥ 3 times, a thin domain-named wrapper that *only* fills slots — never re-implements the primitive's internals).
+
+### (c) Domain-prefix rename check
+
+If the candidate's name fits the pattern `<Domain><PrimitiveSuffix>` (e.g., `BrandCard`, `LicenceCard`, `MarketingFeatureTile`, `PlatformCard`, `PricingTier`, `BrandStrip`, `EcosystemRail`, `TrustStrip`, `*Picker`, `*Row`, `*Item`) **and** a registry entry exists with that suffix (or a synonym: `Tile` → `MediaCard`, `Strip` / `Rail` → `LogoStrip`, `Tier` → `MediaCard`/`SummaryCard`, `Row` → `ListItem` / `TotalRow`, `Picker` → `OptionPicker`) → verdict is **RENAME-AND-COMPOSE**:
+
+1. Drop the domain prefix from the component identifier.
+2. Realise the candidate as a story (or, if reused ≥ 3 times, a thin wrapper named after the *use-case* in the consumer app — not in the design system).
+3. The verdict is **never** `BUILD-NEW` in this branch. Even if the consumer wants a different look, that is an EXTEND on the matched primitive's variant axis.
+
+### (d) BUILD-NEW only when both checks miss
+
+`BUILD-NEW` is permitted **only** when:
+
+1. The structural-shape lookup (a) returns no match in the registry, **and**
+2. The domain-prefix rename check (c) returns no match, **and**
+3. The proposed new component itself satisfies the **genericness rubric** (see the `genericness-rubric` skill): no domain prefix in the name, accepts slots over per-internal-region props, exposes a `variant` axis if it has > 1 visual mode, ships at the lowest atomic tier its responsibilities allow.
+
+A `BUILD-NEW` verdict that fails any of (1)–(3) is invalid and the composer must downgrade to EXTEND, COMPOSE, or RENAME-AND-COMPOSE.
+
+### Pre-flight worked examples
+
+- `BrandCard` (image + title + body + CTA) → (a) matches `MediaCard`; (c) `Brand` + `Card` is a domain prefix on the `Card` family → verdict **RENAME-AND-COMPOSE** as `<MediaCard variant="brand">…</MediaCard>` (or just a story over `MediaCard`).
+- `EcosystemRail` (horizontal row of logos) → (a) matches `LogoStrip`; (c) `Ecosystem` + `Rail` matches the `Strip`/`Rail` synonym → verdict **RENAME-AND-COMPOSE** as `<LogoStrip variant="rail" items={…} />`.
+- `TimelineDial` (radial concentric step indicator with tick marks at angular positions) → (a) no row's signature matches a radial layout; (c) no registry suffix matches `Dial` → verdict **BUILD-NEW** is permitted, provided the new component is named `Dial` (no domain prefix) and accepts slots.
+
 ## Testing composition
 
 - A component's stories should include each composition pattern it supports — see `storybook-atomic-integration` for required stories.
@@ -241,3 +318,4 @@ The audit workflows verify the composition pattern matches the TanStack abstract
 - **`design-tokens`** — the styling layer composition routes around.
 - **`approved-libraries`** — the bouncer-list of libraries the composition routes around.
 - **`tanstack-integration`** — the prop shapes that make composition compose with TanStack Form / Table / DB.
+- **`genericness-rubric`** — the per-component test for "is this name and shape generic enough to ship?" The pre-flight above defers to this skill for clause (d)(3); load it whenever you are evaluating a `BUILD-NEW` candidate on its own terms.

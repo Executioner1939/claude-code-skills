@@ -185,14 +185,15 @@ Each auditor writes its own per-atom HANDOFF.md (when chained — for parallel b
 
 Print one progress line per batch: `Batch <k>/<total> graded.`
 
-## Step 3 — Cross-cutting passes (parallel, four agents at once)
+## Step 3 — Cross-cutting passes (parallel, five agents at once)
 
-Spawn four agents in parallel — they share the inventory but score different axes:
+Spawn five agents in parallel — they share the inventory but score different axes:
 
-1. **`component-deduplicator`** (scope: atoms only) — finds near-duplicates, scores similarity, proposes a canonical version + merge plan.
+1. **`component-deduplicator`** (scope: atoms only) — finds near-duplicates, scores similarity, proposes a canonical version + merge plan. Its output is also the input to the genericness pass's `MERGE-INTO-PRIMITIVE` subsection in Step 4.
 2. **`design-token-enforcer`** (mode `scan`, scope: atoms only) — finds hardcoded values, proposes token refactors with HIGH / MEDIUM / LOW confidence.
 3. **`accessibility-reviewer`** (scope: atoms only) — runs the manual-check matrix from `accessibility-stories` (focus management, keyboard model, target size, color independence, prefers-reduced-motion).
 4. **`library-policy-enforcer`** (mode `audit-imports + audit-integrations`, scope: atoms only) — verifies the field-friendly atom contract; flags forbidden imports.
+5. **`atomic-auditor`** (mode `genericness-only`, scope: atoms only) — emits a per-atom genericness verdict in batch (KEEP / DELETE-wrapper-of-primitive / RENAME-AND-SLOT / MERGE-INTO-PRIMITIVE / PROMOTE-TO-PRIMITIVE) with the canonical replacement expression for DELETE / RENAME / MERGE verdicts. Reads `inventory.json` and the deduplicator's HANDOFF (when available — otherwise emits its verdicts independently and the synthesizer joins).
 
 Each writes a HANDOFF.md to:
 
@@ -200,7 +201,7 @@ Each writes a HANDOFF.md to:
 <scope>/.design-storybook-atomic/handoffs/audit-atomic-<run>/phase-03-<agent>-to-orchestrator.md
 ```
 
-Wait for all four to print `HANDOFF: <path>` before proceeding.
+Wait for all five to print `HANDOFF: <path>` before proceeding.
 
 ## Step 4 — Synthesis
 
@@ -233,6 +234,9 @@ SECTION 1 — SUMMARY
   Needs work (C)                 : <n>
   Blocked (D/F or hygiene fail)  : <n>
   Near-duplicate clusters        : <n>
+  Domain-named shells            : <n>
+  Wrapper-of-primitive (DELETE)  : <n>
+  Structural-duplicate clusters  : <n>
   Hardcoded-value sites          : <n>
   TanStack-contract violations   : <n>
   Library-policy violations      : <n>
@@ -247,15 +251,32 @@ SECTION 2 — PER-ATOM GRADES (alphabetized)
   ❌ F   atoms/Switch       coverage 88  quality 85  hygiene FAIL (no forwardRef)
   …
 
-SECTION 3 — DUPLICATE CLUSTERS
+SECTION 3 — DOMAIN-COUPLING / GENERICNESS DEFECTS
+  (from atomic-auditor mode=genericness-only HANDOFF, joined with component-deduplicator output for MERGE rows)
+
+  DELETE candidates (pure wrappers; component is just <Primitive ... /> with no behavior of its own):
+    - atoms/<Name>  →  use <Primitive ... />  directly. Canonical replacement expression cited verbatim.
+
+  RENAME-AND-SLOT (domain-named shells whose body is a primitive shape):
+    - atoms/<DomainName>  →  rename to <Primitive><Slot>; required slots: <list>; canonical name: <Name>.
+
+  MERGE-INTO-PRIMITIVE (cross-reference component-deduplicator structural clusters):
+    - cluster <id>: { atoms/A, atoms/B, atoms/C, atoms/D, atoms/E }
+        canonical primitive: <Primitive>
+        merge plan: collapse all five into <Primitive> with variant prop <propName>.
+
+  PROMOTE-TO-PRIMITIVE (right shape, wrong name):
+    - atoms/<DomainName>  →  promote to atoms/<Primitive>; rename consumers.
+
+SECTION 4 — DUPLICATE CLUSTERS
   (paste component-deduplicator output)
 
-SECTION 4 — DEPRECATED / UNUSED
+SECTION 5 — DEPRECATED / UNUSED
   atoms/OldButton — last modified 2023, no imports found, marked @deprecated
                     → propose deletion
   atoms/Spinner.legacy.tsx — duplicated by atoms/Spinner → propose deletion
 
-SECTION 4b — RECONCILIATION QUEUE (file/folder convention violations)
+SECTION 5b — RECONCILIATION QUEUE (file/folder convention violations)
   Read directly from inventory.json `reconciliation` array. Group by `kind`.
   Each entry must include path, current vs expected, and the mechanical fix.
 
@@ -289,10 +310,10 @@ SECTION 4b — RECONCILIATION QUEUE (file/folder convention violations)
   status); folder-name-mismatch is `info` (recommendation); tier-mismatch
   and stray are `block` once promoted to action plan.
 
-SECTION 5 — TOKEN GAPS
+SECTION 6 — TOKEN GAPS
   (paste design-token-enforcer output, summary + top offenders)
 
-SECTION 6 — TANSTACK-CONTRACT VIOLATIONS
+SECTION 7 — TANSTACK-CONTRACT VIOLATIONS
   Atom must accept value + onChange(value) + onBlur + aria-invalid + aria-describedby + forwardRef.
   Violations:
     [V1] atoms/Input/Input.tsx:18  — emits onChange(event) instead of onChange(value)
@@ -300,7 +321,7 @@ SECTION 6 — TANSTACK-CONTRACT VIOLATIONS
     [V3] atoms/Combobox/Combobox.tsx:34 — no aria-describedby plumbing
   (full list from library-policy-enforcer Section 3 above; cited verbatim here)
 
-SECTION 7 — ACCESSIBILITY DEFECTS
+SECTION 8 — ACCESSIBILITY DEFECTS
   Critical (block merge):
     - atoms/IconButton: missing accessible name (no aria-label, no children text)
     - atoms/Switch: aria-checked not synced with controlled value
@@ -310,24 +331,28 @@ SECTION 7 — ACCESSIBILITY DEFECTS
     - atoms/Toast: no prefers-reduced-motion guard
   …
 
-SECTION 8 — PRIORITIZED ACTION PLAN
+SECTION 9 — PRIORITIZED ACTION PLAN
+  Block 0 — Surface reduction (do these FIRST; they moot a lot of Block 1 work):
+    0a. DELETE wrapper components (Section 3 DELETE candidates) — replace usages with the primitive expression cited.
+    0b. RENAME-AND-SLOT domain shells (Section 3 RENAME-AND-SLOT) — rename component, expose slot props, update consumers.
   Block 1 — Hygiene blockers (must fix before merge):
-    1. Fix TanStack-contract violations (3 atoms — see Section 6).
+    1. Fix TanStack-contract violations (3 atoms — see Section 7).
     2. Replace 47 hardcoded colors with semantic tokens (design-token-enforcer can apply).
     3. Fix Critical a11y defects (accessibility-reviewer Block 1).
-    4. Reconcile tier-mismatch atoms (Section 4b — atom imports molecule).
-    5. Reconcile stray-component files (Section 4b — classify and move).
+    4. Reconcile tier-mismatch atoms (Section 5b — atom imports molecule).
+    5. Reconcile stray-component files (Section 5b — classify and move).
   Block 2 — Coverage / quality work:
     6. Add missing stories per atom (graded list in Section 2).
     7. Add MDX docs for atoms with quality < 80.
   Block 3 — Consolidation + naming:
-    8. Merge Tag/Pill/Chip cluster (Section 3).
-    9. Delete deprecated atoms (Section 4).
-   10. Fold unfoldered atoms into Name/Name.tsx layout (Section 4b — unfoldered).
-   11. Rename misnamed files/folders to PascalCase (Section 4b — misnamed-*).
-   12. Resolve folder-name-mismatch entries (Section 4b — folder-name-mismatch).
+    8. Merge structural-duplicate clusters into canonical primitive (Section 3 MERGE-INTO-PRIMITIVE).
+    9. Merge near-duplicate atoms (Section 4).
+   10. Delete deprecated atoms (Section 5).
+   11. Fold unfoldered atoms into Name/Name.tsx layout (Section 5b — unfoldered).
+   12. Rename misnamed files/folders to PascalCase (Section 5b — misnamed-*).
+   13. Resolve folder-name-mismatch entries (Section 5b — folder-name-mismatch).
 
-SECTION 9 — DIFF VS BASELINE  (only if baseline existed)
+SECTION 10 — DIFF VS BASELINE  (only if baseline existed)
   Δ overall                     : +5 atoms ship-ready (was 17, now 22)
   Improved since baseline:
     - atoms/Tag: C → A (added MDX, fixed token gap)
@@ -361,7 +386,8 @@ Both contain the synthesis report.
 ## Operating rules
 
 1. **READ ONLY for source files; Write only for audit artifacts** (baseline + history + HANDOFF + inventory.json). No edits to component code.
-2. **BE EXHAUSTIVE.** Every atom in the inventory gets a grade — no sampling. Every reconciliation entry surfaces in Section 4b — no quiet drops.
+2. **BE EXHAUSTIVE.** Every atom in the inventory gets a grade — no sampling. Every reconciliation entry surfaces in Section 5b — no quiet drops.
+2a. **GENERICNESS IS A HYGIENE AXIS.** A domain-named shell that exposes no slot props is a hygiene fail. A pure wrapper-of-primitive (DELETE verdict from atomic-auditor mode=genericness-only) is a hygiene fail. Both force the affected atom to BLOCKED status regardless of coverage / token / a11y scores.
 3. **CITE EVERY DEFECT** — `path:line` in Sections 5, 6, 7. Section 4b cites `path` (and folder) for every reconciliation entry.
 4. **HONOR `rubricOverrides`** — surface Phase 0a detections at Section 0; grade against them, not the skill defaults.
 5. **DON'T DOUBLE-COUNT BASELINE BREAKAGE** — Phase 0b's pre-existing failures stay in their own block; never roll them into atom-defect counts.

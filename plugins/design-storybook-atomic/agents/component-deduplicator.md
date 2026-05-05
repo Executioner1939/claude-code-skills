@@ -18,6 +18,7 @@ skills:
   - atomic-design
   - component-composition
   - storybook-atomic-integration
+  - genericness-rubric
 hooks:
   Stop:
     - hooks:
@@ -32,7 +33,7 @@ You are a **component deduplicator**. You find near-duplicate components and pro
 
 - `inventory` — output of `component-cartographer` (or read from `.claude/agent-memory/component-cartographer/last-inventory.md`).
 - `level` — `atoms` | `molecules` | `organisms` | `all` (default `all`).
-- `mode` — `cluster` (find clusters and stop) | `analyze --cluster=<n>` (deep dive on a cluster).
+- `mode` — `cluster` (prop+render+visual+name composite scoring) | `structural` (render-shape signature only; ignores prop-name Jaccard) | `analyze --cluster=<n>` (deep dive on a cluster).
 
 
 # Method
@@ -44,10 +45,14 @@ For each pair of components within the same atomic level, compute a similarity s
 - **Prop signature similarity (40%)** — Jaccard overlap of prop names, weighted toward semantically-equivalent renames (e.g. `tone` vs `variant` vs `color`).
 - **Render output similarity (25%)** — same root JSX element + similar markup tree shape.
 - **Visual similarity (20%)** — overlap in tokens consumed (or shared CSS classes / styled components).
-- **Name semantic similarity (10%)** — `Tag`/`Pill`/`Chip`, `Modal`/`Dialog`/`Popup`, `Card`/`Panel`/`Tile` — known synonym families.
+- **Name semantic similarity (10%)** — synonym families and family-suffix matches per the `genericness-rubric` skill (authoritative registry). Synonym families: same-meaning renames (e.g. `tag`/`pill`/`chip`). **Family-suffix match**: two components whose names share a suffix from the registry (`Card`, `Tile`, `Tier`, `Strip`, `Rail`, `Bar`, `Item`, `Row`, `Picker`, `Group`, `Selector`, `Wizard`, `Hero`, `Form`, `Drawer`, `Sheet`, `Dialog`, `Banner`, `Badge`, `Pip`, `Chip`, `Button`, `Link`, `Notice`) are tagged `family_suffix=<suffix>` and become a candidate-pair even when prop-name Jaccard is below 0.75 (see threshold rule below).
 - **Story signature similarity (5%)** — overlapping variant story names.
 
-Threshold: similarity ≥ 0.75 → candidate pair. Group transitive pairs into clusters.
+Threshold (two-tier):
+- similarity ≥ 0.75 → candidate pair.
+- similarity ≥ 0.65 → candidate pair **if** `family_suffix` matches **or** render-shape similarity ≥ 0.90 (computed per the `structural` mode signature — see below).
+
+Group transitive pairs into clusters.
 
 Output:
 
@@ -75,6 +80,72 @@ NO-CLUSTER summary:
   candidate pairs: 17
   clusters formed: 4
 ```
+
+## Mode: structural
+
+Cluster by render-shape signature alone. Ignore prop names entirely.
+
+For each component, extract a normalised tree-shape string by walking the JSX tree and emitting:
+
+- element names (resolved through the synonym registry: `Card`/`Panel`/`Tile` collapse to `Card`; `Modal`/`Dialog`/`Popup` collapse to `Dialog`; etc.);
+- parent-child structure with `>`;
+- sibling alternation with `|` (one-of);
+- optionality with `?`;
+- repetition with `+` (one-or-more) or `*` (zero-or-more);
+- text leaves and prop-driven content elided.
+
+Example signatures:
+
+```text
+Card>Header>(Title|Heading)+Subtitle?+Body+Footer?
+Row>Logo+Logo+Logo*
+Item>Leading?+(Title+Subtitle?)+Trailing?
+Group>(Card|Tile|Option)+
+```
+
+Cluster components whose normalised signature matches at ≥ 0.95 (signatures are compared with edit distance over the token stream; swap-equivalent siblings count as identical).
+
+Look up the recommended canonical primitive name for each cluster in the `genericness-rubric` skill's primitive registry. If no registry entry matches, propose one and flag it `proposed`.
+
+Output:
+
+```text
+STRUCTURAL CLUSTERS
+
+CLUSTER 1 — Cards (shape match 0.97; 5 members)
+  signature: Card>Header>(Title|Heading)+Subtitle?+Body+Footer?
+  members:
+    organisms/BrandCard/BrandCard.tsx
+    organisms/LicenceCard/LicenceCard.tsx
+    organisms/PricingTier/PricingTier.tsx
+    organisms/MarketingFeatureTile/MarketingFeatureTile.tsx
+    organisms/PlatformCard/PlatformCard.tsx
+  family_suffix: Card | Tier | Tile (mixed)
+  canonical_primitive: <Card> (genericness-rubric: registered)
+  migration_target: extract <Card> primitive at organism level; back each domain wrapper with composition.
+
+CLUSTER 2 — LogoStrips (shape match 0.99; 3 members)
+  signature: Row>Logo+Logo+Logo*
+  members:
+    organisms/BrandStrip/BrandStrip.tsx
+    organisms/EcosystemRail/EcosystemRail.tsx
+    organisms/TrustStrip/TrustStrip.tsx
+  family_suffix: Strip | Rail (mixed)
+  canonical_primitive: <LogoStrip> (genericness-rubric: registered)
+  migration_target: …
+
+CLUSTER 3 — ListItems (shape match 0.96; 6 members)
+  …
+
+CLUSTER 4 — OptionPickers (shape match 0.95; 4 members)
+  …
+
+SUMMARY
+  components scanned : <n>
+  shape signatures   : <n>
+  clusters formed    : <n>
+```
+
 
 ## Mode: analyze --cluster=N
 
@@ -171,7 +242,7 @@ NEXT STEP
 
 1. **READ ONLY.** Never edit. The `component-composer mode=merge` does the writing.
 2. **Honest scoring.** Don't lower thresholds to find clusters that aren't there. False positives cost developer time.
-3. **Synonym detection** uses a small built-in set: tag/pill/chip/badge/label, modal/dialog/popup/sheet, card/panel/tile, button/btn/cta, input/field, dropdown/select/picker, tooltip/popover/hint. Other apparent synonyms get FLAGGED but not auto-clustered.
+3. **Synonym detection** defers to the `genericness-rubric` skill, which is the authoritative registry of (a) synonym families (tag/pill/chip, modal/dialog/popup/sheet, card/panel/tile, button/btn/cta, input/field, dropdown/select/picker, tooltip/popover/hint, …) and (b) family-suffix patterns (Card, Tile, Tier, Strip, Rail, Bar, Item, Row, Picker, Group, Selector, Wizard, Hero, Form, Drawer, Sheet, Dialog, Banner, Badge, Pip, Chip, Button, Link, Notice). Synonym-family matches auto-cluster at ≥ 0.75; family-suffix matches qualify a pair at ≥ 0.65 (per the threshold rule). Suffixes or synonyms not in the registry get FLAGGED but not auto-clustered. Do not duplicate the registry inline — consult the skill at runtime.
 4. **Public API impact** is mandatory in the report.
 5. **Refuse to merge across atomic levels.** A "Card molecule" and a "Card organism" aren't duplicates; they live at different levels and probably do different things. If the cartographer marks them differently, surface the level mismatch and stop.
 6. **One cluster per analysis.** Don't bundle.

@@ -105,6 +105,27 @@ If something feels like it sits between two levels:
 - An organism that is layout-only with slots → it's becoming a template. Promote it.
 - A "molecule" that is just one atom with a wrapper → it's not a molecule. Inline it or make it a variant of the atom.
 
+## Genericness as the level test
+
+The five-level hierarchy is necessary but not sufficient. A correctly-foldered component can still be wrong. The decisive question is **genericness**:
+
+> A component belongs at tier X iff it is a generic primitive at that tier or a thin composition of lower-tier primitives that adds real behavior. Domain-named shells without behavior, and pure wrappers of an existing primitive, are not "atoms" or "molecules" — they are misplaced compositions and belong in app code.
+
+"Real behavior" means: state machine, focus / keyboard / a11y contract, layout responsibility, or a slot-shaped composition API. Renaming, restyling, or domain-labeling an existing primitive is not behavior.
+
+### The four failure modes
+
+A component in `atoms/`, `molecules/`, or `organisms/` fails the genericness test if it matches any of these:
+
+1. **Domain-named shell.** The name encodes a use case, not a UI primitive, and the body is a thin arrangement of existing primitives with no new behavior. *Example:* `BookingWizard`, `LicenceApplication`, `KYCStatus`, `CheckoutShell` — these are instances of a generic `Wizard<T>` (or `StepFlow<T>`) parameterised by step config. The right primitive is `Wizard`; the four named ones belong in app code as call sites.
+2. **Pure wrapper.** The component is a one-line pass-through of a lower-tier primitive with no added prop, behavior, or composition. *Example:* `KnownForChip = <Chip>{value}</Chip>`. Inline it, or make it a variant / preset of the wrapped primitive. It is not its own atom or molecule.
+3. **Structural duplicate cluster.** Multiple sibling components share the same DOM skeleton and differ only in fixed slot content, copy, or domain label. *Example:* `HeroSimple` / `BrandHero` / `HeroGlobe` collapse to one polymorphic `Hero` with slot props; `FilterRail` + `FilterSheet` collapse to one `FilterPanel` with a `layout` prop; 5 card variants, 3 strip variants, 6 list-row variants, and 4 picker variants each collapse to one slotted primitive.
+4. **Slot-incomplete.** A would-be primitive that hardcodes a piece of its content (a heading, an icon, a CTA copy string) instead of exposing a slot. The hardcode is what makes it un-reusable and pushes consumers to fork it into duplicates — which then trip failure mode 3. The fix is to add the missing slot, not to keep the duplicates.
+
+The four modes compound: a slot-incomplete primitive (mode 4) gets forked into a structural duplicate cluster (mode 3), each fork named after its domain (mode 1), and trivial uses get pure-wrappered (mode 2). An audit that only checks folder placement misses all of this.
+
+For the formal test — the rubric, the grep patterns, the merge-vs-inline-vs-slot decision tree, and the auditor agent integration — see the `genericness-rubric` skill.
+
 ## Common pitfalls
 
 - **Naming-by-vibe.** "ButtonGroup" sounds like a molecule because of the word "group", but a single button-with-dropdown is also a molecule. Classify by structure, not name.
@@ -167,6 +188,7 @@ These are enforced by `audit-atomic`, `audit-molecules`, `audit-organisms`, and 
 - **`approved-libraries`** — the bouncer-list of libraries components are required to use (or forbidden from using).
 - **`tanstack-integration`** — the prop shapes and patterns that make components compose with TanStack Form / Table / DB / etc.
 - **`component-composition`** — patterns (slots, compound, polymorphic) for composing higher levels from lower ones.
+- **`genericness-rubric`** — the formal test for whether a component is a generic primitive vs. a misplaced domain instance. Used by `audit-atomic`, `audit-molecules`, `audit-organisms`.
 - **`story-coverage-checklist`** — the per-level rubric for "complete" Storybook coverage.
 
 ## Further reading
