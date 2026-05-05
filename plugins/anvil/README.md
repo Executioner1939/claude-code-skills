@@ -95,7 +95,7 @@ Adapted from the [`han`](https://github.com/TheBushidoCollective/han) plugin mar
 
 `_handoff/HANDOFF-template.md` — adapted from the user's `handoff` skill template, scoped to phase boundaries within a workflow run. Storage path `<scope>/.anvil/handoffs/<workflow>-<run>/phase-<NN>-<from>-to-<to>.md`. Validation contract: write the file, re-read to verify, print `HANDOFF: <path>` to stdout — orchestrator halts on missing line.
 
-## Slash-command workflows (8)
+## Slash-command workflows (9)
 
 Skill-commands with `disable-model-invocation: true` — they fire only when invoked explicitly. All follow the `terraform-audit` `Step N` numbered pattern; the audit-* variants emit a 9-section report with **Section 9 — Diff vs baseline** when a prior baseline exists.
 
@@ -106,6 +106,7 @@ Skill-commands with `disable-model-invocation: true` — they fire only when inv
 | `/anvil:audit-organisms` | Same, scoped to organisms. Adds mandatory Empty/Loading/Error, data-contract MDX, no-routing-coupling, Table-instance / DB-collection contracts. |
 | `/anvil:audit-tokens` | Source-tier audit + hardcoded-value scan + per-component compliance grade + refactor plan (auto exact matches, manual nearest matches). |
 | `/anvil:audit-libraries` | **NEW v2.0.** package.json + import-graph + atomic-level integration audit against `approved-libraries` and `tanstack-integration`. |
+| `/anvil:audit-component` | **NEW v3.1.** Audit one component end-to-end (all six axes), then sweep the rest of the codebase for every place each finding's underlying pattern is repeated. Output is a propagation matrix that turns one fix into a leveraged change. |
 | `/anvil:add-component` | Interactive new-component flow. Spec interpreter → cartography → reuse / extend / compose / build verdict → user confirm → composer → token enforce → stories + MDX (parallel) → policy + a11y review. HANDOFF.md per phase. |
 | `/anvil:merge-duplicates` | Find near-duplicate clusters, propose canonical + migration plan, apply additive merge + codemod consumers + story consolidation + verify + post-merge audit. HANDOFF.md per cluster. |
 | `/anvil:coverage-report` | Full coverage matrix across every atomic level. TanStack adoption heatmap. Top risks with cross-links to triage workflows. Quick wins. Optional `--html`. |

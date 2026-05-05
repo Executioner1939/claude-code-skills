@@ -5,6 +5,21 @@ All notable changes to the `anvil` plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-05-05
+
+### Added
+
+- **New slash command** `/anvil:audit-component <path-to-component>` — audits a single target component end-to-end (Coverage / Quality / Hygiene / Genericness / Accessibility / Tokens / Library Policy) AND sweeps the rest of the codebase for every place each finding's underlying *pattern* is repeated. Premise: a defect found once is almost always a pattern repeated across the codebase, so the audit should make propagation explicit.
+- **Pattern-extraction step** — agents in Step 1 flag findings as `PATTERN-ELIGIBLE` and the calling command abstracts each into a typed pattern: `LITERAL` (hardcoded value), `IMPORT` (forbidden / off-policy import), `STRUCTURAL` (render-shape signature), `DOMAIN` (domain-prefix in name), `WRAPPER` (thin wrapper of a primitive), `MISSING` (missing required artifact), `COUPLING` (tight coupling to data shape / route / singleton).
+- **Cross-codebase pattern sweep (Step 3)** — typed dispatch per pattern: literal/import patterns via grep; structural patterns via `component-deduplicator` mode=structural; domain/wrapper patterns via `component-cartographer`; missing-artifact patterns via `storybook-coverage-analyst`; coupling patterns via grep grouped by tier.
+- **Propagation matrix (Section 3 of the report)** — per pattern: signature, source, recommended remediation, every other occurrence with `file:line`, and a propagation-effort estimate (S / M / L / XL).
+- **Action plan ordering (Section 4)** — sequenced as "fix target first, then propagate," with patterns ordered by `(occurrences_count * effort_inverse)` so the highest-leverage propagation runs first.
+- `--no-sweep` mode flag — audit the target only, skip the cross-codebase sweep.
+
+### Why
+
+Per-tier audits (`audit-atoms`, `audit-molecules`, `audit-organisms`) grade the layer; they don't make repetition visible. When a deep look at one component surfaces a fix, that same fix usually applies to N other components — but without a cross-cutting sweep, the developer has to remember to check. `/anvil:audit-component` automates the "where else does this happen?" pass and turns "fix this one component" into a leveraged change the user can prioritize on a propagation matrix.
+
 ## [3.0.0] - 2026-05-05
 
 ### Changed (BREAKING)

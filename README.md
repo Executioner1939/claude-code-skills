@@ -3,7 +3,7 @@
 A personal marketplace of Claude Code plugins for CI/CD, Rust, documentation, code analysis, design systems, and infrastructure-as-code review. Eight plugins, sharing conventions, kept in sync.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) (with bundled Apache-2.0 portions — see [Attribution](#attribution))
-[![Marketplace version](https://img.shields.io/badge/marketplace-v5.9.0-green.svg)](.claude-plugin/marketplace.json)
+[![Marketplace version](https://img.shields.io/badge/marketplace-v5.10.0-green.svg)](.claude-plugin/marketplace.json)
 [![Plugins](https://img.shields.io/badge/plugins-8-green.svg)](#plugins)
 
 ---
@@ -53,11 +53,11 @@ Brutal, structured audit of a Terraform / OpenTofu module repository. Detects cr
 - Auto-triggers on: "audit terraform", "review terraform", "tear apart terraform", "tech-debt audit terraform".
 - Output: `<repo>/.terraform-audit/audit-<date>.md` plus optional baseline at `baseline.md`. Section 9 baseline-diff (Fixed / Regressed / New) when the baseline exists.
 
-#### `anvil` — v3.0.0
+#### `anvil` — v3.1.0
 
 The largest plugin in the marketplace. Atomic design (Brad Frost) + Storybook 10 expert toolkit. CSF Factories only. TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history.
 
-- 8 slash-command workflows: `audit-atoms`, `audit-molecules`, `audit-organisms`, `audit-tokens`, `audit-libraries`, `add-component`, `merge-duplicates`, `coverage-report`.
+- 9 slash-command workflows: `audit-atoms`, `audit-molecules`, `audit-organisms`, `audit-tokens`, `audit-libraries`, `audit-component` (new in v3.1: single-component audit + cross-codebase pattern sweep), `add-component`, `merge-duplicates`, `coverage-report`.
 - 11 specialized subagents: `accessibility-reviewer`, `atomic-auditor`, `component-cartographer`, `component-composer`, `component-deduplicator`, `design-token-enforcer`, `library-policy-enforcer`, `mdx-doc-writer`, `story-writer`, `storybook-coverage-analyst`, `ui-spec-interpreter`.
 - ~20 knowledge skills + a static component-graph scanner (`scripts/inventory.py`) refreshed automatically by a `PostToolUse` hook on edits.
 - Bundles 7 Apache-2.0 atomic-design methodology references adapted from `TheBushidoCollective/han`.
