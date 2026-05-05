@@ -8,7 +8,7 @@ A complete plugin for working on a design system: **atomic design** (Brad Frost)
 
 Driven by post-deployment audit feedback:
 
-- **Static component-graph scanner** at `skills/audit-atomic/scripts/inventory.py`. Walks the project, classifies every component by tier, builds a directed graph of `composes` edges, and emits JSON conforming to `skills/audit-atomic/schemas/inventory.schema.json`. Stdlib only; uses `networkx` opportunistically for centrality / cycles / GEXF. Exports to `mermaid`, `graphviz`, `cytoscape`, `gexf`.
+- **Static component-graph scanner** at `scripts/inventory.py`. Walks the project, classifies every component by tier, builds a directed graph of `composes` edges, and emits JSON conforming to `schemas/inventory.schema.json`. Stdlib only; uses `networkx` opportunistically for centrality / cycles / GEXF. Exports to `mermaid`, `graphviz`, `cytoscape`, `gexf`.
 - **Reconciliation queue** in every scan: `unfoldered` (atoms at tier root without a folder), `misnamed-folder` / `misnamed-file`, `folder-name-mismatch` (Foo/Bar.tsx), `stray-component` (PascalCase outside any tier folder), `tier-mismatch-by-signal` (atom imports a molecule). Each entry carries a mechanical fix. Audit reports surface them as **Section 4b — Reconciliation queue**.
 - **Auto-refresh PostToolUse hook** at `hooks/refresh-inventory.sh`. After every Edit / Write / MultiEdit on a component file, inventory rebuilds in the background (30s debounce; opt-in via the project owning a `.design-storybook-atomic/` directory).
 - **Phase 0 in `audit-atomic`** — rubric detection (MDX convention, form contract, tier placement, token convention, lint rules affecting atoms, motion-reduce defaults), baseline integrity probe quarantines pre-existing breakage, tier-aware contract resolution, mode flags (`--auto-baseline=replace|history-only|prompt`, `--static-only`, `--no-prompt`), cardinality cutoff (> 30 atoms ⇒ static-scan grading).
@@ -23,7 +23,7 @@ Driven by post-deployment audit feedback:
 
 ```bash
 # Initial scan (the hook handles subsequent refreshes automatically)
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/audit-atomic/scripts/inventory.py \
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/inventory.py \
   scan --root . --tier all --out .design-storybook-atomic/inventory.json
 
 # Common queries

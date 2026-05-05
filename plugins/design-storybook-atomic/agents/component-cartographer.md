@@ -106,7 +106,7 @@ SUMMARY
 
 ## Step 0 — Read the static inventory first
 
-Before touching the file system, look for `<scope>/.design-storybook-atomic/inventory.json`. The static scanner (`audit-atomic/scripts/inventory.py`) refreshes this on every component edit via the `refresh-inventory` PostToolUse hook, so it is almost certainly fresh.
+Before touching the file system, look for `<scope>/.design-storybook-atomic/inventory.json`. The static scanner (`scripts/inventory.py`) refreshes this on every component edit via the `refresh-inventory` PostToolUse hook, so it is almost certainly fresh.
 
 If `inventory.json` exists:
 - Use it as the authoritative source for component paths, tiers, props, forwardRef, ariaProps, lastModified, hardcodedLiterals, stories metadata, mdx metadata, consumers, composes, and tierViolations.
@@ -116,7 +116,7 @@ If `inventory.json` exists:
 If `inventory.json` is missing or older than 5 minutes, run the scanner first:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/audit-atomic/scripts/inventory.py" \
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/inventory.py" \
   scan --root "$scope" --tier all \
   --out "$scope/.design-storybook-atomic/inventory.json"
 ```
