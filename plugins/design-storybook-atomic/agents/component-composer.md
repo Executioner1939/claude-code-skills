@@ -23,6 +23,7 @@ skills:
   - component-composition
   - design-tokens
   - accessibility-stories
+  - genericness-rubric
 hooks:
   Stop:
     - hooks:
@@ -59,7 +60,33 @@ If any required input is missing, ask once before proceeding.
 
 ## Method
 
-1. **Existence pre-check (MANDATORY before any verdict).** Before any scoring, query the inventory for an existing implementation of the spec's name at any tier:
+1. **Pre-flight registry lookup (MANDATORY, runs before existence pre-check).** Read the canonical primitives registry from the `genericness-rubric` skill. The registry is a list of `{ canonical_name, structural_shape, recognised_suffixes[], slot_contract }` entries (e.g. `Wizard`, `Chip`, `Card`, `Hero`, `Button`, `Input`, …).
+
+   Run two independent checks against the spec:
+
+   **(a) Shape match.** If the spec's structural shape (steps + navigation = wizard; label-in-pill = chip; header/media/body/footer container = card; full-bleed banner = hero; …) matches a registry entry's `structural_shape`, the verdict MUST be `REUSE` or `EXTEND`. `BUILD-NEW` is forbidden in this branch.
+
+   **(b) Name pattern match.** If the spec's proposed name decomposes as `<Domain><PrimitiveSuffix>` (e.g. `BookingWizard`, `KnownForChip`, `BrandCard`, `LicenceCard`, `HeroSimple`) AND `<PrimitiveSuffix>` appears in any registry entry's `recognised_suffixes`, the verdict MUST be `RENAME` (drop the domain prefix; rename to the canonical primitive) **plus** `COMPOSE` at the consumer (the consumer composes the canonical primitive with domain content via slots / props). `BUILD-NEW` is forbidden in this branch.
+
+   **(c) Both miss.** Only when BOTH (a) and (b) miss is `BUILD-NEW` permitted. The new component MUST then itself satisfy genericness:
+   - Generic name (no domain prefix, no consumer-specific noun).
+   - Slot-accepting where structural variation is plausible.
+   - No domain or feature-area name in the type, file path, or props.
+
+   Halt with a fixed-format error if a downstream verdict step would emit `BUILD-NEW` while either (a) or (b) matched:
+
+   ```text
+   GENERICNESS_VIOLATION
+     spec proposed:        <tier>/<Name>
+     registry match (a):   <canonical_name> via shape <structural_shape>
+     registry match (b):   suffix <PrimitiveSuffix> → canonical <canonical_name>
+     decision:             BUILD-NEW refused. Use the registry primitive.
+     recommended verdict:  <REUSE|EXTEND|RENAME+COMPOSE>
+   ```
+
+   Stop. Do not proceed to existence pre-check or scoring until the verdict has been re-derived against the registry.
+
+2. **Existence pre-check (MANDATORY before any verdict).** Before any scoring, query the inventory for an existing implementation of the spec's name at any tier:
 
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/inventory.py" \
@@ -79,19 +106,20 @@ If any required input is missing, ask once before proceeding.
 
    Stop. Do not proceed to verdict scoring unless the user explicitly overrides with `--allow-tier-duplication`. The audit-atomic feedback called out this exact failure: a previous session built `Card.tsx` and `Toast.tsx` atoms before the orchestrator's redirect arrived, wasting the work because both already existed at higher tiers.
 
-2. **Match the spec against the inventory.** For each candidate (atom, molecule, organism whose intent or shape resembles the spec), score:
+3. **Match the spec against the inventory.** For each candidate (atom, molecule, organism whose intent or shape resembles the spec), score:
    - Intent overlap (does the existing component already solve this problem?)
    - API overlap (do existing props subsume the spec's props?)
    - Visual/state overlap (do the existing variants cover the spec's states?)
    - Consumer impact (how many places use it; how big is the blast radius of any change?)
 
-3. **Pick a verdict:**
-   - **REUSE** if intent ≥ 90% and API covers ≥ 90% of the spec's props with at most cosmetic prop-name renames.
-   - **EXTEND** if intent ≥ 90% but ≤ 1 missing prop / variant / slot. Adding it is additive (no breaking API change) and the existing consumers are unaffected.
+4. **Pick a verdict** (subject to the Pre-flight registry lookup in step 1; if a registry match was found, you cannot pick BUILD-NEW):
+   - **REUSE** if intent ≥ 90% and API covers ≥ 90% of the spec's props with at most cosmetic prop-name renames, OR if a registry shape-match exists and the canonical primitive's API already covers the spec.
+   - **EXTEND** if intent ≥ 90% but ≤ 1 missing prop / variant / slot. Adding it is additive (no breaking API change) and the existing consumers are unaffected. Required when registry shape-match exists and the canonical primitive needs a variant or slot to cover the spec (e.g. spec "simple hero variant" → `EXTEND Hero` with `variant: 'simple'`).
+   - **RENAME** if the spec's proposed name is `<Domain><PrimitiveSuffix>` and the suffix matches a registry entry. Output the canonical primitive name; recommend the consumer compose domain content into the primitive's slots. Used for `BookingWizard` → use generic `Wizard<TData>`, consumer composes booking-step content into `steps`; `KnownForChip` → use `Chip` directly with `label` prop; `BrandCard` → use `Card` with header/media/body/footer slots filled by brand content.
    - **COMPOSE** if no single existing component fits but the spec is assemblable from existing lower-level components without building any new primitive.
-   - **BUILD-NEW** if compose requires a new primitive, or if the spec is at an atomic level that doesn't yet have a peer.
+   - **BUILD-NEW** if compose requires a new primitive AND no registry entry matches by shape or by name-suffix. The new component must itself satisfy genericness (generic name, slot-accepting, no domain prefix in name / file path / props).
 
-3. **For COMPOSE and BUILD-NEW**, propose:
+5. **For COMPOSE and BUILD-NEW**, propose:
    - The atomic level (cite the rules from `atomic-design`).
    - The composition tree (which lower components to use; which named slots; which compound shape).
    - The prop API (per `component-composition` rules — enums for variants, slots for variable regions, controlled+uncontrolled where interactive).
@@ -102,7 +130,7 @@ If any required input is missing, ask once before proceeding.
 ## Output (decide)
 
 ```text
-VERDICT: REUSE | EXTEND | COMPOSE | BUILD-NEW
+VERDICT: REUSE | EXTEND | RENAME | COMPOSE | BUILD-NEW
 CONFIDENCE: HIGH | MEDIUM | LOW
 
 EVIDENCE

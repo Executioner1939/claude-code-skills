@@ -24,6 +24,7 @@ skills:
   - story-coverage-checklist
   - design-tokens
   - accessibility-stories
+  - genericness-rubric
 hooks:
   Stop:
     - hooks:
@@ -41,7 +42,7 @@ You return a structured per-component grade report. You never edit files.
 Expected inputs from the calling workflow (passed as the user message):
 
 - `target` — a single component path *or* an atomic level + scope path.
-- `mode` — `default` (grade as the component's level) | `composition` (grade plus walk upward to confirm API sufficiency).
+- `mode` — `default` (grade as the component's level) | `composition` (grade plus walk upward to confirm API sufficiency) | `genericness-only` (run only the GENERICNESS axis from the genericness-rubric skill — used by audit slash commands that want a focused cross-cutting pass without re-grading coverage / quality / hygiene).
 - Optional `overrides` — path to a `.storybook-atomic.yml` if the project uses one.
 
 If inputs are unclear, ask once before grading. Don't guess scope.
@@ -91,6 +92,14 @@ COMPONENT: <level>/<Name>
     ✅ no @deprecated marker
     ✅ exported from src/components/atoms/index.ts
 
+  GENERICNESS  <n>/100   <PASS|DELETE|RENAME-AND-SLOT|MERGE-INTO-PRIMITIVE|PROMOTE-TO-PRIMITIVE>
+    name        ✅|❌  function-shaped (domain-prefix match: <none|BrandCard matches Brand+Card>)
+    slots       ✅|❌  accepts <children|content|slots|render|steps[]|as|asChild|none>
+    boil-down   ✅|❌  <pure-wrapper of <Primitive>|adds <list of behavior signals>>
+    cluster     <none|cluster-N: <member, member, ...>>
+    registry    ✅|❌  <listed as <Primitive>|not listed; nearest = <Primitive>>
+    boil-down expression: <ComponentName> → <JSX>
+
   COMPOSITE  <n>/100   <letter>   <SHIP-READY|NEEDS-WORK|BLOCKED>
 
   RECOMMENDED ACTIONS (ordered by leverage):
@@ -112,6 +121,9 @@ BATCH SUMMARY (atomic-auditor, <level>)
   Needs work (C) : <n>
   Blocked        : <n>
   Hygiene fails  : <n>
+  Domain-named shells                       : <n>
+  Wrapper-of-primitive (DELETE candidates)  : <n>
+  Structural-duplicate clusters surfaced    : <n> (see component-deduplicator handoff)
   Top systemic gap: <e.g. "missing MDX (24/31 components)" or "no RTL stories anywhere">
 ```
 
@@ -125,7 +137,8 @@ For each component:
 3. **Score coverage.** Cross-reference exports in the story file against the required-stories table for this level (`story-coverage-checklist`). Sum weights.
 4. **Score quality.** Walk the file-level, story-level, MDX, and a11y checklists from `story-coverage-checklist`. One point per item present.
 5. **Run hygiene.** Each hygiene check is binary; any failure flips HYGIENE to FAIL and the composite gets penalized to BLOCKED regardless of other scores.
-6. **Compute composite.** Average of three scores out of 100. Letter grade per rubric: A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, F < 60. Status: SHIP-READY if A and HYGIENE pass; NEEDS-WORK if B/C; BLOCKED if D/F or HYGIENE FAIL.
+5b. **Run genericness.** Read the `genericness-rubric` skill. For the component, run: (a) domain-prefix regex on the component name (reject `Booking|Licence|KYC|Checkout|KnownFor|Brand|...` style prefixes that name a business concept rather than a UI shape); (b) slot-acceptance probe on the props (look for `ReactNode | children | render*` slots — absence on a "shell" component is evidence for RENAME-AND-SLOT); (c) boil-down probe on the body (if the JSX reduces to a single child primitive call after removing trivial mapping/forwarding, the verdict is DELETE or MERGE-INTO-PRIMITIVE); (d) structural-cluster lookup against the cartographer's `inventory.json` (≥3 components with the same prop-shape signature is evidence for the cluster's slotted-primitive replacement). Emit the GENERICNESS section per the output-contract block. If `mode: genericness-only`, skip Steps 3, 4, 5 entirely and emit ONLY the COMPONENT name + PATH + GENERICNESS section + a stripped COMPOSITE line that reflects the GENERICNESS override only.
+6. **Compute composite.** Average of three scores (coverage, quality, hygiene) out of 100. Letter grade per rubric: A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, F < 60. Status: SHIP-READY if A and HYGIENE pass; NEEDS-WORK if B/C; BLOCKED if D/F or HYGIENE FAIL. **GENERICNESS override:** verdict ∈ {DELETE, MERGE-INTO-PRIMITIVE} forces composite to BLOCKED regardless of other axes (the component should not exist in its current form). Verdict ∈ {RENAME-AND-SLOT, PROMOTE-TO-PRIMITIVE} forces NEEDS-WORK if not already worse. Verdict PASS does not change the composite.
 7. **Generate recommended actions.** Ordered by leverage: hygiene fixes first (they unlock SHIP-READY), then highest-weight missing stories, then MDX, then minor quality items.
 
 For composition mode (only for molecules / organisms): after grading the component, walk upward — find every consumer (file imports it), and check whether the component's API supports the consumer without "smells" (ad-hoc style overrides, type assertions, hidden props passed via spread, prop-drilling). Append a COMPOSITION block to the report.

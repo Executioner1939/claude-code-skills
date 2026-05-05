@@ -22,6 +22,7 @@ skills:
   - atomic-design
   - storybook-atomic-integration
   - component-composition
+  - genericness-rubric
 hooks:
   Stop:
     - hooks:
@@ -62,6 +63,11 @@ ATOMS
       - from molecules: (none) ✅ no level violation
     deprecated: no
     lastModified: 2026-04-12
+    domainNamePattern: <none|prefix|suffix|both>
+    domainPrefix: <captured word, only when pattern includes prefix>
+    genericPrimitiveCandidate: <Wizard|Hero|Card|Modal|Drawer|Chip|Badge|...|null>
+    slotsAccepted: <true|false>
+    bodyShapeSignature: <normalised tree string>
 
   src/components/atoms/Avatar/Avatar.tsx
     …
@@ -99,6 +105,8 @@ SUMMARY
   components_without_mdx: 31
   csf_format_distribution: { 'CSF-Factories': 14, 'CSF3': 62, 'CSF2': 3, 'none': 8 }
   candidate_duplicate_clusters: 4
+  domain_named_components: <n>
+  wrappers_of_primitive_candidates: <n>
 ```
 
 
@@ -190,6 +198,18 @@ For each component, gather:
 - **imports** of other components: parse imports; classify each by atomic level via the inventory itself; flag level violations (atom→atom, molecule→molecule, anything→up-level).
 - **deprecated**: grep for `@deprecated` JSDoc or a deprecation banner; check folder name suffix `.legacy.` or `Old`.
 - **lastModified**: `git log -1 --format=%ad --date=short -- <path>` (Bash).
+
+## Step 4b — Genericness signals
+
+For each component, derive five genericness fields. All five rely on the `genericness-rubric` skill (loaded via frontmatter):
+
+- **domainNamePattern**: run the rubric's domain-prefix and domain-suffix regexes against the component name. Set to `prefix`, `suffix`, `both`, or `none`. The regex catalogue lives in the genericness-rubric skill — do not hard-code it here.
+- **domainPrefix**: when `domainNamePattern` includes `prefix`, capture the leading domain word (e.g. `Booking` from `BookingWizard`, `KnownFor` from `KnownForChip`). Empty when pattern is `suffix` or `none`.
+- **genericPrimitiveCandidate**: the rubric's canonical-primitives registry (Wizard, Hero, Card, Modal, Drawer, Chip, Badge, Avatar, Tabs, …) is matched against the trailing token of the component name AND the body's root-element signature. Best-guess match wins; emit `null` if no registry primitive matches with confidence ≥ rubric threshold.
+- **slotsAccepted**: `true` if the component declares any of `children`, `content`, `slots`, `render`, `steps`, `as`, or `asChild` in its prop signature (already extracted in Step 4). Else `false`.
+- **bodyShapeSignature**: parse the component body and emit a normalised string of the root JSX element plus its first two tree levels — e.g. a component whose body is `<Chip variant="known-for" {...rest} />` becomes `Chip`; a component whose body is `<Wizard><Step/><Step/></Wizard>` becomes `Wizard>Step,Step`. Used by `component-deduplicator mode=structural` to detect "this is just a domain-named wrapper of a registry primitive".
+
+Do NOT re-walk the file system in this step. Use the source already cached from Step 4. If the static `inventory.json` from Step 0 already carries these fields (post-schema-update), pass them through unchanged.
 
 ## Step 5 — Detect candidate duplicate clusters
 

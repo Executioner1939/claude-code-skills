@@ -34,16 +34,17 @@ Spawn `atomic-auditor` per molecule with the **molecule rubric**. Additional che
 - **Error UI a11y**: if molecule renders error state, must use `aria-invalid` + `aria-describedby` + `role="alert"` (or live region) correctly.
 - **FormField-shape molecules** (detected by name pattern): must accept a TanStack Form `field` as primary prop. Scattered `label + value + onChange + error` props = TanStack-contract violation.
 
-## Step 3 — Cross-cutting (parallel — four agents)
+## Step 3 — Cross-cutting (parallel — five agents)
 
-Same four agents as `audit-atomic`, scoped to molecules:
+Same five agents as `audit-atomic`, scoped to molecules:
 
 1. `component-deduplicator` — flag near-duplicate molecules.
 2. `design-token-enforcer` (mode `scan`) — molecules must consume tokens.
 3. `accessibility-reviewer` — keyboard flow + announcement audit.
 4. `library-policy-enforcer` (mode `audit-imports + audit-integrations`) — composition + form-field shape.
+5. `atomic-auditor` (mode `genericness-only`, scoped to molecules) — per-molecule genericness verdict in batch (KEEP / DELETE-wrapper / RENAME-AND-SLOT / MERGE-INTO-PRIMITIVE / PROMOTE-TO-PRIMITIVE).
 
-All four write HANDOFF.md per the contract.
+All five write HANDOFF.md per the contract.
 
 ## Step 4 — Composition-up audit (sequential, after Step 3)
 
@@ -64,6 +65,9 @@ Baseline : present | not present (first run)
 SECTION 1 — SUMMARY
   Molecules scanned             : <n>
   Ship-ready / Solid / Needs work / Blocked counts.
+  Domain-named shells            : <n>
+  Wrapper-of-primitive (DELETE)  : <n>
+  Structural-duplicate clusters  : <n>
   Composition violations        : <n>
   Domain-state leaks            : <n>
   Missing-interaction-test      : <n>
@@ -74,10 +78,13 @@ SECTION 1 — SUMMARY
 SECTION 2 — PER-MOLECULE GRADES
   (alphabetized)
 
-SECTION 3 — DUPLICATE CLUSTERS
-SECTION 4 — DEPRECATED / UNUSED
-SECTION 5 — TOKEN GAPS
-SECTION 6 — COMPOSITION + TANSTACK-CONTRACT VIOLATIONS
+SECTION 3 — DOMAIN-COUPLING / GENERICNESS DEFECTS
+  (from atomic-auditor mode=genericness-only HANDOFF; subsections: DELETE candidates, RENAME-AND-SLOT, MERGE-INTO-PRIMITIVE, PROMOTE-TO-PRIMITIVE — same shape as audit-atomic SECTION 3 / audit-organisms SECTION 3)
+
+SECTION 4 — DUPLICATE CLUSTERS
+SECTION 5 — DEPRECATED / UNUSED
+SECTION 6 — TOKEN GAPS
+SECTION 7 — COMPOSITION + TANSTACK-CONTRACT VIOLATIONS
   Composition violations:
     molecules/SearchBar/SearchBar.tsx:7 imports molecules/IconButton
       → fix: extract IconButton to atom OR compose SearchBar from atoms/Button + atoms/Icon.
@@ -91,8 +98,11 @@ SECTION 6 — COMPOSITION + TANSTACK-CONTRACT VIOLATIONS
     molecules/Combobox/Combobox.tsx:34
       → not forwarding aria-describedby from field.state.meta.
 
-SECTION 7 — ACCESSIBILITY DEFECTS
-SECTION 8 — PRIORITIZED ACTION PLAN
+SECTION 8 — ACCESSIBILITY DEFECTS
+SECTION 9 — PRIORITIZED ACTION PLAN
+  Block 0 — Surface reduction (do these FIRST):
+    0a. DELETE wrapper molecules (Section 3 DELETE candidates).
+    0b. RENAME-AND-SLOT domain-named molecules (Section 3 RENAME-AND-SLOT).
   Block 1 — Hygiene blockers (must fix):
     1. Resolve composition violations (3 molecules).
     2. Resolve domain-state leaks (2 molecules).
@@ -102,9 +112,10 @@ SECTION 8 — PRIORITIZED ACTION PLAN
     5. Add missing primary-interaction `play` stories.
     6. Add `KeyboardFlow` stories where missing.
   Block 3 — Consolidation:
-    7. Merge near-duplicate molecules.
+    7. Merge structural-duplicate clusters into canonical primitive (Section 3 MERGE-INTO-PRIMITIVE).
+    8. Merge near-duplicate molecules (Section 4).
 
-SECTION 9 — DIFF VS BASELINE  (only if baseline existed)
+SECTION 10 — DIFF VS BASELINE  (only if baseline existed)
 NEXT
   - Apply Block 1?
   - Save as new baseline?
@@ -119,6 +130,7 @@ NEXT
 
 Same as `audit-atomic`. Plus:
 
+- **Genericness is a hygiene axis.** A domain-named shell that exposes no slot props is a hygiene fail. A pure wrapper-of-primitive (DELETE verdict) is a hygiene fail. Both force the molecule to BLOCKED.
 - **Composition violations and domain-state leaks are hygiene fails.** Don't soften these — atomic design depends on level discipline.
 - **A "molecule" that owns domain state is misclassified** — flag for promotion to organism with the path move recommendation.
 - **A "molecule" that's just one atom + a wrapper** — flag for inlining or atom-variant promotion.
