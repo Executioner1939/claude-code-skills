@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, and design.",
-    "version": "5.5.0",
+    "version": "5.6.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -69,8 +69,8 @@
     {
       "name": "analysis-codebase-archaeology",
       "source": "./plugins/analysis-codebase-archaeology",
-      "description": "Deep structural analysis of any codebase -- extracts business rules, maps data flows, traces dependencies, assesses risk, and produces transformation plans. Supports 7 analysis lenses.",
-      "version": "1.1.3",
+      "description": "Deep structural analysis of any codebase -- extracts business rules, maps data flows, traces dependencies, assesses risk, and produces transformation plans. 7 analysis lenses, 2 specialized subagents, 1 slash-command workflow (/analysis-codebase-archaeology:archaeology).",
+      "version": "1.2.0",
       "category": "development",
       "keywords": ["code-analysis", "reverse-engineering", "business-rules", "technical-debt", "migration"],
       "author": {
