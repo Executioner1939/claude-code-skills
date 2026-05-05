@@ -1,39 +1,33 @@
 ---
-name: analysis-codebase-archaeology
+name: codebase-archaeology
 description: >
-  Systematically reverse-engineers and analyzes existing codebases to extract
-  business rules, map data flows, trace dependencies, assess risk, and produce
-  transformation plans. MUST use this skill when the user asks to understand,
-  analyze, or reverse-engineer code they inherited or didn't write, plan a
-  migration or architectural change to an existing system, perform due diligence
-  or technical audit, extract business logic or document how code works,
-  decompose a monolith, assess technical debt, or build a test strategy for
-  legacy code. Triggers on: analyze codebase, extract business rules, map data
-  flows, trace dependencies, code archaeology, reverse engineer, plan migration,
-  rewrite in, port to, move to hexagonal, CQRS, technical debt, due diligence,
-  onboarding guide, split monolith, what does this code do, hidden complexity,
-  blast radius, coupling analysis, or data lineage questions.
+  Methodology and templates for systematic codebase archaeology -- the
+  reverse-engineering reference loaded by the codebase-archaeologist and
+  transformation-strategist agents. Provides the lens-selection table, the
+  five-layer analysis model, the five-phase planning framework, and the
+  template inventory. Auto-loaded into the two agents via their `skills:`
+  frontmatter. The procedural workflow that drives these agents lives in the
+  /analysis-codebase-archaeology:archaeology slash command -- read this skill
+  alongside the agent system prompt; do not invoke this skill directly to
+  start an analysis.
 ---
 
-# Codebase Archaeology
+# Codebase Archaeology -- Methodology Reference
 
-A two-phase system for understanding existing codebases and planning their transformation. Phase 1 excavates what exists using structured templates. Phase 2 plans what to do with it. Every finding is traceable to a file:line reference.
+This skill is **methodology and templates only**. Three audiences read it:
 
-## How It Works
+1. The `codebase-archaeologist` agent (auto-loaded via its `skills:` frontmatter).
+2. The `transformation-strategist` agent (same).
+3. The `analysis-codebase-archaeology:archaeology` slash command, which reads this file to look up lens names and template paths when constructing agent envelopes.
 
-This skill orchestrates two agents with purpose-specific output templates:
+If you are a human trying to run an analysis, run the slash command -- not this skill.
 
-1. **codebase-archaeologist** — Reads code systematically through five analysis layers. Produces structured findings using core templates plus a lens selected based on the objective.
-2. **transformation-strategist** — Consumes archaeology output. Produces actionable transformation plans with sequencing, verification strategies, and risk registers.
+## Lens selection
 
-The skill selects the right lens and templates automatically based on what the user wants to accomplish.
+Every archaeology run picks one or more lenses. The lens determines which template the archaeologist reads in addition to `core.md`. Multiple lenses compose; they add fields without conflicting.
 
-## Step 1: Determine the Objective
-
-Identify the user's objective from their request. This determines which lens to apply — the lens selection dramatically changes the output format and focus areas.
-
-| Objective | Lens | User Signals |
-|-----------|------|-------------|
+| Objective | Lens name | Trigger phrases |
+|---|---|---|
 | Language or framework migration | `migration-lens` | "rewrite in", "port to", "migrate from X to Y", "convert to" |
 | Architectural restructuring | `architecture-lens` | "hexagonal", "CQRS", "clean architecture", "ports and adapters", "event sourcing", "modular monolith" |
 | Service decomposition | `decomposition-lens` | "microservices", "break apart", "extract services", "service boundaries", "split the monolith" |
@@ -41,104 +35,57 @@ Identify the user's objective from their request. This determines which lens to 
 | Documentation generation | `documentation-lens` | "document this", "onboarding guide", "explain this codebase", "architecture docs" |
 | Test strategy | `test-strategy-lens` | "test plan", "test strategy", "what should I test", "characterization tests", "coverage" |
 | Technical debt remediation | `debt-lens` | "technical debt", "code quality", "cleanup", "anti-patterns", "pay down debt" |
-| General understanding | No additional lens | "what does this do", "analyze this", "understand this code" |
+| General understanding | (none -- core only) | "what does this do", "analyze this", "understand this code" |
 
-If the objective is ambiguous, ask the user — don't guess. Multiple objectives can use multiple lenses; they add fields without conflicting.
+When the calling envelope does not pass a `lenses_to_apply` value, ask the calling user once with these eight options. Do not guess.
 
-## Step 2: Run Archaeology
+## Five-layer analysis model (codebase-archaeologist)
 
-Invoke the **codebase-archaeologist** agent with:
+The archaeologist's system prompt details each layer. This table is the canonical naming so the strategist and the index command can refer to layer numbers unambiguously.
 
-1. **Core templates** — Always loaded. Read `references/templates/core.md`
-2. **Lens templates** — Based on objective. Read `references/templates/{lens}-lens.md`
-3. **Scope** — Which files, modules, or entry points to analyze
+| Layer | Name | Output |
+|---|---|---|
+| 1 | Structural Cartography | entry points, call graph, module boundaries, dead code, shared mutable state |
+| 2 | Data Flow Tracing | sources, transformations, intermediate state, sinks, lineage |
+| 3 | Business Rule Extraction | catalog of `BUSINESS RULE` template instances |
+| 4 | Dependency Mapping | `DEPENDENCY` template instances with HARD / SOFT / CONVENTIONAL coupling |
+| 5 | Risk and Complexity Assessment | risk scores, debt patterns, hotspots |
 
-The archaeologist works iteratively through five layers, reporting each before moving to the next:
+## Five-phase planning framework (transformation-strategist)
 
-- **Layer 1: Structural Cartography** — entry points, call graph, module boundaries, dead code, shared state
-- **Layer 2: Data Flow Tracing** — sources, transformations, sinks, lineage
-- **Layer 3: Business Rule Extraction** — the critical layer; domain decisions encoded as logic
-- **Layer 4: Dependency Mapping** — explicit, implicit, temporal, environmental
-- **Layer 5: Risk and Complexity Assessment** — debt patterns, hidden complexity hotspots
+| Phase | Name | Output |
+|---|---|---|
+| 1 | Gap Analysis | validates the archaeology is sufficient for the objective; halts if not |
+| 2 | Mapping Analysis | classifies elements: `NATURAL_FIT`, `FORCED_FIT`, `RESISTS_MAPPING`, `INVARIANT`, `ELIMINATED` |
+| 3 | Sequencing | execution order with stable, deployable interim states per phase |
+| 4 | Verification Strategy | behavioral parity tests derived from archaeology `RULE_ID`s |
+| 5 | Risk Register | per-risk: trigger, impact, mitigation, detection, contingency |
 
-The agent surfaces surprises immediately and asks for human input on low-confidence, high-blast-radius findings.
+## Template inventory
 
-## Step 3: Review Archaeology Output
+All templates live at `${CLAUDE_PLUGIN_ROOT}/skills/codebase-archaeology/references/templates/`. Read on demand -- do not preload the full set.
 
-Before transformation planning, check:
-- **KNOWN_UNKNOWNS** — are there gaps that matter for the objective?
-- **LOW_CONFIDENCE** rules — are these clustered in critical areas?
-- **LENS_SPECIFIC** section — does it answer the objective's questions?
+| File | Purpose | Loaded when |
+|---|---|---|
+| `core.md` | `BUSINESS RULE`, `DATA FLOW`, `DEPENDENCY`, `COMPONENT SUMMARY`, `ARCHAEOLOGY REPORT` | every archaeology run |
+| `migration-lens.md` | `TYPE_MAPPING`, `ECOSYSTEM_MAPPING`, `PRECISION_AUDIT` | language / framework migration |
+| `architecture-lens.md` | `BOUNDED_CONTEXTS`, `SEAM_ANALYSIS`, `DOMAIN_EVENT_CANDIDATES` | architectural restructuring |
+| `decomposition-lens.md` | `SERVICE_CANDIDATES`, `DATA_OWNERSHIP`, `DISTRIBUTED_TRANSACTIONS` | service decomposition |
+| `risk-lens.md` | `LIABILITY_REGISTER`, `MAINTAINABILITY_SCORECARD`, `KEY_PERSON_RISK` | due diligence / audit / compliance |
+| `documentation-lens.md` | `SYSTEM_NARRATIVES`, `DECISION_RECORDS`, `ONBOARDING_PATHS` | documentation objective |
+| `test-strategy-lens.md` | `TEST_CASE_SPECS`, `COVERAGE_MAPS`, `EXECUTION_PLANS` | test strategy objective |
+| `debt-lens.md` | `DEBT_ITEMS`, `DEBT_INVENTORY`, `REMEDIATION_ROADMAP` | technical debt objective |
+| `transformation-plan.md` | `GAP_ANALYSIS`, `MAPPING_ANALYSIS`, `SEQUENCING`, `VERIFICATION_STRATEGY`, `RISK_REGISTER` | every transformation-strategist run |
 
-If gaps are significant, run targeted re-analysis on specific areas rather than re-analyzing everything.
+## Output discipline (shared across both agents)
 
-## Step 4: Plan the Transformation
+- Every claim cites `file:line`. Unanchored claims are unreliable.
+- Every finding has `CONFIDENCE: HIGH | MEDIUM | LOW` with justification.
+- `KNOWN_UNKNOWNS` is first-class output, never hidden.
+- `LOW_CONFIDENCE` findings cluster into their own sub-section so the human can scan them.
+- `"N/A -- [reason]"` is preferred over silent omission of a layer or section.
+- `DECISIONS_REQUIRED` are surfaced to the human; agents never choose on the user's behalf.
 
-If the objective requires changing the codebase (migration, restructuring, decomposition, debt remediation), invoke the **transformation-strategist** agent with:
+## Memory hooks
 
-1. **Transformation plan templates** — Read `references/templates/transformation-plan.md`
-2. **Archaeology output** — All artifacts from Step 2
-3. **Stated objective** — The user's target state
-
-The strategist works through five phases:
-1. Gap Analysis — validates archaeology completeness
-2. Mapping Analysis — classifies every element (NATURAL_FIT, FORCED_FIT, RESISTS_MAPPING, INVARIANT, ELIMINATED)
-3. Sequencing — determines execution order with stable interim states
-4. Verification Strategy — behavioral parity tests derived from business rules
-5. Risk Register — everything that could go wrong, with mitigations
-
-For documentation or test strategy objectives, the archaeology output is often sufficient without a transformation plan.
-
-## Template Reference
-
-All templates are in `references/templates/`. Read the relevant template files before producing output.
-
-| File | Purpose | When Used |
-|------|---------|-----------|
-| `core.md` | Business Rule, Data Flow, Dependency, Component Summary, Archaeology Report | Always |
-| `migration-lens.md` | Type mapping, ecosystem mapping, precision audit | Language/framework migrations |
-| `architecture-lens.md` | Bounded contexts, seam analysis, domain events | Architectural restructuring |
-| `decomposition-lens.md` | Service candidates, distributed transactions, data ownership | Service extraction |
-| `risk-lens.md` | Liability register, maintainability scorecard, key-person risk | Due diligence and audits |
-| `documentation-lens.md` | System narratives, decision records, onboarding paths | Documentation generation |
-| `test-strategy-lens.md` | Test case specs, coverage maps, execution plans | Test strategy development |
-| `debt-lens.md` | Debt items, debt inventory, remediation roadmap | Technical debt remediation |
-| `transformation-plan.md` | Gap analysis, element mapping, sequencing, verification, risk | Any transformation objective |
-
-## Examples
-
-### Language Migration
-User: "We need to migrate this Python 2.7 service to Python 3.12"
-
-1. Objective: **Language migration** → load `core.md` + `migration-lens.md`
-2. Run codebase-archaeologist with migration lens
-3. Review — focus on TYPE_MAPPING and PRECISION_AUDIT sections
-4. Run transformation-strategist with migration objective
-5. Deliver: Archaeology report + Transformation plan
-
-### CQRS Restructuring
-User: "We want to move our order service to CQRS with event sourcing"
-
-1. Objective: **Architecture (CQRS-ES)** → load `core.md` + `architecture-lens.md`
-2. Run codebase-archaeologist with architecture lens
-3. Review — focus on READ_WRITE ratio, EVENT_CANDIDATES, SEAM_ANALYSIS
-4. Run transformation-strategist with CQRS-ES objective
-5. Deliver: Archaeology report + Transformation plan
-
-### General Understanding
-User: "I just inherited this codebase, help me understand it"
-
-1. Objective: **General understanding** → load `core.md` + `documentation-lens.md`
-2. Run codebase-archaeologist with documentation lens
-3. Deliver: Archaeology report with narratives and onboarding path
-4. No transformation plan needed unless user requests one
-
-## Troubleshooting
-
-**Archaeology taking too long:** Reduce scope. Analyze one module or entry point at a time rather than the entire codebase.
-
-**Low confidence on critical rules:** Ask the user for domain context. Some rules cannot be understood from code alone — they require business knowledge.
-
-**Lens doesn't fit:** If the objective evolves mid-analysis, switch lenses. Core templates are always present; only the additional lens fields change.
-
-**Transformation plan has too many RESISTS_MAPPING:** This is information, not failure. High resistance means the target architecture requires significant redesign in those areas. Surface it honestly.
+Both agents declare a `Stop` hook that appends an activity line to `.claude/agent-memory/<agent-name>/activity.log`. Useful for cross-session continuity and for the slash command's final index to cite recent runs.
