@@ -1,0 +1,14 @@
+{
+  "$schema": "../preset.schema.json",
+  "name": "hardcoded-color",
+  "description": "Inline colour literals — bg-[#hex], text-[#hex], stroke-[hsl(...)], style={{ color: '#...' }}. Surfaces every site so the agent can replace with a semantic token or open a system gap.",
+  "filter": {
+    "anyOf": [
+      { "classPattern": "^bg-\\[#",     "ruleId": "arbitrary-bg-color",     "reason": "Arbitrary background colour — map to a semantic token (bg-accent, bg-surface-raised, …)." },
+      { "classPattern": "^text-\\[#",   "ruleId": "arbitrary-text-color",   "reason": "Arbitrary text colour — map to text-text, text-text-muted, etc." },
+      { "classPattern": "^border-\\[#", "ruleId": "arbitrary-border-color", "reason": "Arbitrary border colour — map to border-border-subtle / border-border-strong." },
+      { "classPattern": "^fill-\\[#",   "ruleId": "arbitrary-fill",         "reason": "Arbitrary fill — map to a semantic token." },
+      { "classPattern": "^stroke-\\[#", "ruleId": "arbitrary-stroke",       "reason": "Arbitrary stroke — map to a semantic token." }
+    ]
+  }
+}

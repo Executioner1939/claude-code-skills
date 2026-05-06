@@ -15,6 +15,13 @@ Thumbs.db
 
 # Node
 node_modules/
+dist/
+
+# Inspector caches (per-project archaeology snapshots)
+.anvil/
+
+# /codify scratch
+.codify-inbox/
 
 # Python
 __pycache__/

@@ -1,0 +1,16 @@
+{
+  "$schema": "../preset.schema.json",
+  "name": "raw-html-containers",
+  "description": "Raw HTML containers that should usually compose a layout primitive instead. Surfaces every <section>, <article>, <aside>, <header>, <footer>, <main>, and <nav> in a component body — the agent then decides whether the project has a matching layout primitive (Section, Article, Stack, Row, Grid) and whether to migrate.",
+  "filter": {
+    "anyOf": [
+      { "tag": "section", "ruleId": "raw-section", "reason": "Compose <Section> or <Stack as=\"section\"> instead of a raw <section>." },
+      { "tag": "article", "ruleId": "raw-article", "reason": "Compose <Article> or <Stack as=\"article\">." },
+      { "tag": "aside",   "ruleId": "raw-aside",   "reason": "Compose <Aside> or a side-rail surface." },
+      { "tag": "header",  "ruleId": "raw-header",  "reason": "Compose <HeaderSurface> at template tier; <Stack as=\"header\"> for in-card headers." },
+      { "tag": "footer",  "ruleId": "raw-footer",  "reason": "Compose <FooterSurface> at template tier; <Stack as=\"footer\"> for in-card footers." },
+      { "tag": "main",    "ruleId": "raw-main",    "reason": "Only one <main> per page — typically owned by ShellTemplate or an equivalent. Audit." },
+      { "tag": "nav",     "ruleId": "raw-nav",     "reason": "Compose <NavRow>, <NavTrail>, <NavSidebar>, or <RouteTabs> rather than a raw <nav>." }
+    ]
+  }
+}

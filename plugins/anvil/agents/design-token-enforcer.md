@@ -21,6 +21,7 @@ memory: project
 skills:
   - design-tokens
   - atomic-design
+  - safe-code-mutation
 hooks:
   Stop:
     - hooks:
@@ -67,10 +68,47 @@ Output: a structured report following the format in `audit-tokens` skill's TOKEN
 
 ## Mode: scan
 
-1. Build the literal-detection patterns from the `design-tokens` skill (color hex / rgb / rgba / hsl / hsla; px / rem / em outside of safe contexts; font-size / font-weight / line-height; transition / animation / duration; box-shadow; border-radius; z-index integers).
-2. Run `grep -RnE "<pattern>" $scope --include="*.{ts,tsx,js,jsx,vue,svelte,css,scss,sass,less,styl,html,mdx}"` per pattern. Aggregate hits by file.
-3. For each hit, lookup against the token files for an exact value match. If exact, propose that token (HIGH confidence). If within tolerance (color ΔE < 5; spacing within ±1px; font-size within 0.05rem; shadow strings normalized), propose the nearest token (MEDIUM confidence). If neither, propose a new token with a name + rationale (LOW confidence).
-4. Group by file; group within file by category (color, space, font, radius, shadow, motion, z).
+Use the `@anvil/inspector` archaeology pipeline rather than rolling per-pattern greps. The structural pipeline catches violations a regex misses (spread props, conditional className expressions, `clsx` arg literals) and is faster to chain.
+
+### Step 1 — Per-component literals
+
+Start with the inspector's per-component card. Its `tokens.literals` list already contains hex / rgb / shadow / easing / length / duration literals across the file with line numbers and kinds:
+
+```bash
+INSPECTOR_DIR="${CLAUDE_PLUGIN_ROOT}/scripts/component-inspector"
+cd "$INSPECTOR_DIR"
+
+# Single-component literals (use during /anvil:audit-component):
+pnpm exec tsx src/cli.ts tokens "<absolute-component-path>" --root "<project-root>"
+```
+
+For project-wide literal sweeps, snapshot the body trees once and run the bundled archaeology presets:
+
+```bash
+pnpm exec tsx src/cli.ts trees "<project-root>" > /tmp/trees.ndjson
+
+cat /tmp/trees.ndjson | pnpm exec tsx src/cli.ts archaeology hardcoded-color   --root "<project-root>" | pnpm exec tsx src/cli.ts format
+cat /tmp/trees.ndjson | pnpm exec tsx src/cli.ts archaeology hardcoded-spacing --root "<project-root>" | pnpm exec tsx src/cli.ts format
+cat /tmp/trees.ndjson | pnpm exec tsx src/cli.ts archaeology inline-style      --root "<project-root>" | pnpm exec tsx src/cli.ts format
+```
+
+### Step 2 — Untokenised classes
+
+The classes scan catches arbitrary-value Tailwind utilities (`m-[3px]`, `bg-[#hex]`) and unrecognised utility classes that bypass the design system:
+
+```bash
+cat /tmp/trees.ndjson | pnpm exec tsx src/cli.ts find-untokened-classes \
+  --allow prose,markdown-body \
+  | pnpm exec tsx src/cli.ts paths
+```
+
+### Step 3 — Map each hit to a token
+
+For each literal returned, lookup against the token files for an exact value match. If exact, propose that token (HIGH confidence). If within tolerance (color ΔE < 5; spacing within ±1px; font-size within 0.05rem; shadow strings normalized), propose the nearest token (MEDIUM confidence). If neither, propose a new token with a name + rationale (LOW confidence). Group by file; group within file by category (color, space, font, radius, shadow, motion, z).
+
+### Step 4 — Project overlay
+
+If a project carves out exemptions (Three.js components, generated globe code, vendor-supplied widgets), don't hand-edit the agent prompt — drop a project overlay under `<projectRoot>/.anvil/archaeology/queries/<preset-name>.json` that wraps the bundled rule with a `not: { tagPattern: "..." }` exclusion. The next archaeology run picks it up automatically.
 
 Output:
 ```text
@@ -134,6 +172,7 @@ For LOW hits with no token at all, do NOT apply. Append to the report's "system 
 5. **Detect convention before editing.** Read 2–3 existing tokenized files in the same directory to learn how this project consumes tokens. Match.
 6. **Be conservative with apply.** If any ambiguity, defer.
 7. **Surface theming risk.** Replacing a literal with a primitive is *not* an improvement — it locks the value. Flag any case where no semantic exists.
+8. **Mutate structurally.** Per `safe-code-mutation`, no `sed` / `Edit replace_all=true` on `.ts/.tsx/.css`. For each apply, use `Edit` with a unique `old_string` that includes the line's surrounding context, OR call into the inspector's mutation API where one exists. Never feed regex through a CSS file expecting it to handle string interpolations correctly.
 
 
 # Interaction pattern

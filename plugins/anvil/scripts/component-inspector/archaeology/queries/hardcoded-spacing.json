@@ -1,0 +1,14 @@
+{
+  "$schema": "../preset.schema.json",
+  "name": "hardcoded-spacing",
+  "description": "Tailwind utilities that use arbitrary values for spacing — m-[3px], p-[7px], gap-[5px], etc. These bypass the design-token system; the agent should map each to the nearest spacing token or surface a system gap.",
+  "filter": {
+    "anyOf": [
+      { "classPattern": "^m[lrtbxy]?-\\[",    "ruleId": "arbitrary-margin",  "reason": "Arbitrary margin value — map to a spacing token or surface a system gap." },
+      { "classPattern": "^p[lrtbxy]?-\\[",    "ruleId": "arbitrary-padding", "reason": "Arbitrary padding value — map to a spacing token." },
+      { "classPattern": "^gap(-x|-y)?-\\[",   "ruleId": "arbitrary-gap",     "reason": "Arbitrary gap value — map to a spacing token." },
+      { "classPattern": "^space-(x|y)-\\[",   "ruleId": "arbitrary-space",   "reason": "Arbitrary space-x/y value — map to a spacing token." },
+      { "classPattern": "^(top|right|bottom|left|inset)-\\[", "ruleId": "arbitrary-position", "reason": "Arbitrary position offset — map to a token or surface a system gap." }
+    ]
+  }
+}

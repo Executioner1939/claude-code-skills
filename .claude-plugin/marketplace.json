@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, and design.",
-    "version": "5.10.0",
+    "version": "5.11.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -111,8 +111,8 @@
     {
       "name": "anvil",
       "source": "./plugins/anvil",
-      "description": "Atomic design + Storybook 10 expert toolkit. CSF Factories only (no exceptions). TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history (mirrors terraform-audit). 9 slash-command workflows (audit-atoms / audit-molecules / audit-organisms / audit-tokens / audit-libraries / audit-component / add-component / merge-duplicates / coverage-report), 11 specialized subagents. The audit-component workflow audits a single target component and surfaces every other place in the codebase where the same defect pattern is repeated.",
-      "version": "3.1.0",
+      "description": "Atomic design + Storybook 10 expert toolkit. CSF Factories only (no exceptions). TanStack-ecosystem-centric. Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Ships `@anvil/inspector` — a structurally precise TS toolkit (TypeScript Compiler API + ast-grep) with 24 CLI verbs: per-component cards (props/stories/variants/consumers/tokens/issues), full design-system inventory via the structural import graph, body-tree archaeology pipeline (NDJSON-piping verbs + 10 project-extensible JSON presets for raw HTML containers, hardcoded spacing/colour, inline styles, untokenised classes, image-no-alt, link-no-href, button-no-label, data-attr-without-testid), and structural mutations (rename-component / rename-prop / rename-story-title / rename-jsx-prop / remove-import / safe-delete / verify-mdx / orphan-exports — all dry-run by default). The `safe-code-mutation` skill encodes the no-regex-on-.ts/.tsx rule that the inspector embodies. 19 slash-command workflows including 10 inspector commands plus the existing audit/add/merge suite. Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history.",
+      "version": "4.0.0",
       "category": "design",
       "keywords": ["atomic-design", "storybook", "storybook-10", "csf-factories", "design-system", "design-tokens", "tanstack", "tanstack-form", "tanstack-table", "tanstack-db", "tanstack-query", "tailwind", "nativewind", "react-native", "audit", "wcag", "brad-frost"],
       "author": {

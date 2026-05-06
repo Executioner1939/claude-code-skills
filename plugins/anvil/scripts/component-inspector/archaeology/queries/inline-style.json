@@ -1,0 +1,10 @@
+{
+  "$schema": "../preset.schema.json",
+  "name": "inline-style",
+  "description": "Inline style props (`style={{ ... }}`). Every inline style is a token-system bypass; the agent should migrate to className with a token utility, or to a design-token CSS variable. Three.js / canvas / globe components are usually exempt — pass an allow-list via .anvil/archaeology/queries/inline-style.json overlay.",
+  "filter": {
+    "attr": "style",
+    "ruleId": "inline-style-prop",
+    "reason": "Inline style bypasses the token system — replace with a className or CSS variable."
+  }
+}

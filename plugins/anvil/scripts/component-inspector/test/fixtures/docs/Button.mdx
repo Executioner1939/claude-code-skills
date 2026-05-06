@@ -1,0 +1,27 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as Stories from "../atoms/Button/Button.stories";
+
+<Meta of={Stories.default} />
+
+# Button
+
+The cornerstone of the action vocabulary.
+
+<Canvas of={Stories.Default} />
+
+## Variants
+
+<Canvas of={Stories.Primary} />
+<Canvas of={Stories.Secondary} />
+
+## Sizes
+
+<Canvas of={Stories.Sizes} />
+
+## States
+
+<Canvas of={Stories.Disabled} />
+
+## Stale (this used to exist; now it doesn't — should fail verify-mdx)
+
+<Canvas of={Stories.LegacyDoesNotExist} />
