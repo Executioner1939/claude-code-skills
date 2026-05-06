@@ -5,6 +5,39 @@ All notable changes to the `anvil` plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-05-06
+
+### Added
+
+- **`@anvil/inspector` TypeScript package** at `scripts/component-inspector/`. Structurally precise replacement for the regex-based `inventory.py` (which remains for backwards compatibility but is no longer the agent default).
+- **New skill** `safe-code-mutation` — auto-loads on `.ts/.tsx/.jsx/.vue/.svelte`. Hard rule: no `sed`, `awk`, or `Edit replace_all=true` on code files. Embeds an `ast-grep` cookbook plus a verification protocol for cross-file rewrites.
+- **24 inspector CLI verbs** — `card`, `json`, `inventory`, `discover`, `consumers`, `tokens`, `tree`, `trees`, `find-jsx`, `find-class`, `find-attr`, `find-untokened-classes`, `archaeology`, `format`, `count`, `paths`, `rename-story-title`, `rename-jsx-prop`, `rename-component`, `rename-prop`, `remove-import`, `safe-delete`, `verify-mdx`, `orphan-exports`. NDJSON-piping pipeline so verbs compose unix-style.
+- **10 archaeology presets** (project-extensible via `<projectRoot>/.anvil/archaeology/queries/*.json`): `raw-html-containers`, `raw-list-containers`, `raw-flex-layout`, `hardcoded-spacing`, `hardcoded-color`, `inline-style`, `image-no-alt`, `link-no-href`, `button-no-label`, `data-attr-without-testid`. Each is a JSON predicate over the body-tree DSL.
+- **Predicate DSL**: `tag`, `tagPattern`, `tagKind`, `classPattern`, `rawClassPattern`, `attr`, `attrPattern`, `attrValue`, `anyOf`, `allOf`, `not`. Annotations (`ruleId`, `reason`) propagate from the matched branch through `format` / `paths` sinks.
+- **Structural mutation API**: `renameStoryTitle`, `renameJsxProp`, `renameComponent` (full project-wide JSX + imports + exports + type refs + declaration sites + `<Name>Props` co-rename), `renameProp` (interface + destructure + body refs + consumers), `removeImport`, `safeDeleteCheck`. All dry-run by default.
+- **Cross-cutting verifiers**: `verify-mdx` (catches dangling `<Canvas of={Stories.X}>` references after story renames), `orphan-exports` (uses the structural import graph to find unimported exports, resolving tsconfig path aliases that grep misses).
+- **10 new slash commands**: `/anvil:inspect`, `/anvil:inventory`, `/anvil:archaeology`, `/anvil:safe-delete`, `/anvil:safe-rename-story-title`, `/anvil:safe-rename-jsx-prop`, `/anvil:safe-remove-import`, `/anvil:safe-rename-component`, `/anvil:safe-rename-prop`, `/anvil:orphan-exports`.
+
+### Changed (BREAKING)
+
+- **6 agents rewired to depend on `@anvil/inspector`** instead of grep / regex / re-walking the tree:
+  - `component-cartographer` — uses `inventory` + per-component `json` cards.
+  - `atomic-auditor` — `card.issues` drives HYGIENE, `card.tokens.literals` drives hardcoded-value findings, archaeology presets drive systemic checks.
+  - `mdx-doc-writer` — reads `card.props` + `card.stories.variants[*].exportName` for accurate `<ArgTypes>` / `<Canvas>` references; runs `verify-mdx` mandatorily before yielding.
+  - `story-writer` — reads existing variants from the card; uses `rename-story-title` for taxonomy fixes; verifies post-write.
+  - `design-token-enforcer` — replaces per-pattern grep loop with `tokens` / `archaeology` / `find-untokened-classes` pipeline.
+  - `component-deduplicator` — uses body-tree NDJSON + cards for similarity scoring; recommends inspector mutations (`rename-component`, `rename-prop`, `safe-delete`) in migration plans.
+- **First-time setup** required per consuming project: `pnpm install` inside `${CLAUDE_PLUGIN_ROOT}/scripts/component-inspector/` before the rewired agents can run. Cold-clone CI needs this in its setup step.
+
+### Why
+
+The chrome-rebuild transcript that motivated this round had two failure classes regex-based tooling cannot prevent:
+
+1. A bulk rename targeting `meta.title` overwrote fixture data (`"Casual range session"`, `"Email verified"`, `"Visa"`, `"Order shipped"`) because regex matched the first lexical `title:` in each file rather than the AST node inside the `meta` object literal.
+2. After deletions and rename passes, MDX docs and showcase stories silently dangled — `<Canvas of={Stories.EachBrand}>` referenced an export the rename had already removed; deleted components left orphan imports in `.storybook/showcase/pages/`.
+
+`@anvil/inspector` makes both classes structurally impossible: mutations target AST nodes, not text; verifiers walk the import graph and resolve MDX references to confirm they stay valid. The `safe-code-mutation` skill encodes the rule so agents refuse the unsafe path before damage.
+
 ## [3.1.0] - 2026-05-05
 
 ### Added

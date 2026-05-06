@@ -24,6 +24,7 @@ skills:
   - storybook-atomic-integration
   - story-coverage-checklist
   - accessibility-stories
+  - safe-code-mutation
 hooks:
   Stop:
     - hooks:
@@ -84,10 +85,26 @@ CSF Factories is the only accepted format. Refuse to write CSF3 / CSF2 / `storie
 
 ## Step 2 — Inspect the target component
 
-Read the component file. Extract:
-- Component name and exports.
-- Prop interface — every prop, its type, required-ness, default.
-- Variants / sizes / states inferred from the prop type union.
+Use the inspector card rather than re-parsing the source. The card already extracts every prop with its type / default / JSDoc and every existing story export.
+
+```bash
+INSPECTOR_DIR="${CLAUDE_PLUGIN_ROOT}/scripts/component-inspector"
+cd "$INSPECTOR_DIR"
+pnpm exec tsx src/cli.ts json "<absolute-component-path>" --root "<scope>" --no-consumers
+```
+
+From the JSON:
+
+- `card.name` and `card.exports.names` — component identifier(s).
+- `card.props` — every prop with `name`, `type` (printed as in source), `default`, `required`, `doc`, `tags`. Use these for `argTypes` entries; never invent props that aren't in the card.
+- `card.stories.variants[*]` — already-existing story exports. **In `fill-gaps` mode, this is the authoritative coverage list** — diff against `story-coverage-checklist`'s required set for the tier and only add what's missing.
+- `card.stories.metaTitle`, `card.stories.metaTags`, `card.stories.argTypes` — preserve when augmenting.
+- `card.tokens.cssVars` / `tailwindAliases` — useful when authoring tokens-related stories or the design-tokens MDX block.
+- `card.exports.directive` — `"use client"` flag, helps decide whether decorators need React Server Component awareness.
+
+If you need additional source context the card doesn't carry (a co-located CSS module, a sibling `index.ts` re-export shape), `Read` the file directly — but never grep stories for export names. The card has them.
+
+Read the component source for the variants / states inference (since prop unions sometimes encode the rendering matrix in JSDoc comments the card preserves). The variants inferred:
 - Slots (children / named props that take ReactNode).
 - forwardsRef target element.
 - Whether the component is interactive (has `onClick` / `onChange` / etc.).
@@ -170,6 +187,26 @@ export const SubmitsForm = meta.story({
 7. **No `console.log`** in stories. If you need feedback, use Actions (`{ action: 'clicked' }` argType).
 8. **`fill-gaps` mode is non-destructive.** Never rewrite existing stories. Append.
 9. **Surface unmet requirements.** If the component has `loading?: boolean` but no `Loading` story is achievable (because the component never actually renders a loading state), say so in the output rather than writing a story that does nothing.
+10. **No regex on `.stories.tsx`.** Per `safe-code-mutation`, structural rewrites only. For renaming the meta title (e.g. taxonomy migration), use the inspector mutation:
+
+   ```bash
+   # Dry-run:
+   pnpm exec tsx "${CLAUDE_PLUGIN_ROOT}/scripts/component-inspector/src/cli.ts" \
+     rename-story-title "<absolute-stories-path>" "Atoms/Actions/Button"
+   # Apply:
+   pnpm exec tsx "${CLAUDE_PLUGIN_ROOT}/scripts/component-inspector/src/cli.ts" \
+     rename-story-title "<absolute-stories-path>" "Atoms/Actions/Button" --apply
+   ```
+
+   This locator targets only `meta.title`, never `title:` properties inside fixture data, args, or arbitrary object literals — which is the failure mode that motivated the inspector.
+
+11. **Verify after authoring.** After writing or appending stories, run the inspector card again to confirm the new exports were picked up:
+
+    ```bash
+    pnpm exec tsx "${CLAUDE_PLUGIN_ROOT}/scripts/component-inspector/src/cli.ts" json "<component-path>" --root "<scope>" --no-consumers
+    ```
+
+    Cross-check `card.stories.variants[*].exportName` against the required set you intended to add. If MDX docs reference these stories, also run `verify-mdx` so any new `<Canvas of={Stories.X}>` references resolve.
 
 
 # Interaction pattern

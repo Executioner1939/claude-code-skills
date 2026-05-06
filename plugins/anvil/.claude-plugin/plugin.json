@@ -1,7 +1,7 @@
 {
   "name": "anvil",
   "description": "Atomic design + Storybook 10 expert toolkit. CSF Factories only (no exceptions). TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history. Static component-graph scanner (Python, networkx-aware) refreshed via PostToolUse hook; queryable inventory.json with reconciliation queue (misnamed/unfoldered/stray/tier-mismatch entries) + GraphViz/Mermaid/Cytoscape/GEXF exporters. 29 skills total (knowledge skills, Han atomic-design references, storybook deeper-dives, library policy, TanStack integration, migration guide, handoff template), 9 slash-command workflows (audit-atoms / audit-molecules / audit-organisms / audit-tokens / audit-libraries / audit-component / add-component / merge-duplicates / coverage-report), 11 specialized subagents. The audit-component workflow audits a single target component end-to-end and surfaces every other place in the codebase where the same defect pattern is repeated, so a single fix can be propagated.",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "author": {
     "name": "Executioner1939"
   },

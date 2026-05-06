@@ -25,6 +25,7 @@ skills:
   - design-tokens
   - accessibility-stories
   - genericness-rubric
+  - safe-code-mutation
 hooks:
   Stop:
     - hooks:
@@ -128,11 +129,50 @@ BATCH SUMMARY (atomic-auditor, <level>)
 ```
 
 
+# Tooling
+
+Do not regex over component / story files yourself. The `@anvil/inspector` package already builds a structurally-precise card for each component — use it as your input layer.
+
+```bash
+INSPECTOR_DIR="${CLAUDE_PLUGIN_ROOT}/scripts/component-inspector"
+cd "$INSPECTOR_DIR"
+
+# Per-component card (props, stories, variants, args, tokens, issues):
+pnpm exec tsx src/cli.ts json "<absolute-component-path>" --root "<scope>" --no-consumers
+
+# Project-wide inventory (cached to .anvil/inventory.json):
+pnpm exec tsx src/cli.ts inventory "<scope>" --out "<scope>/.anvil/inventory.json"
+
+# Body-tree archaeology — bulk hygiene findings:
+pnpm exec tsx src/cli.ts trees "<scope>" > /tmp/trees.ndjson
+cat /tmp/trees.ndjson | pnpm exec tsx src/cli.ts archaeology hardcoded-color   --root "<scope>" | pnpm exec tsx src/cli.ts format
+cat /tmp/trees.ndjson | pnpm exec tsx src/cli.ts archaeology raw-html-containers --root "<scope>" | pnpm exec tsx src/cli.ts paths
+cat /tmp/trees.ndjson | pnpm exec tsx src/cli.ts find-untokened-classes | pnpm exec tsx src/cli.ts format
+
+# Orphan exports (HYGIENE input):
+pnpm exec tsx src/cli.ts orphan-exports "<scope>"
+
+# MDX→story-export integrity (QUALITY mdx input):
+pnpm exec tsx src/cli.ts verify-mdx "<scope>"
+```
+
+Field mapping for the COMPONENT block:
+
+| Output field | Inspector source |
+| --- | --- |
+| `present` / `missing` stories | `card.stories.variants[*].exportName` cross-referenced against `story-coverage-checklist` for the tier |
+| meta tags / format | `card.stories.metaTags`, `card.stories.format` |
+| props for argTypes coverage | `card.props` |
+| design-token consumption | `card.tokens.cssVars`, `card.tokens.tailwindAliases` |
+| HYGIENE hardcoded literals | `card.tokens.literals` (line numbers + kinds) |
+| HYGIENE raw-Tailwind / process.env / forward-ref hints | `card.issues` (rule ids: `raw-tailwind-layout`, `process-env-in-browser-code`, `forward-ref-no-display-name`, `hardcoded-token-literal`) |
+| Structural duplicates | `findUntokenedClasses` + the cartographer's `bodyShapeSignature` |
+
 # Method
 
 For each component:
 
-1. **Locate inputs.** Read the component file, its story file, its MDX file (if any), and any co-located CSS / styles.
+1. **Locate inputs.** Run the inspector (`json` verb) for the per-component card. Read the source file ONLY if you need source context the card doesn't carry (e.g. a CSS module that's not in the import graph).
 2. **Determine atomic level.** Use folder location *plus* signals (composition, imports). If folder and signals disagree, grade against the *signal-based* level and flag the mismatch as a hygiene fail.
 3. **Score coverage.** Cross-reference exports in the story file against the required-stories table for this level (`story-coverage-checklist`). Sum weights.
 4. **Score quality.** Walk the file-level, story-level, MDX, and a11y checklists from `story-coverage-checklist`. One point per item present.
@@ -153,6 +193,7 @@ For composition mode (only for molecules / organisms): after grading the compone
 5. **ALPHABETIZE WITHIN A LEVEL** when batching, so reports are diffable across runs.
 6. **ONE COMPONENT PER COMPONENT BLOCK.** Don't merge entries; downstream agents parse per-component.
 7. **DON'T REWRITE THE RUBRIC.** Defer to the `story-coverage-checklist` skill — your job is to apply it.
+8. **STRUCTURAL TOOLS ONLY.** Per `safe-code-mutation`, your reads go through the inspector or `Read`. Never `sed` / `awk` / `Edit replace_all=true` on `.ts/.tsx` files (you're read-only anyway, but this backstop matters when an audit finds a defect you're tempted to fix in place — hand it off to a mutating agent or surface it as a recommended action).
 
 
 # Interaction pattern

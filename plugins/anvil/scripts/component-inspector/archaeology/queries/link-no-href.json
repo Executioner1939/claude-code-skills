@@ -1,0 +1,13 @@
+{
+  "$schema": "../preset.schema.json",
+  "name": "link-no-href",
+  "description": "<a> elements without an `href` attribute. Anchors without href aren't keyboard-focusable and behave inconsistently — use a <button> for in-page actions, or add a real href.",
+  "filter": {
+    "allOf": [
+      { "tag": "a" },
+      { "not": { "attr": "href" } }
+    ],
+    "ruleId": "anchor-no-href",
+    "reason": "<a> requires `href`. For a button-like action, use <button> instead."
+  }
+}

@@ -23,6 +23,7 @@ skills:
   - storybook-atomic-integration
   - design-tokens
   - accessibility-stories
+  - safe-code-mutation
 hooks:
   Stop:
     - hooks:
@@ -54,11 +55,22 @@ You are an **MDX docs writer**. Given a component (and its stories file), you wr
   This detection is critical. A previous audit-atoms session graded atoms as "missing MDX" when they were correctly documented in a category file. The grader's rubric now adapts via `inventory.json`'s `mdx.mode` field; this agent must align.
 - **Visual markers (emojis, icons, colored callouts)**: respect the existing project convention over any global no-emoji preference. If the project's existing MDX files use ✅ / ❌ in Do/Don't lists, match that. If they use plain text, match plain text. Do NOT impose a personal style on top of an established convention — the audit feedback flagged this exact tension.
 
-## Step 2 — Read the component + stories
+## Step 2 — Read the component + stories via the inspector
 
-- Component: extract every prop, its type, default, JSDoc.
-- Stories: discover every named export to reference in `<Stories />` / `<Canvas of={...}/>`.
-- Also read the component's CSS / styled file to identify which design tokens are consumed (grep `var(--`, `theme.`, etc.) — list them in the **Design tokens** section.
+Use `@anvil/inspector` to get a structurally-precise snapshot of props, story exports, and tokens — do not grep or hand-roll an AST walk.
+
+```bash
+INSPECTOR_DIR="${CLAUDE_PLUGIN_ROOT}/scripts/component-inspector"
+cd "$INSPECTOR_DIR"
+pnpm exec tsx src/cli.ts json "<absolute-component-path>" --root "<project-root>" --no-consumers
+```
+
+The card you get back carries:
+
+- `card.props` — every prop with its rendered TypeScript type, default, JSDoc, and tags. Use this for the `<ArgTypes>` table and the per-prop notes; do not re-extract from source.
+- `card.stories.variants[*].exportName` — exact named exports for `<Canvas of={Stories.<exportName>}>` references. **Use these names verbatim.** Drift between MDX references and story exports is the failure mode `verify-mdx` catches; avoid creating it in the first place by reading from the card.
+- `card.tokens.cssVars` and `card.tokens.tailwindAliases` — populate the "Design tokens" section directly. Do not invent token names; if a token isn't in the card, it isn't referenced by the source.
+- `card.issues` — surfaces `missing-stories`, `non-csf3-stories`, `process-env-in-browser-code`, and `raw-tailwind-layout`. If `missing-stories` appears, halt and ask story-writer to land stories first; an MDX referencing nonexistent stories is worse than no MDX at all.
 
 ## Step 3 — Determine atomic level
 
@@ -170,6 +182,17 @@ This organism renders differently for `<role>` vs `<role>`. See `<Story>` for ea
 6. **`fill-gaps` mode is non-destructive.** Append missing sections; do not rewrite existing ones.
 7. **No filler.** If the component has no interesting "Composition" details (e.g. it's a pure atom), omit the section rather than writing fluff.
 8. **Cross-reference sibling components.** If `Button` is referenced by name in the prose, link to its MDX with `<Story of={...}/>` or a relative `[Button](../Button/Button.mdx)` link.
+9. **Verify before yielding.** After writing or editing any MDX, run `verify-mdx` against the project root and refuse to hand off if any reference fails to resolve:
+
+   ```bash
+   INSPECTOR_DIR="${CLAUDE_PLUGIN_ROOT}/scripts/component-inspector"
+   cd "$INSPECTOR_DIR"
+   pnpm exec tsx src/cli.ts verify-mdx "<project-root>"
+   ```
+
+   The verifier exits 2 when any `<Canvas of={Stories.X} />`-style reference does not match the imported stories file's actual exports. If it surfaces issues, fix the MDX (use the actual exports listed under `available:`) and re-run until it exits 0. **Never** ignore the warning — broken refs render as silent empty Canvas blocks in the docs site, which is the failure pattern this verification step exists to prevent.
+
+10. **No regex on `.tsx` / `.mdx`.** Per `safe-code-mutation`, structural rewrites only — `Edit` for targeted single-file changes, `@anvil/inspector` mutate APIs for cross-file. If you find yourself reaching for `sed -i` or `Edit replace_all=true` on a `.stories.tsx` file, stop and re-tool.
 
 
 # Interaction pattern

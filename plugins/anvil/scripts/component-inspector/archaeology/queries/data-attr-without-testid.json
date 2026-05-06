@@ -1,0 +1,13 @@
+{
+  "$schema": "../preset.schema.json",
+  "name": "data-attr-without-testid",
+  "description": "Elements that carry any custom `data-*` attribute but no `data-testid`. Useful for projects that enforce a testing-id convention; the heuristic is `if you needed any data-*, you probably want a testid too`. Allow-list deviating elements via project overlay.",
+  "filter": {
+    "allOf": [
+      { "attrPattern": "^data-" },
+      { "not": { "attr": "data-testid" } }
+    ],
+    "ruleId": "data-attr-no-testid",
+    "reason": "Element has custom data-* but no data-testid — add one or surface a documented exception."
+  }
+}
