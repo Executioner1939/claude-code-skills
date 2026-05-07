@@ -5,8 +5,8 @@
     "email": "executioner1939@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, and design.",
-    "version": "5.11.0",
+    "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, and multi-agent orchestration.",
+    "version": "5.12.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -121,6 +121,20 @@
       "homepage": "https://github.com/Executioner1939/claude-code-skills",
       "repository": "https://github.com/Executioner1939/claude-code-skills",
       "license": "MIT (with Apache-2.0 portions adapted from TheBushidoCollective/han for the 7 atomic-design methodology references)"
+    },
+    {
+      "name": "rust-monorepo-orchestrator",
+      "source": "./plugins/rust-monorepo-orchestrator",
+      "description": "Methodology-first multi-agent refactoring orchestrator for monorepos. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top-to-bottom (HTTP commands -> events -> views -> inter-service events), document architecture violations, author project-specific ast-grep rules, then run a wave of isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, and dead-letter on failure. Filesystem inbox; HANDOFF.md cross-phase contract; subagent memory; auto-loaded prompting and orchestration skills. Stack-agnostic by design -- rules are authored per project, not shipped by the plugin. Active development: M1 ships /init only.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": ["monorepo", "refactoring", "orchestration", "multi-agent", "ast-grep", "opus", "parallel-workers", "claim-lock", "worktree", "inbox", "handoff", "ddd", "hexagonal", "rust"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
     }
   ]
 }
