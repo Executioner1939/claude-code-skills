@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, and multi-agent orchestration.",
-    "version": "5.12.0",
+    "version": "5.15.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -125,10 +125,24 @@
     {
       "name": "rust-monorepo-orchestrator",
       "source": "./plugins/rust-monorepo-orchestrator",
-      "description": "Methodology-first multi-agent refactoring orchestrator for monorepos. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top-to-bottom (HTTP commands -> events -> views -> inter-service events), document architecture violations, author project-specific ast-grep rules, then run a wave of isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, and dead-letter on failure. Filesystem inbox; HANDOFF.md cross-phase contract; subagent memory; auto-loaded prompting and orchestration skills. Stack-agnostic by design -- rules are authored per project, not shipped by the plugin. Active development: M1 ships /init only.",
-      "version": "0.1.0",
+      "description": "Methodology-first multi-agent refactoring orchestrator for monorepos. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top-to-bottom (HTTP commands -> events -> views -> inter-service events), document architecture violations, author project-specific ast-grep rules, then run a wave of isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, and dead-letter on failure. Filesystem inbox; HANDOFF.md cross-phase contract; subagent memory; auto-loaded prompting and orchestration skills. Stack-agnostic by design -- rules are authored per project, not shipped by the plugin. Seven slash commands (/init, /audit-domain, /plan-refactor, /run-wave, /status, /replay, /sweep-rules), nine subagents, three methodology skills.",
+      "version": "0.4.0",
       "category": "development",
       "keywords": ["monorepo", "refactoring", "orchestration", "multi-agent", "ast-grep", "opus", "parallel-workers", "claim-lock", "worktree", "inbox", "handoff", "ddd", "hexagonal", "rust"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "harness-tuner",
+      "source": "./plugins/harness-tuner",
+      "description": "Meta-plugin: optimize the Claude Code harness for a project. Reads session transcripts to digest recurring user friction, audits CLAUDE.md / skills / rules / commands / hooks / monitors across the hierarchy, and recommends additions / edits / removals -- never touching the root CLAUDE.md. Hierarchy-aware (parent-but-not-root); uses @ imports for cwd-relative content; for monorepos, can author a per-service summary CLAUDE.md that autoloads when working in that subtree. Four-phase pipeline: /digest -> /audit -> /plan -> /tune. Hard rules: never edits root CLAUDE.md, never edits ~/.claude/, refuses CLAUDE.md changes that exceed 200 lines or path-scoped rule changes that exceed 150 lines, validates @ imports resolve, appends one line to .claude/CHANGELOG.md per applied change.",
+      "version": "0.4.0",
+      "category": "development",
+      "keywords": ["claude-md", "harness", "meta", "tuner", "transcript-mining", "audit", "monorepo", "hierarchy", "claude-code"],
       "author": {
         "name": "Executioner1939"
       },
