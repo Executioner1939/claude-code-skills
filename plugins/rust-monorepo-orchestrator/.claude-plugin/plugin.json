@@ -1,7 +1,7 @@
 {
   "name": "rust-monorepo-orchestrator",
   "description": "Methodology-first multi-agent refactoring orchestrator for monorepos. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top-to-bottom (HTTP commands -> events -> views -> inter-service events), document architecture violations, author project-specific ast-grep rules, then run a wave of isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, and dead-letter on failure. Filesystem inbox; HANDOFF.md cross-phase contract; subagent memory; auto-loaded prompting and orchestration skills. Stack-agnostic by design -- the rules are authored per project, not shipped by the plugin.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "Executioner1939"
   },
