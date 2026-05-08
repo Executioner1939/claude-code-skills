@@ -1,0 +1,22 @@
+{
+  "name": "harness-tuner",
+  "description": "Meta-plugin: optimize the Claude Code harness for a project. Reads session transcripts to digest recurring user friction, audits CLAUDE.md / skills / rules / commands / hooks / monitors across the hierarchy, and recommends additions / edits / removals -- never touching the root CLAUDE.md. Hierarchy-aware (parent-but-not-root); uses @ imports for cwd-relative content; for monorepos, can author a per-service summary CLAUDE.md that autoloads when working in that subtree. Active development: M1 ships /digest (transcript-only). M2 adds /audit, M3 adds /plan, M4 adds /tune (apply with confirmation).",
+  "version": "0.1.0",
+  "author": {
+    "name": "Executioner1939"
+  },
+  "homepage": "https://github.com/Executioner1939/claude-code-skills",
+  "repository": "https://github.com/Executioner1939/claude-code-skills",
+  "license": "MIT",
+  "keywords": [
+    "claude-md",
+    "harness",
+    "meta",
+    "tuner",
+    "transcript-mining",
+    "audit",
+    "monorepo",
+    "hierarchy",
+    "claude-code"
+  ]
+}
