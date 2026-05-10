@@ -1,10 +1,10 @@
 # skunkworks
 
-A personal Claude Code marketplace. Eleven plugins covering CI/CD, Rust, documentation, code analysis, design systems, infrastructure-as-code review, Solana indexing, and multi-agent orchestration. Shared conventions, kept in sync.
+A personal Claude Code marketplace. Twelve plugins covering CI/CD, Rust, documentation, code analysis, design systems, infrastructure-as-code review, Solana indexing, multi-agent orchestration, and meta-tooling. Shared conventions, kept in sync.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) (with bundled Apache-2.0 portions — see [Attribution](#attribution))
-[![Marketplace version](https://img.shields.io/badge/marketplace-v5.16.0-green.svg)](.claude-plugin/marketplace.json)
-[![Plugins](https://img.shields.io/badge/plugins-11-green.svg)](#plugins)
+[![Marketplace version](https://img.shields.io/badge/marketplace-v5.17.0-green.svg)](.claude-plugin/marketplace.json)
+[![Plugins](https://img.shields.io/badge/plugins-12-green.svg)](#plugins)
 
 ---
 
@@ -30,6 +30,7 @@ Install plugins individually as needed:
 /plugin install anvil@skunkworks
 /plugin install rust-monorepo-orchestrator@skunkworks
 /plugin install harness-tuner@skunkworks
+/plugin install meta-skill-improver@skunkworks
 ```
 
 Each plugin is independent. Pick what you need.
@@ -83,6 +84,16 @@ Meta-plugin: optimize the Claude Code harness itself for a project. Reads sessio
 Hierarchy-aware (parent-but-not-root); uses `@` imports for cwd-relative content; for monorepos, can author a per-service summary `CLAUDE.md` that auto-loads when working in that subtree. Hard rules: never edits root `CLAUDE.md`, never edits `~/.claude/`, refuses `CLAUDE.md` changes that exceed 200 lines or path-scoped rule changes that exceed 150 lines, validates `@` imports resolve, appends one line to `.claude/CHANGELOG.md` per applied change.
 
 Four-phase pipeline: `/digest` → `/audit` → `/plan` → `/tune`.
+
+#### `meta-skill-improver` — v0.1.0
+
+Evidence-grounded skill evolution. Mines Claude Code transcripts and git history across one or more repos for recurring user friction on a topic, clusters the friction into anonymized failure-mode reproducers, synthesizes a four-class prompt matrix per failure mode, runs a sandbox harness with and without the candidate skill loaded, and produces a mathematically-graded scorecard with a promote-or-block verdict. Treats the skill-under-test as a non-deterministic SUT and uses property-based-testing-with-N-runs methodology to separate signal from noise. Builds on the `_codify` pipeline and adds the missing executor-and-grader stages.
+
+- Workflow: **`/meta-skill-improver:improve-skill <topic> --repos <paths> (--target <plugin:skill> | --new <plugin:skill>)`**
+- Subagents: `transcript-miner`, `snapshot-builder`, `prompt-synthesizer`, `skill-author`, `skill-auditor`, `sandbox-runner`.
+- Skills: `grading` (the math), `eval-methodology` (the design), `snapshot-anonymization` (the privacy rules).
+- Scripts: `eval_score.py` -- pure deterministic grading library; ships with synthetic-fixture smoke tests.
+- Output: `evals/<plugin--skill>/scorecards/<version>.json` plus a markdown report; the scorecard is the regression baseline future iterations replay against.
 
 ### Knowledge plugins
 
@@ -193,6 +204,7 @@ Plugins are prefixed by category so the marketplace stays browsable as it grows:
 | `ci-*` | build systems, CI/CD, task runners |
 | `design-*` | design principles, design systems, UI/UX |
 | `docs-*` | documentation tooling and authoring |
+| `meta-*` | marketplace meta-tooling — skills that produce, evaluate, or evolve other skills |
 | `rust-*` | Rust ecosystem crates and patterns |
 | `terraform-*` | Terraform / OpenTofu / IaC review |
 | (other) | meta tooling — `anvil`, `harness-tuner` |
@@ -228,6 +240,6 @@ The marketplace is **MIT** for original content. Two plugins bundle Apache-2.0 t
 
 ## License
 
-[MIT](LICENSE) for original content (this README, the eleven plugin manifests, the original audit / archaeology / atomic-design / orchestration / Carbon-reference / knowledge skills, the slash commands, the subagents, and `scripts/carbon.py`).
+[MIT](LICENSE) for original content (this README, the twelve plugin manifests, the original audit / archaeology / atomic-design / orchestration / Carbon-reference / meta-evaluation / knowledge skills, the slash commands, the subagents, `scripts/carbon.py`, and `eval_score.py`).
 
 Apache-2.0 for the bundled portions noted in [Attribution](#attribution). Each bundled component preserves its license file in the appropriate `_<source>-license/` directory.

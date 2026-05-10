@@ -5,8 +5,8 @@
     "email": "executioner1939@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, and multi-agent orchestration.",
-    "version": "5.16.0",
+    "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, and meta-tooling.",
+    "version": "5.17.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -157,6 +157,20 @@
       "version": "0.4.0",
       "category": "development",
       "keywords": ["claude-md", "harness", "meta", "tuner", "transcript-mining", "audit", "monorepo", "hierarchy", "claude-code"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "meta-skill-improver",
+      "source": "./plugins/meta-skill-improver",
+      "description": "Evidence-grounded skill evolution. Mines transcripts and git history across one or many repos for recurring user friction on a topic, clusters the friction into anonymized failure-mode reproducers, synthesizes a four-class prompt matrix per failure mode, runs a sandbox harness with and without the candidate skill loaded, and produces a mathematically-graded scorecard with a promote-or-block verdict. Treats the skill-under-test as a non-deterministic SUT and uses property-based-testing-with-N-runs methodology to separate signal from noise. Builds on the /codify pipeline (transcript-analyzer, skill-author, skill-auditor) and adds the missing executor-and-grader stages.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": ["meta", "skill-evolution", "skill-quality", "skill-eval", "evals", "eval-harness", "regression-testing", "property-based-testing", "transcript-mining", "judge-calibration"],
       "author": {
         "name": "Executioner1939"
       },
