@@ -99,4 +99,6 @@ What is new: snapshot-builder, prompt-synthesizer, sandbox-runner, the grading l
 
 ## Stability
 
-`v0.1.0` -- proof of concept. The grading methodology is stable; the orchestrator is the first surface likely to evolve as the marketplace gains more skills under improvement.
+`v0.1.1` -- proof of concept. The grading methodology is stable; the orchestrator is the first surface likely to evolve as the marketplace gains more skills under improvement.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for version-by-version notes. Convention: every version bump touches the changelog in the same commit.
