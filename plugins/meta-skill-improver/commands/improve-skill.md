@@ -79,17 +79,30 @@ Parse `$ARGUMENTS`. Required: `<topic>` (positional, quoted), `--repos <comma-se
 ```!
 set -e
 
-# Resolve REPO_ROOT portably. CLAUDE_PLUGIN_ROOT is set by Claude Code for
-# plugin-scoped commands; the marketplace root is two parents up from the
-# plugin dir (plugins/<plugin>/). Fall back to git toplevel of cwd if not set.
-if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+# Resolve REPO_ROOT. The user invokes /improve-skill from their working
+# marketplace tree, which is git rev-parse --show-toplevel of cwd. We prefer
+# that over CLAUDE_PLUGIN_ROOT, because for installed plugins
+# CLAUDE_PLUGIN_ROOT points at the user-scope cache (e.g.
+# ~/.claude/plugins/cache/skunkworks/meta-skill-improver/), not the working
+# marketplace -- editing the cache would not affect the user's checkout.
+#
+# If cwd is not inside a git repo or that repo has no .claude-plugin/, we
+# fall back to CLAUDE_PLUGIN_ROOT/../.. (development mode where the plugin
+# lives in-tree at plugins/<plugin>/ and the user invokes from the
+# marketplace root via --plugin-dir).
+
+CWD_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
+if [ -n "$CWD_ROOT" ] && test -d "$CWD_ROOT/.claude-plugin"; then
+  REPO_ROOT="$CWD_ROOT"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && test -d "$CLAUDE_PLUGIN_ROOT/../../.claude-plugin"; then
   REPO_ROOT=$(cd "$CLAUDE_PLUGIN_ROOT/../.." && pwd)
 else
-  REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-fi
-
-if ! test -d "$REPO_ROOT/.claude-plugin"; then
-  echo "ABORT: not inside a marketplace -- no .claude-plugin/ at $REPO_ROOT"
+  echo "ABORT: not inside a marketplace tree (no .claude-plugin/ found at git toplevel of cwd or CLAUDE_PLUGIN_ROOT/../..)"
+  echo "  cwd:                $(pwd)"
+  echo "  git toplevel:       ${CWD_ROOT:-<none>}"
+  echo "  CLAUDE_PLUGIN_ROOT: ${CLAUDE_PLUGIN_ROOT:-<unset>}"
+  echo ""
+  echo "  Run /improve-skill from the marketplace repo you want to edit."
   exit 0
 fi
 

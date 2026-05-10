@@ -1,6 +1,6 @@
 {
   "name": "meta-skill-improver",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Evidence-grounded skill evolution. Mines transcripts and git history across one or many repos for recurring user friction on a topic, clusters the friction into anonymized failure-mode reproducers, synthesizes a four-class prompt matrix per failure mode, runs a sandbox harness with and without the candidate skill loaded, and produces a mathematically-graded scorecard with a promote-or-block verdict. Treats the skill-under-test as a non-deterministic SUT and uses property-based-testing-with-N-runs methodology to separate signal from noise. Builds on the /codify pipeline (transcript-analyzer, skill-author, skill-auditor) and adds the missing executor-and-grader stages.",
   "author": {
     "name": "Executioner1939"

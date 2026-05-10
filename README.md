@@ -3,7 +3,7 @@
 A personal Claude Code marketplace. Twelve plugins covering CI/CD, Rust, documentation, code analysis, design systems, infrastructure-as-code review, Solana indexing, multi-agent orchestration, and meta-tooling. Shared conventions, kept in sync.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) (with bundled Apache-2.0 portions — see [Attribution](#attribution))
-[![Marketplace version](https://img.shields.io/badge/marketplace-v5.17.0-green.svg)](.claude-plugin/marketplace.json)
+[![Marketplace version](https://img.shields.io/badge/marketplace-v5.17.1-green.svg)](.claude-plugin/marketplace.json)
 [![Plugins](https://img.shields.io/badge/plugins-12-green.svg)](#plugins)
 
 ---
@@ -85,7 +85,7 @@ Hierarchy-aware (parent-but-not-root); uses `@` imports for cwd-relative content
 
 Four-phase pipeline: `/digest` → `/audit` → `/plan` → `/tune`.
 
-#### `meta-skill-improver` — v0.1.0
+#### `meta-skill-improver` — v0.1.1
 
 Evidence-grounded skill evolution. Mines Claude Code transcripts and git history across one or more repos for recurring user friction on a topic, clusters the friction into anonymized failure-mode reproducers, synthesizes a four-class prompt matrix per failure mode, runs a sandbox harness with and without the candidate skill loaded, and produces a mathematically-graded scorecard with a promote-or-block verdict. Treats the skill-under-test as a non-deterministic SUT and uses property-based-testing-with-N-runs methodology to separate signal from noise. Builds on the `_codify` pipeline and adds the missing executor-and-grader stages.
 
