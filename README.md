@@ -1,22 +1,25 @@
-# skunkworks — Claude Code marketplace
+# skunkworks
 
-A personal marketplace of Claude Code plugins for CI/CD, Rust, documentation, code analysis, design systems, and infrastructure-as-code review. Eight plugins, sharing conventions, kept in sync.
+A personal Claude Code marketplace. Eleven plugins covering CI/CD, Rust, documentation, code analysis, design systems, infrastructure-as-code review, Solana indexing, and multi-agent orchestration. Shared conventions, kept in sync.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) (with bundled Apache-2.0 portions — see [Attribution](#attribution))
-[![Marketplace version](https://img.shields.io/badge/marketplace-v5.10.0-green.svg)](.claude-plugin/marketplace.json)
-[![Plugins](https://img.shields.io/badge/plugins-8-green.svg)](#plugins)
+[![Marketplace version](https://img.shields.io/badge/marketplace-v5.16.0-green.svg)](.claude-plugin/marketplace.json)
+[![Plugins](https://img.shields.io/badge/plugins-11-green.svg)](#plugins)
 
 ---
 
-## Install the marketplace
+## Quick start
+
+Add the marketplace once:
 
 ```
 /plugin marketplace add Executioner1939/claude-code-skills
 ```
 
-Then install the plugins you want:
+Install plugins individually as needed:
 
 ```
+/plugin install carbon-solana@skunkworks
 /plugin install ci-moonrepo@skunkworks
 /plugin install rust-utoipa@skunkworks
 /plugin install rust-fmodel@skunkworks
@@ -25,44 +28,73 @@ Then install the plugins you want:
 /plugin install analysis-codebase-archaeology@skunkworks
 /plugin install terraform-audit@skunkworks
 /plugin install anvil@skunkworks
+/plugin install rust-monorepo-orchestrator@skunkworks
+/plugin install harness-tuner@skunkworks
 ```
 
-The plugins are independent. Install only what you need.
+Each plugin is independent. Pick what you need.
 
 ---
 
 ## Plugins
 
-### Workflow plugins (slash commands, subagents, hooks)
+The marketplace splits along two shapes: **workflow plugins** drive multi-step processes through slash commands and subagents, and **knowledge plugins** auto-load reference material when a relevant prompt comes in.
+
+### Workflow plugins
 
 #### `analysis-codebase-archaeology` — v1.2.0
 
-Two-agent system that reverse-engineers existing codebases. Phase 1 excavates what IS via the `codebase-archaeologist` subagent; Phase 2 plans what to DO with it via the `transformation-strategist` subagent. 7 analysis lenses (migration, architecture, decomposition, risk, documentation, test-strategy, debt). Every finding traces to `file:line`.
+Two-agent system that reverse-engineers existing codebases. The `codebase-archaeologist` excavates what *is*; the `transformation-strategist` plans what to *do* with it. Seven analysis lenses (migration, architecture, decomposition, risk, documentation, test-strategy, debt). Every finding traces to `file:line`.
 
-- Workflow: **`/analysis-codebase-archaeology:archaeology [path] [--objective=...]`**
-- Subagents: `codebase-archaeologist`, `transformation-strategist` — both read-only, plan-mode.
-- Auto-triggers on natural language: "analyze codebase", "extract business rules", "plan migration", "technical debt", etc.
-- Output: timestamped report under `<path>/.archaeology/<timestamp>/index.md` with linked archaeology + transformation artifacts.
+```
+/analysis-codebase-archaeology:archaeology [path] [--objective=...]
+```
+
+Outputs a timestamped report under `<path>/.archaeology/<timestamp>/index.md`. Auto-triggers on phrases like "analyze codebase", "extract business rules", "plan migration", "technical debt".
 
 #### `terraform-audit` — v1.1.0
 
-Brutal, structured audit of a Terraform / OpenTofu module repository. Detects cross-module composition smells (overlap, duplication, thin wrappers, scope-discriminator primitives, copy-pasted module blocks, tier misplacement), cross-project / cross-account linking flaws, missing validations, dead code, version-pinning drift, and provider-specific landing-zone gaps (GCP / AWS / Azure / OCI). Produces an 8-section critique with per-module letter grades and a numbered defect list, with optional baseline diff.
+Structured, opinionated audit of a Terraform / OpenTofu module repository. Detects cross-module composition smells (overlap, duplication, thin wrappers, scope-discriminator primitives, copy-pasted module blocks, tier misplacement), cross-project / cross-account linking flaws, missing validations, dead code, version-pinning drift, and provider-specific landing-zone gaps (GCP, AWS, Azure, OCI). Eight-section critique with per-module letter grades and a numbered defect list. Optional baseline diff for tracking debt over time.
 
-- Workflow: **`/terraform-audit:audit [path-to-repo]`**
-- Bundles Anton Babenko's `terraform-skill` v1.6.0 (Apache-2.0) for canonical Terraform best-practices. Auto-loaded during the audit.
-- Auto-triggers on: "audit terraform", "review terraform", "tear apart terraform", "tech-debt audit terraform".
-- Output: `<repo>/.terraform-audit/audit-<date>.md` plus optional baseline at `baseline.md`. Section 9 baseline-diff (Fixed / Regressed / New) when the baseline exists.
+```
+/terraform-audit:audit [path-to-repo]
+```
 
-#### `anvil` — v3.1.0
+Bundles Anton Babenko's `terraform-skill` v1.6.0 (Apache-2.0) for canonical Terraform best-practices context. Auto-triggers on "audit terraform", "review terraform".
 
-The largest plugin in the marketplace. Atomic design (Brad Frost) + Storybook 10 expert toolkit. CSF Factories only. TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history.
+#### `anvil` — v4.0.0
 
-- 9 slash-command workflows: `audit-atoms`, `audit-molecules`, `audit-organisms`, `audit-tokens`, `audit-libraries`, `audit-component` (new in v3.1: single-component audit + cross-codebase pattern sweep), `add-component`, `merge-duplicates`, `coverage-report`.
-- 11 specialized subagents: `accessibility-reviewer`, `atomic-auditor`, `component-cartographer`, `component-composer`, `component-deduplicator`, `design-token-enforcer`, `library-policy-enforcer`, `mdx-doc-writer`, `story-writer`, `storybook-coverage-analyst`, `ui-spec-interpreter`.
-- ~20 knowledge skills + a static component-graph scanner (`scripts/inventory.py`) refreshed automatically by a `PostToolUse` hook on edits.
-- Bundles 7 Apache-2.0 atomic-design methodology references adapted from `TheBushidoCollective/han`.
+The largest plugin in the marketplace. Atomic design (Brad Frost) plus Storybook 10. CSF Factories only. TanStack-ecosystem-centric (Query, DB, Form, Table, Virtual, Store, Pacer). Web (Tailwind 4) and native (NativeWind / Expo / Reanimated). Inter-agent `HANDOFF.md` contract. Tier-1 baseline diff plus Tier-2 dated audit history.
 
-### Knowledge plugins (auto-loaded reference)
+Ships `@anvil/inspector` — a structurally precise TypeScript toolkit (TypeScript Compiler API + ast-grep, never regex on `.ts` / `.tsx`) with 24 CLI verbs covering per-component cards, design-system inventory via the structural import graph, body-tree archaeology presets (raw HTML containers, hardcoded spacing/colour, inline styles, untokenised classes, image-no-alt, link-no-href, button-no-label, data-attr-without-testid), and structural mutations (rename / safe-delete / verify-mdx / orphan-exports — dry-run by default).
+
+Nineteen slash commands (10 inspector commands plus the audit / add / merge suite), 11 specialized subagents, ~20 knowledge skills. Bundles 7 atomic-design references (Apache-2.0, adapted from `TheBushidoCollective/han`).
+
+#### `rust-monorepo-orchestrator` — v0.4.0
+
+Methodology-first multi-agent refactoring orchestrator for monorepos. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top to bottom (HTTP commands → events → views → inter-service events), document architecture violations, author project-specific ast-grep rules, then run a wave of isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, and dead-letter on failure. Filesystem inbox; `HANDOFF.md` cross-phase contract; subagent memory.
+
+Stack-agnostic: rules are authored per project, not shipped by the plugin. Seven slash commands (`/init`, `/audit-domain`, `/plan-refactor`, `/run-wave`, `/status`, `/replay`, `/sweep-rules`), nine subagents, three methodology skills.
+
+#### `harness-tuner` — v0.4.0
+
+Meta-plugin: optimize the Claude Code harness itself for a project. Reads session transcripts to digest recurring user friction, audits `CLAUDE.md` / skills / rules / commands / hooks / monitors across the user → project → subdirectory hierarchy, and recommends additions / edits / removals — never touching the root `CLAUDE.md`.
+
+Hierarchy-aware (parent-but-not-root); uses `@` imports for cwd-relative content; for monorepos, can author a per-service summary `CLAUDE.md` that auto-loads when working in that subtree. Hard rules: never edits root `CLAUDE.md`, never edits `~/.claude/`, refuses `CLAUDE.md` changes that exceed 200 lines or path-scoped rule changes that exceed 150 lines, validates `@` imports resolve, appends one line to `.claude/CHANGELOG.md` per applied change.
+
+Four-phase pipeline: `/digest` → `/audit` → `/plan` → `/tune`.
+
+### Knowledge plugins
+
+These have no commands or subagents — just `SKILL.md` files that auto-load when their description matches the user's prompt.
+
+#### `carbon-solana` — v0.1.0
+
+Reference for the [Carbon](https://github.com/sevenlabs-hq/carbon) Solana indexing framework. Top-level skill covers the pipeline, all 14 datasources (Yellowstone gRPC, Helius LaserStream / Atlas / GPA / GTFA, RPC block / program / transaction subscribers, Jito Shredstream, Jetstreamer, validator-snapshot), the five pipe types, the `Processor` trait, transaction schema matching, and the `carbon-cli` codegen.
+
+Sixty-four per-protocol sub-skills (`carbon-raydium-amm-v4`, `carbon-pumpfun`, `carbon-meteora-dlmm`, `carbon-orca-whirlpool`, `carbon-drift-v2`, `carbon-jupiter-swap`, …) auto-load on protocol keywords and list every available instruction, account, CPI event, and shared type by name. For full struct fields, discriminators, and `ArrangeAccounts` variants, the bundled `scripts/carbon.py` extracts on demand from your local cargo registry cache (or `$CARBON_SRC`) using ast-grep with regex fallback. No stale snapshots.
+
+Auto-triggers on: `carbon`, `carbon-core`, `Pipeline::builder`, `InstructionDecoder`, `ArrangeAccounts`, `decode_log_events`, `yellowstone grpc`, plus protocol-specific terms (Raydium, Pumpfun, Meteora, Orca, Jupiter, Drift, Kamino, Phoenix, etc.) when paired with "decode", "indexer", "instruction", "event", or "args".
 
 #### `ci-moonrepo` — v3.2.0
 
@@ -96,9 +128,9 @@ Auto-triggers on: UI/UX review, design critique, product tradeoff calls, microco
 
 ---
 
-## How the plugins are organized
+## Plugin layout
 
-Two distinct shapes, applied consistently across the marketplace:
+Two distinct shapes, applied consistently across the marketplace.
 
 ### Workflow plugins
 
@@ -116,7 +148,7 @@ Two distinct shapes, applied consistently across the marketplace:
     └── hooks.json
 ```
 
-Each workflow command renders subagent prompts as a structured **invocation envelope** — `goal` / `inputs` / `context` / `constraints` / `out_of_scope` / `acceptance` / `output_format` — rather than free-form prose. Reduces non-determinism in agent dispatch.
+Each workflow command renders subagent prompts as a structured **invocation envelope** — `goal` / `inputs` / `context` / `constraints` / `out_of_scope` / `acceptance` / `output_format` — instead of free-form prose. Reduces non-determinism in agent dispatch.
 
 ### Knowledge plugins
 
@@ -128,50 +160,42 @@ Each workflow command renders subagent prompts as a structured **invocation enve
     └── references/              # progressive disclosure, loaded on demand
 ```
 
-No agents. No commands. The skill auto-loads when its `description` triggers match the user's prompt.
+No agents, no commands. The skill loads when its `description` triggers fire.
+
+`carbon-solana` extends this shape: one main skill plus 64 thin per-protocol sub-skills under `skills/carbon-<slug>/SKILL.md`, plus a `scripts/` directory with the on-demand extraction tool.
 
 ---
 
-## Conventions used across plugins
+## Conventions
 
 These are not enforced by the spec — they're patterns that have proven useful and are propagated when new plugins are added.
 
-- **Workflows in `commands/`**, knowledge in `skills/`. Workflows are flat `.md` files with `disable-model-invocation: true` + `argument-hint`. Knowledge skills are directories with `SKILL.md` + sibling `references/`.
+- **Workflows in `commands/`, knowledge in `skills/`.** Workflows are flat `.md` files with `disable-model-invocation: true` plus `argument-hint`. Knowledge skills are directories with `SKILL.md` and sibling `references/`.
 - **Agent ↔ skill linkage** declared via the agent's `skills:` frontmatter. The skill's content auto-loads into the subagent at dispatch.
-- **Inter-agent HANDOFF contract** (used in `anvil`). Every agent in a chain ends its output with `HANDOFF: <path>` pointing to a phase-boundary file. The orchestrator halts if any agent skips the handoff.
-- **Tier-1 baseline + Tier-2 dated history.** Audit-style outputs write a static "current state" baseline plus an append-only dated history dir. Diff-friendly, blame-friendly.
+- **Inter-agent HANDOFF contract** (used in `anvil`, `rust-monorepo-orchestrator`). Every agent in a chain ends its output with `HANDOFF: <path>` pointing to a phase-boundary file. The orchestrator halts if any agent skips the handoff.
+- **Tier-1 baseline plus Tier-2 dated history.** Audit-style outputs write a static "current state" baseline alongside an append-only dated history directory. Diff-friendly, blame-friendly.
 - **agent-memory activity logs.** Subagents declare a `Stop` hook that appends to `.claude/agent-memory/<agent>/activity.log`. Telemetry-by-default for cross-session continuity.
 - **`file:line` discipline.** Every audit / archaeology finding traces to `file:line`. Unanchored claims are not allowed in output.
+- **Always-current data over frozen snapshots.** `carbon-solana` reads decoder source from the local cargo cache; `harness-tuner` reads transcripts from disk; `anvil/inspector` walks the live AST. Avoid baking blockchain or framework versions into static markdown when source is queryable on demand.
+- **No regex on `.ts` / `.tsx`** in any plugin tooling — use the TypeScript Compiler API or ast-grep. Encoded in `anvil`'s `safe-code-mutation` skill and applied across the marketplace.
 - **No emojis** in any plugin output, command body, agent prompt, or skill content.
 
 ---
 
-## Attribution
-
-The marketplace is **MIT** for original content. Two plugins bundle Apache-2.0 third-party content with attribution:
-
-### `terraform-audit` bundles `terraform-skill`
-
-Anton Babenko's [terraform-skill](https://github.com/antonbabenko/terraform-skill) v1.6.0 — `terraform-best-practices.com`. Verbatim copy under `plugins/terraform-audit/skills/terraform-skill/`. License preserved at `plugins/terraform-audit/skills/_terraform-skill-license/LICENSE-Apache-2.0`. Frontmatter retains author + version metadata. No modifications.
-
-### `anvil` bundles `han` atomic-design references
-
-Seven atomic-design methodology references adapted from [TheBushidoCollective/han](https://github.com/TheBushidoCollective/han). Apache-2.0 license preserved at `plugins/anvil/skills/_han-license/LICENSE-Apache-2.0`. Adapted to the plugin's structure; original content authorship credited.
-
----
-
-## Naming conventions
+## Naming
 
 Plugins are prefixed by category so the marketplace stays browsable as it grows:
 
 | Prefix | Domain |
 |---|---|
 | `analysis-*` | code analysis, reverse engineering, auditing |
+| `carbon-*` | Carbon Solana indexing framework references |
 | `ci-*` | build systems, CI/CD, task runners |
 | `design-*` | design principles, design systems, UI/UX |
 | `docs-*` | documentation tooling and authoring |
 | `rust-*` | Rust ecosystem crates and patterns |
 | `terraform-*` | Terraform / OpenTofu / IaC review |
+| (other) | meta tooling — `anvil`, `harness-tuner` |
 
 ---
 
@@ -191,8 +215,19 @@ For repo-internal tooling that is **not** a published plugin, see [`_codify/`](_
 
 ---
 
+## Attribution
+
+The marketplace is **MIT** for original content. Two plugins bundle Apache-2.0 third-party content, fully attributed:
+
+- **`terraform-audit`** bundles Anton Babenko's [terraform-skill](https://github.com/antonbabenko/terraform-skill) v1.6.0 (`terraform-best-practices.com`). Verbatim copy under `plugins/terraform-audit/skills/terraform-skill/`. License preserved at `plugins/terraform-audit/skills/_terraform-skill-license/LICENSE-Apache-2.0`. Frontmatter retains author and version metadata. No modifications.
+- **`anvil`** bundles seven atomic-design methodology references adapted from [TheBushidoCollective/han](https://github.com/TheBushidoCollective/han). Apache-2.0 license preserved at `plugins/anvil/skills/_han-license/LICENSE-Apache-2.0`. Adapted to the plugin's structure; original content authorship credited.
+
+`carbon-solana` references the [`sevenlabs-hq/carbon`](https://github.com/sevenlabs-hq/carbon) framework — neither bundled nor modified. The plugin reads decoder source on demand from the user's own cargo cache and does not ship Carbon code.
+
+---
+
 ## License
 
-[MIT](LICENSE) for original content (this README, the eight plugin manifests, the original audit / archaeology / atomic-design / knowledge skills, the slash commands, and the subagents).
+[MIT](LICENSE) for original content (this README, the eleven plugin manifests, the original audit / archaeology / atomic-design / orchestration / Carbon-reference / knowledge skills, the slash commands, the subagents, and `scripts/carbon.py`).
 
-Apache-2.0 for the bundled portions — see [Attribution](#attribution) above. Each bundled component preserves its license file in the appropriate `_<source>-license/` directory.
+Apache-2.0 for the bundled portions noted in [Attribution](#attribution). Each bundled component preserves its license file in the appropriate `_<source>-license/` directory.
