@@ -161,8 +161,37 @@ Every decoder is `carbon-<protocol>-decoder` on crates.io and exports:
 | Decoder layout, `CarbonDeserialize`, `ArrangeAccounts`, discriminators | `references/decoder-anatomy.md` |
 | Schema matching for whole-transaction pipes | `references/transaction-schema.md` |
 | `carbon-cli parse|scaffold` to generate a decoder from an IDL | `references/cli-codegen.md` |
-| Args/accounts/events for a specific program | `references/protocols/<name>.md` |
-| Browse all 60+ supported programs | `references/protocols/_index.md` |
+| Browse all 64 supported programs | `references/protocols/_index.md` |
+| **A specific protocol** (Raydium, Pumpfun, Meteora, Drift, …) | the `carbon-<slug>` sub-skill auto-loads when you mention it; or open `plugins/carbon-solana/skills/carbon-<slug>/SKILL.md` directly |
+
+## Per-protocol details — use the bundled script
+
+Each of the 64 protocols has a thin sub-skill (`plugins/carbon-solana/skills/carbon-<slug>/SKILL.md`) that lists:
+- crate name + program ID + decoder struct
+- the names of every available instruction, account, CPI event, and shared type
+
+To pull **full** struct fields, discriminators, and account variants for any of those names, run:
+
+```bash
+# requires python3 (>= 3.8); ast-grep optional but recommended for richer output
+python3 plugins/carbon-solana/scripts/carbon.py list <slug>
+python3 plugins/carbon-solana/scripts/carbon.py ix <slug> <InstructionName>
+python3 plugins/carbon-solana/scripts/carbon.py account <slug> <AccountName>
+python3 plugins/carbon-solana/scripts/carbon.py event <slug> <EventName>
+python3 plugins/carbon-solana/scripts/carbon.py type <slug> <TypeName>
+python3 plugins/carbon-solana/scripts/carbon.py search '<regex>' [--in <slug>]
+```
+
+The script reads from your local cargo registry cache (`~/.cargo/registry/src/.../carbon-<slug>-decoder-*/`) — populated automatically the first time any project depends on the crate and runs `cargo fetch` or `cargo build`. To point at a different source tree (e.g. a clone of `sevenlabs-hq/carbon`), set `CARBON_SRC=/path/to/carbon`.
+
+If `ast-grep` and the crate aren't available, the script falls back to regex extraction and prompts:
+
+```sh
+# install ast-grep (recommended for richer struct extraction):
+cargo install ast-grep
+# or:
+brew install ast-grep
+```
 
 ## Conventions when writing indexers
 
