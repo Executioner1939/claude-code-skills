@@ -1,0 +1,23 @@
+{
+  "name": "k8s-deployment-readiness",
+  "description": "Three-gate Kubernetes deployment readiness workflow (develop / staging|uat / production) derived from learnkube.com/production-best-practices. Verifies application code, manifests, Terraform, and GitOps repos against the full checklist; deeply instrumented for OpenTelemetry, RED/USE metrics, exemplars, and multi-burn-rate SLO alerting. Two specialized subagents (deployment-verifier, observability-auditor) load six internal skills that are not user-invocable.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Executioner1939"
+  },
+  "homepage": "https://github.com/Executioner1939/claude-code-skills",
+  "repository": "https://github.com/Executioner1939/claude-code-skills",
+  "license": "MIT",
+  "keywords": [
+    "kubernetes",
+    "deployment",
+    "production-readiness",
+    "opentelemetry",
+    "observability",
+    "slo",
+    "terraform",
+    "gitops",
+    "argocd",
+    "flux"
+  ]
+}
