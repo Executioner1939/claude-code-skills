@@ -373,8 +373,10 @@ For Kubernetes nodes (via `node_exporter` and `cadvisor`):
 # CPU utilization per node
 1 - avg by (node) (rate(node_cpu_seconds_total{mode="idle"}[5m]))
 
-# CPU saturation — run-queue length
-node_load1 / count without () (node_cpu_seconds_total{mode="idle"})
+# CPU saturation — load average normalized by per-instance core count
+# (the canonical node-exporter mixin formulation; values > 1.0 mean
+# more runnable work than CPU capacity per core).
+node_load1 / count without (cpu, mode) (node_cpu_seconds_total{mode="idle"})
 
 # Memory utilization (RSS / total)
 1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
