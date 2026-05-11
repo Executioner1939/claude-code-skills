@@ -291,7 +291,10 @@ groups:
 
 The verifier confirms that every workload with a stated SLO has:
 
-1. A recording rule producing the SLI as a ratio (success / total).
+1. A recording rule producing the SLI complement as a ratio (errors /
+   total) — this is what the burn-rate alerts compare against. (The
+   SLI itself is success / total; the complement is what gets compared
+   to `burn_rate × (1 − SLO)`.)
 2. Recording rules for the four windows above.
 3. A page alert with both `1h ∧ 5m` and `6h ∧ 30m`, joined by `or`.
 4. A ticket alert for the slow 3d / 6h pair.
