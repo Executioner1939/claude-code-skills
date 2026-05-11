@@ -135,7 +135,7 @@ contain the technical depth; this matrix is the assignment table.
 
 Write `<output_dir>/findings.md` with this shape:
 
-```markdown
+````markdown
 # Deployment readiness — <gate>
 
 **Verdict:** PASS | PASS_WITH_WARNINGS | FAIL
@@ -146,19 +146,23 @@ Write `<output_dir>/findings.md` with this shape:
 ## Blockers (FAIL)
 
 ### [FAIL-001] <one-line title>
+
 - **Item:** "<verbatim checklist text>"
 - **Source:** <skill section that defines the rule>
 - **Evidence:** path/to/file.yaml:42
 - **Why it matters:** <one paragraph; the *why*, not the *what*>
 - **Fix:**
+
   ```yaml
   # minimal patch
   ```
 
 ## Warnings (WARN)
+
 ...
 
 ## Notes (INFO)
+
 ...
 
 ## Decisions required for the human
@@ -169,7 +173,8 @@ Write `<output_dir>/findings.md` with this shape:
 
 | Item | Reason |
 |---|---|
-```
+
+````
 
 Also emit a structured machine-readable summary at
 `<output_dir>/findings.json`:

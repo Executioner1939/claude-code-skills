@@ -186,7 +186,7 @@ explicit, all probes present) and the dev overlay is **lax**
 
 When asked for an IaC compliance summary the skill produces a table:
 
-```
+```text
 | Tier   | Item                                | Source                        | Verdict | Evidence             |
 |--------|-------------------------------------|-------------------------------|---------|----------------------|
 | EKS    | etcd KMS encryption                 | aws_eks_cluster.main          | PASS    | eks.tf:42            |
