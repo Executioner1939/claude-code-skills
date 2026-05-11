@@ -410,9 +410,11 @@ parameter-specific slow query, you may never find it.
    they're guaranteed to be findable in the trace store.
 
 2. **Collector forwards exemplars to Prometheus.** The
-   `prometheusremotewrite` exporter (and the in-process `prometheus`
-   exporter) preserves exemplars when `enable_exemplars: true`. Prometheus
-   needs `--enable-feature=exemplar-storage`.
+   `prometheusremotewrite` exporter forwards exemplars implicitly when
+   they are present on input OTLP metrics — there is no `send_exemplars`
+   or `enable_exemplars` toggle in the exporter's config schema; exemplar
+   translation is automatic. On the storage side, Prometheus must be
+   started with `--enable-feature=exemplar-storage` to retain them.
 
 3. **Tempo (or Jaeger, or any OTLP trace backend) stores the trace
    keyed by `trace_id`.** Grafana's Prometheus datasource is linked to the
@@ -446,7 +448,9 @@ processors:
 exporters:
   prometheusremotewrite:
     endpoint: https://prom.internal/api/v1/write
-    send_exemplars: true            # << this is the bit
+    # Exemplars are forwarded automatically when present on input OTLP
+    # metrics -- there is no exporter-side toggle. (Storage side: start
+    # Prometheus with --enable-feature=exemplar-storage.)
     resource_to_telemetry_conversion:
       enabled: true
   otlp/tempo:
@@ -528,6 +532,11 @@ exporters:
     resolver:
       k8s:
         service: otel-gateway.observability.svc.cluster.local
+  # Metrics do not need trace-affinity routing -- a plain OTLP exporter
+  # to the Prometheus-bearing gateway fleet is sufficient.
+  otlp/prom-gateway:
+    endpoint: prom-gateway.observability.svc.cluster.local:4317
+    tls: { insecure: true }
 service:
   pipelines:
     traces:
