@@ -13,6 +13,7 @@ allowed-tools:
   - Bash(echo:*)
   - Bash(awk:*)
   - Bash(printf:*)
+  - Bash(sed:*)
   - Agent(deployment-verifier)
 model: claude-opus-4-7
 ---
@@ -31,7 +32,7 @@ restate methodology in your envelope — the agent already has it.
 `$ARGUMENTS` is `[path]` (defaults to `pwd`).
 
 ```!
-PATH_ARG=$(printf '%s' "$ARGUMENTS" | awk '{print $1}')
+PATH_ARG=$(printf '%s' "$ARGUMENTS" | sed -E 's/[[:space:]]+--.*$//')
 case "$PATH_ARG" in ''|--*) PATH_ARG="$(pwd)";; esac
 test -d "$PATH_ARG" || { echo "ERROR: $PATH_ARG is not a directory"; exit 1; }
 TIMESTAMP=$(date +%Y%m%dT%H%M%S)
@@ -47,7 +48,7 @@ echo "OUTDIR=$OUTDIR"
 Use the Task tool to dispatch agent `deployment-verifier` with this
 envelope verbatim:
 
-```
+```md
 ## goal
 Run the develop-gate readiness check against <PATH_ARG>. Catch
 contract-level violations that should not escape to staging.

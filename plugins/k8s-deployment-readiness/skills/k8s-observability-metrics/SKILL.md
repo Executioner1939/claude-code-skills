@@ -89,7 +89,7 @@ label-combinations is 600 timeseries. Multiply across pods and services.
 **Pick buckets for the SLO threshold, not for visual prettiness.** If your
 SLO is "p99 < 250ms", you need bucket boundaries clustered around 250ms:
 
-```
+```text
 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10   # seconds
 ```
 
@@ -430,10 +430,12 @@ receivers:
 
 processors:
   batch: {}
-  # Convert delta-temporality histograms from Go/Java SDKs to cumulative
-  # so Prometheus can ingest them, while preserving exemplars.
-  cumulativetodelta: {}
-  # Trim high-cardinality attributes BEFORE export
+  # Trim high-cardinality attributes BEFORE export.
+  # (Note on temporality: OTel Go/Java/.NET SDKs emit CUMULATIVE histograms
+  # by default, which Prometheus wants natively -- no temporality conversion
+  # is needed here. If you instead source delta-temporality metrics from a
+  # Python SDK configured for delta, add `deltatocumulative: {}` to this
+  # list, not `cumulativetodelta`.)
   attributes:
     actions:
       - key: url.full

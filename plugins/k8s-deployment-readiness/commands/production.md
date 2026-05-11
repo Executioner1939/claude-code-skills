@@ -13,7 +13,9 @@ allowed-tools:
   - Bash(echo:*)
   - Bash(awk:*)
   - Bash(grep:*)
+  - Bash(head:*)
   - Bash(printf:*)
+  - Bash(sed:*)
   - Bash(cut:*)
   - Bash(jq:*)
   - Agent(deployment-verifier)
@@ -34,7 +36,7 @@ The agents auto-load their skills. Do not restate methodology.
 `$ARGUMENTS` is `[path] [--no-iac]`.
 
 ```!
-PATH_ARG=$(printf '%s' "$ARGUMENTS" | awk '{print $1}')
+PATH_ARG=$(printf '%s' "$ARGUMENTS" | sed -E 's/[[:space:]]+--.*$//')
 case "$PATH_ARG" in ''|--*) PATH_ARG="$(pwd)";; esac
 SKIP_IAC=$(printf '%s' "$ARGUMENTS" | grep -oE -- '--no-iac' | head -n1)
 test -d "$PATH_ARG" || { echo "ERROR: $PATH_ARG is not a directory"; exit 1; }
@@ -67,7 +69,7 @@ Record the answers; thread them into the envelopes below as
 
 ## Phase 1 — Dispatch deployment-verifier
 
-```
+```md
 ## goal
 Run the production-gate readiness check against <PATH_ARG>. Apply the full
 production column of the gate matrix. Every FAIL is a go-live blocker.
@@ -112,7 +114,7 @@ write_to: <OUTDIR>/verifier/findings.md
 
 ## Phase 2 — Dispatch observability-auditor (parallel)
 
-```
+```md
 ## goal
 Audit the production observability posture against the k8s-observability-
 metrics skill. The stated SLO is <stated_slo>; verify multi-burn-rate

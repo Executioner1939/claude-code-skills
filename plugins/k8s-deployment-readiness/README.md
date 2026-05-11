@@ -18,10 +18,11 @@ Each gate is a slash command that orchestrates two read-only subagents against
 Each command dispatches **two subagents**:
 
 - **`deployment-verifier`** — checks app code + manifests + Helm/Kustomize +
-  Terraform + GitOps configs against the gate's checklist. Loads four internal
+  Terraform + GitOps configs against the gate's checklist. Loads five internal
   skills: `k8s-runtime-contract`, `k8s-rollout-strategy`,
-  `k8s-supply-chain-security`, `k8s-scaling-resilience`, plus
-  `k8s-iac-compliance` when Terraform or GitOps repos are in scope.
+  `k8s-supply-chain-security`, `k8s-scaling-resilience`, and
+  `k8s-iac-compliance` (the last is exercised only when Terraform or GitOps
+  repos are in scope).
 
 - **`observability-auditor`** — audits metrics, traces, logs, and SLO/alerting
   posture against the OpenTelemetry semantic conventions and the Google SRE

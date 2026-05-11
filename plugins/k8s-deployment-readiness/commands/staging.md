@@ -13,7 +13,9 @@ allowed-tools:
   - Bash(echo:*)
   - Bash(awk:*)
   - Bash(grep:*)
+  - Bash(head:*)
   - Bash(printf:*)
+  - Bash(sed:*)
   - Bash(cut:*)
   - Agent(deployment-verifier)
   - Agent(observability-auditor)
@@ -32,7 +34,7 @@ The agents auto-load their skills. Do not restate methodology in envelopes.
 `$ARGUMENTS` is `[path] [--no-iac] [--no-observability]`.
 
 ```!
-PATH_ARG=$(printf '%s' "$ARGUMENTS" | awk '{print $1}')
+PATH_ARG=$(printf '%s' "$ARGUMENTS" | sed -E 's/[[:space:]]+--.*$//')
 case "$PATH_ARG" in ''|--*) PATH_ARG="$(pwd)";; esac
 SKIP_IAC=$(printf '%s' "$ARGUMENTS" | grep -oE -- '--no-iac' | head -n1)
 SKIP_OBS=$(printf '%s' "$ARGUMENTS" | grep -oE -- '--no-observability' | head -n1)
@@ -52,7 +54,7 @@ echo "SKIP_OBS=${SKIP_OBS:-no}"
 Use the Task tool. If `SKIP_IAC` is set, narrow `scope_hint` to
 `[app, manifests, helm]`; otherwise include `terraform` and `gitops`.
 
-```
+```md
 ## goal
 Run the staging-gate readiness check against <PATH_ARG>. Verify the full
 staging column of the gate matrix, including Helm/Kustomize/Terraform/
@@ -95,7 +97,7 @@ write_to: <OUTDIR>/verifier/findings.md
 Skip Phase 2 if `SKIP_OBS` was set. Otherwise dispatch in **parallel** with
 Phase 1 — they don't depend on each other.
 
-```
+```md
 ## goal
 Audit the microservice observability posture of <PATH_ARG> against the
 k8s-observability-metrics skill's checklist (semantic conventions,
