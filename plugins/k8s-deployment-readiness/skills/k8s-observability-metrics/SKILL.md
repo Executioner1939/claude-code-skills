@@ -163,7 +163,7 @@ Trade-offs from the spec:
 
 > "The component(s) that implement tail sampling must be stateful systems
 > that can accept and store a large amount of data."
-
+>
 > "Tail sampling can be difficult to implement [and] difficult to operate."
 
 The decision-wait window (default 30s) is the trace-completion bound: any
@@ -190,7 +190,7 @@ Quoting the spec:
 
 > "An exemplar is a recorded value that associates OpenTelemetry context to
 > a metric event within a Metric."
-
+>
 > "Exemplars allow users to link Trace signals w/ Metrics."
 
 For histograms:
@@ -240,7 +240,7 @@ Quoting the workbook:
 
 > "We recommend the parameters listed in [Table 5-8] … as the starting
 > point for your SLO-based alerting configuration."
-
+>
 > "A good guideline is to make the short window 1/12 the duration of the
 > long window."
 
