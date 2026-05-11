@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, and meta-tooling.",
-    "version": "5.19.0",
+    "version": "5.20.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -125,8 +125,8 @@
     {
       "name": "rust-monorepo-orchestrator",
       "source": "./plugins/rust-monorepo-orchestrator",
-      "description": "Methodology-first multi-agent refactoring orchestrator for monorepos. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top-to-bottom (HTTP commands -> events -> views -> inter-service events), document architecture violations, author project-specific ast-grep rules, then run a wave of isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, and dead-letter on failure. Two wave runners: /run-wave (subagent-driven) and /run-wave-ralph (bash Ralph loop, no nested-Agent dispatch, disk-resumable, live monitor). Ralph mode 0.6.0+ side-loads four speedups per worker: SessionStart workspace-tree injection (no exploration turns), PreToolUse allowed_paths enforcement (real-time scope blocking), Stop auto-commit (conventional-commits from ticket frontmatter), shared CARGO_TARGET_DIR (5-10x Rust compile), and a verifier:deterministic bash verifier route that skips the LLM for mechanical tickets. Filesystem inbox; HANDOFF.md cross-phase contract; subagent memory; auto-loaded prompting and orchestration skills. Stack-agnostic by design -- rules are authored per project, not shipped by the plugin. Eight slash commands (/init, /audit-domain, /plan-refactor, /run-wave, /run-wave-ralph, /status, /replay, /sweep-rules), nine subagents, three methodology skills.",
-      "version": "0.6.0",
+      "description": "Methodology-first multi-agent refactoring orchestrator for monorepos. Context-aware: scripts/discover-workspace.sh walks up from cwd to find the workspace and detects services + aggregates automatically; commands take zero path arguments by default. Service-level by default: /audit-domain <service> drills ALL aggregates in parallel; /plan-refactor <service> produces ONE unified PLAN.md with cross-aggregate depends_on and de-duplicated shared-infrastructure tickets; /run-wave-ralph <service> drives a single inbox. New /migrate command runs /init -> /audit -> /plan -> decisions gate -> /run end-to-end with reasoning gates at each phase. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top-to-bottom (HTTP -> events -> views -> inter-service events), document violations, author ast-grep rules, then run isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, dead-letter on failure. Two wave runners: /run-wave (subagent-driven) and /run-wave-ralph (bash Ralph loop, no nested-Agent dispatch, disk-resumable, live monitor). Ralph mode side-loads five per-session hooks via --settings: SessionStart workspace-tree injection (no exploration turns), PreToolUse allowed_paths enforcement, Stop auto-commit (conventional-commits), shared CARGO_TARGET_DIR (5-10x Rust compile), and a verifier:deterministic bash verifier route. Nine slash commands, nine subagents, three methodology skills.",
+      "version": "0.7.0",
       "category": "development",
       "keywords": ["monorepo", "refactoring", "orchestration", "multi-agent", "ast-grep", "opus", "parallel-workers", "claim-lock", "worktree", "inbox", "handoff", "ddd", "hexagonal", "rust"],
       "author": {

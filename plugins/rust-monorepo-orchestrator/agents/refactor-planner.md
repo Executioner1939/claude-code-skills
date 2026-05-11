@@ -33,17 +33,37 @@ You can write under `.refactor/domains/<domain>/` and `.refactor/inbox/<domain>/
 
 # Inputs
 
+You operate in two modes depending on which input shape arrives:
+
+**Aggregate mode** (legacy; single-domain plan):
 - `scope` -- absolute path to the monorepo root.
-- `domain` -- the domain you plan for.
+- `domain` -- the aggregate you plan for.
 - `violations_md` -- absolute path to `.refactor/domains/<domain>/violations.md`.
 - `rules_dir` -- absolute path to `.refactor/rules/<domain>/`.
-- `standard_md` -- absolute path to `.refactor/standard.md` (may be null).
 - `chain_md` -- absolute path to `.refactor/domains/<domain>/chain.md`.
-- `output_plan` -- absolute path: `.refactor/domains/<domain>/PLAN.md`.
-- `output_tests` -- absolute path: `.refactor/domains/<domain>/tests.json`.
-- `inbox_pending_dir` -- absolute path: `.refactor/inbox/<domain>/pending/`.
+
+**Service mode** (v0.7.0+; multi-aggregate unified plan):
+- `scope` -- absolute path to the monorepo root.
+- `planning_unit` -- the service name (e.g., `svc-api-users`).
+- `aggregates` -- comma-separated list of aggregate names in the service (e.g., `user,kyc,licence,privacy_export,privacy_erasure`).
+- `violations_md_paths` -- list of per-aggregate violations.md paths.
+- `rules_dirs` -- list of per-aggregate rule directories.
+- `decisions_md_paths` -- list of per-aggregate decisions.md paths (may not all exist).
+- `chain_md_paths` -- list of per-aggregate chain.md paths.
+
+**Common (both modes):**
+- `standard_md` -- absolute path to `.refactor/standard.md` (may be null).
+- `output_plan` -- absolute path: `.refactor/domains/<planning_unit>/PLAN.md`.
+- `output_tests` -- absolute path: `.refactor/domains/<planning_unit>/tests.json`.
+- `inbox_pending_dir` -- absolute path: `.refactor/inbox/<planning_unit>/pending/`.
 - `handoff_dir` -- absolute path for HANDOFF artefacts.
 - `wave_width` (default 5) -- the orchestrator's parallelism limit; the planner uses this only as a hint for ticket sizing.
+
+In service mode, you read every per-aggregate violations.md and produce a SINGLE unified PLAN.md that:
+1. **De-duplicates shared infrastructure tickets across aggregates.** If 5 aggregates' violations all flag "lift libs/cqrs from reference", emit ONE T-001 ticket, not 5. Every downstream per-aggregate ticket references T-001 via `depends_on`.
+2. **Models cross-aggregate dependencies explicitly.** If `kyc/UserError` introduction requires `libs/cqrs` lift to have landed, that edge is in the DAG.
+3. **Emits T-000 preamble (per step 4a)** for manifest-hub edits shared across aggregates.
+4. **Tags every ticket with its `aggregate:` frontmatter** so the wave can group them and the verifier can scope acceptance commands correctly.
 
 # Method
 

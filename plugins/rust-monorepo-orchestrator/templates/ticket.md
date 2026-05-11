@@ -1,6 +1,14 @@
 ---
 id: T-NNN
-domain: <domain>
+# `planning_unit` is the service (or aggregate, in legacy mode) the ticket
+# belongs to. The wave inbox lives at .refactor/inbox/<planning_unit>/.
+planning_unit: <service-or-aggregate>
+# `aggregate` is set only in service-mode plans -- it names the specific
+# aggregate this ticket belongs to (e.g., user, kyc). Used by the hooks +
+# verifier to scope acceptance commands. Absent for shared-infrastructure
+# tickets that span multiple aggregates (T-000 preamble, lib lifts).
+aggregate: <aggregate-or-empty>
+domain: <legacy alias for planning_unit; kept for back-compat>
 severity: <BLOCKING|NEEDS-WORK|NIT>
 created: <ISO8601>
 status: pending

@@ -1,6 +1,6 @@
 ---
-description: Run the implementation wave with the Ralph loop. No nested-subagent orchestrator; the bash loop (scripts/run-wave-ralph.sh) drives dispatch, claim, wait, verify, automerge, and triage. Each ticket runs as an OS-level `claude -p` process in its own worktree, so progress survives parent crashes, parallelism is real, and the monitor (scripts/monitor-wave.sh) can tail live. Use this instead of /run-wave on plugins or environments where nested Agent dispatch is restricted. Invoke as `/rust-monorepo-orchestrator:run-wave-ralph <domain> [--scope=<path>] [--wave-width=<n>] [--max-iterations=<n>] [--no-monitor]`.
-argument-hint: "<domain> [--scope=<path>] [--wave-width=<n>] [--max-iterations=<n>] [--no-monitor]"
+description: Run the implementation wave with the Ralph loop. No nested-subagent orchestrator; the bash loop (scripts/run-wave-ralph.sh) drives dispatch, claim, wait, verify, automerge, and triage. Each ticket runs as an OS-level `claude -p` process in its own worktree, so progress survives parent crashes, parallelism is real, and the monitor (scripts/monitor-wave.sh) can tail live. Context-aware: with no args, runs the wave for the inbox matching the current cwd's service. Use this instead of /run-wave on plugins or environments where nested Agent dispatch is restricted. Invoke as `/rust-monorepo-orchestrator:run-wave-ralph [<service-or-aggregate>] [--wave-width=<n>] [--max-iterations=<n>] [--no-monitor]`.
+argument-hint: "[<service-or-aggregate>] [--wave-width=<n>] [--max-iterations=<n>] [--no-monitor]"
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -42,13 +42,33 @@ Use this when:
 set -e
 ARGS=$(printf '%s' "$ARGUMENTS")
 
-DOMAIN=$(printf '%s' "$ARGS" | awk '{ for (i=1;i<=NF;i++) if ($i !~ /^--/) { print $i; exit } }')
-test -n "$DOMAIN" || { echo "ABORT: domain is required. Usage: /rust-monorepo-orchestrator:run-wave-ralph <domain> [--scope=<path>] [--wave-width=<n>] [--max-iterations=<n>] [--no-monitor]"; exit 0; }
+TARGET=$(printf '%s' "$ARGS" | awk '{ for (i=1;i<=NF;i++) if ($i !~ /^--/) { print $i; exit } }')
 
-SCOPE=$(printf '%s' "$ARGS" | grep -oE -- '--scope=[^ ]+' | cut -d= -f2 || true)
-[ -z "${SCOPE:-}" ] && SCOPE="$(pwd)"
-test -d "$SCOPE" || { echo "ABORT: scope $SCOPE is not a directory"; exit 0; }
-SCOPE=$(cd "$SCOPE" && pwd)
+# Locate plugin dir for discover-workspace.sh.
+PLUGIN_DIR_DISC="${CLAUDE_PLUGIN_DIR:-}"
+if [ -z "$PLUGIN_DIR_DISC" ] || [ ! -d "$PLUGIN_DIR_DISC/scripts" ]; then
+  CACHE="$HOME/.claude/plugins/cache/skunkworks/rust-monorepo-orchestrator"
+  [ -d "$CACHE" ] && PLUGIN_DIR_DISC=$(ls -1d "$CACHE"/*/ 2>/dev/null | tail -1 | sed 's:/$::')
+fi
+test -d "$PLUGIN_DIR_DISC/scripts" || { echo "ABORT: cannot locate plugin dir."; exit 0; }
+
+DISCOVERY=$(bash "$PLUGIN_DIR_DISC/scripts/discover-workspace.sh" "$(pwd)" 2>/dev/null || true)
+test -n "$DISCOVERY" || { echo "ABORT: workspace discovery failed."; exit 0; }
+
+SCOPE=$(printf '%s' "$DISCOVERY" | jq -r '.workspace_root')
+CURRENT_SVC=$(printf '%s' "$DISCOVERY" | jq -r '.current.service // empty')
+
+# Resolve DOMAIN (the inbox key) from TARGET or current context.
+DOMAIN=""
+if [ -n "$TARGET" ]; then
+  case "$TARGET" in
+    */*) DOMAIN="${TARGET#*/}";;
+    *) DOMAIN="$TARGET";;
+  esac
+elif [ -n "$CURRENT_SVC" ]; then
+  DOMAIN="$CURRENT_SVC"
+fi
+test -n "$DOMAIN" || { echo "ABORT: no target supplied and cwd is not inside a service. Usage: /run-wave-ralph <service-or-aggregate>"; exit 0; }
 
 WAVE_WIDTH=$(printf '%s' "$ARGS" | grep -oE -- '--wave-width=[0-9]+' | cut -d= -f2 || true)
 [ -z "${WAVE_WIDTH:-}" ] && WAVE_WIDTH=5
