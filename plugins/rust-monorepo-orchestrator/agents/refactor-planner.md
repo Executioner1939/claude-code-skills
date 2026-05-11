@@ -82,6 +82,24 @@ The `orchestration-protocol` skill is auto-loaded; consult it for ticket-file sh
    }
    ```
    The verifier reads `tests.json` and refuses any ticket that removes or weakens a `must_not_be_removed: true` test.
+6a. **Classify each ticket for the Stop hook + verifier router (v0.6.0).** Two frontmatter fields drive optimizations the Ralph loop applies automatically; set them per ticket:
+
+   **`commit_type`** -- one of `feat`, `fix`, `refactor`, `chore`, `test`, `docs`, `build`, `ci`. Drives the Stop-hook auto-commit message (`<type>(<scope>): <objective> [T-NNN]`). Defaults by severity:
+   - BLOCKING + structural change -> `refactor`
+   - BLOCKING + bug-class violation (panic, unwrap, missing validation) -> `fix`
+   - BLOCKING + new capability (introducing a missing port / runner / type) -> `feat`
+   - NEEDS-WORK -> `refactor`
+   - NIT (cleanup, style, lint suppression removal) -> `chore`
+   - Test-only tickets (adding must_not_be_removed coverage) -> `test`
+   - Manifest-only preamble (T-000, see step 4a) -> `build`
+
+   **`verifier`** -- one of `llm` (default), `deterministic`, or `hybrid`. Drives whether the verifier is the LLM subagent or the bash `verify-deterministic.sh` script. Set `deterministic` ONLY when ALL of these hold:
+   - The ticket's acceptance section is purely commands (cargo build/test/clippy/fmt, ast-grep --error, etc.) -- no "the code structure should make sense" phrasing.
+   - The fix is mechanical (rename, import-rewrite, derive-add, field-add, manifest edit, file copy, file move, deletion of named modules) and the worker can complete it without judgment calls.
+   - No tests.json `must_not_be_removed: true` entries hinge on test-shape judgment.
+
+   Use `llm` for: introducing new abstractions (UserService, lift_decider_to_app_error, UserError enum design), splitting aggregates, designing new traits, anything with a "shape" decision. Use `hybrid` for high-stakes deterministic tickets where you want both checks (rare).
+
 7. **Author each ticket.** Use the templates/ticket.md shape verbatim. Set:
    - `id`: T-NNN, sequential within the domain.
    - `domain`: <domain>.
@@ -93,8 +111,11 @@ The `orchestration-protocol` skill is auto-loaded; consult it for ticket-file sh
    - `claimed_at`: null.
    - `attempts`: 0.
    - `max_attempts`: 3 (default; raise to 5 for tricky tickets).
+   - `severity`: BLOCKING / NEEDS-WORK / NIT (mirrors the violations.md classification).
    - `isolation`: worktree.
    - `worker_model`: chosen per step 5.
+   - `commit_type`: per step 6a.
+   - `verifier`: per step 6a (default `llm`).
    - Body sections (objective, inputs, context, tools_and_sources, boundaries, out_of_scope, acceptance, output_format, handoff) populated per the structured envelope contract.
    - The `acceptance` section MUST list the specific ast-grep rule(s) that must pass after the fix, plus `cargo test` / `cargo clippy` commands.
 8. **Write each ticket file** to `<inbox_pending_dir>/T-NNN.md`.

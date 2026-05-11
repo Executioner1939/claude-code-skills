@@ -1,6 +1,7 @@
 ---
 id: T-NNN
 domain: <domain>
+severity: <BLOCKING|NEEDS-WORK|NIT>
 created: <ISO8601>
 status: pending
 depends_on: []
@@ -11,6 +12,15 @@ attempts: 0
 max_attempts: 3
 isolation: worktree
 worker_model: claude-sonnet-4-6
+# Conventional-commits type for the auto-commit Stop hook. Optional; defaults
+# from severity (BLOCKING/NEEDS-WORK -> refactor, NIT -> chore, BUG/FIX -> fix).
+# Override per ticket to one of: feat, fix, refactor, chore, test, docs, build, ci.
+commit_type: refactor
+# Verifier mode. `llm` is the default and uses the verifier subagent for
+# judgment-bearing tickets. `deterministic` skips the LLM and uses the bash
+# verifier (verify-deterministic.sh) -- chosen for purely mechanical tickets
+# whose acceptance is commands + ast-grep rules only. `hybrid` runs both.
+verifier: llm
 ---
 
 ## objective

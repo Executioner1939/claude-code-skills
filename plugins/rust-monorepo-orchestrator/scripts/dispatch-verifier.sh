@@ -38,6 +38,26 @@ if [ -z "$RESULT_PATH" ] || [ ! -f "$RESULT_PATH" ]; then
   exit 0
 fi
 
+# Route to the deterministic (bash) verifier if the ticket's frontmatter
+# requests it. Mechanical tickets (rename, import-rewrite, derive-add,
+# manifest-only) don't need an LLM verifier -- bash re-running the acceptance
+# commands + ast-grep rules is sufficient and ~40-50% cheaper.
+VERIFIER_KIND=$(awk -F': ' '
+  BEGIN { in_fm=0 }
+  /^---$/ { in_fm = !in_fm; next }
+  in_fm && /^verifier:/ {
+    sub(/^[ \t]*/, "", $2)
+    gsub(/"/, "", $2)
+    print $2
+    exit
+  }
+' "$TICKET_PATH" 2>/dev/null || echo "")
+
+if [ "$VERIFIER_KIND" = "deterministic" ]; then
+  exec bash "$(dirname "$0")/verify-deterministic.sh" \
+    "$TICKET_ID" "$WORKTREE" "$INBOX_DIR" "$DOMAIN" "$SCOPE" "$STATE_DIR"
+fi
+
 PROMPT="Verify ticket ${TICKET_ID}.
 
 ticket_path: ${TICKET_PATH}
