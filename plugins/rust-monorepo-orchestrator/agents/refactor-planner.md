@@ -56,6 +56,12 @@ The `orchestration-protocol` skill is auto-loaded; consult it for ticket-file sh
    - Do NOT bundle findings across services or across hexagonal layers into one ticket; they have different `allowed_paths`.
 3. **Compute `allowed_paths` per ticket.** The minimum set of paths the worker may modify. Be precise -- this is the verifier's enforcement boundary. Include test files for the affected code.
 4. **Compute `depends_on` edges.** Tickets that change a shared port trait (or a shared event variant) must precede tickets that consume the change.
+4a. **Identify path-lock hotspots and emit preamble tickets.** Files that act as "manifest hubs" -- root `Cargo.toml`, `package.json`, `pyproject.toml`, root `moon.yml`, root `sgconfig.yml` -- are touched by many downstream tickets but every touch path-locks the entire wave to width=1 until they complete. If three or more downstream tickets share an `allowed_paths` entry pointing at one of these manifest files, emit a single **preamble ticket** (T-000 by convention) that consolidates ALL the manifest-level edits up front. The downstream tickets then drop the manifest from their `allowed_paths`, freeing the wave to run at full width. Examples:
+   - Lifting four lib crates each adding itself to the root `Cargo.toml` `[workspace] members` -> emit T-000 that pre-adds all four entries, then T-001..T-004 only touch `libs/<name>/`.
+   - Adding three new `[workspace.dependencies]` entries -> emit T-000 that adds all three with the chosen versions; downstream tickets only touch their own crate manifests.
+   - Registering N new ast-grep rule directories in `sgconfig.yml` -> emit T-000 that registers all directories at once.
+
+   Preamble tickets are mechanical (sonnet 4.6) and have `depends_on: []`. Document the consolidation in the ticket body's `objective` so the worker knows why.
 5. **Choose worker model per ticket.**
    - Default: `claude-sonnet-4-6` for mechanical fixes, single-file edits, hardcoded-literal replacements.
    - Escalate to `claude-opus-4-7` for architectural ticket types: introducing a new port trait, refactoring a Decider, splitting an aggregate.
