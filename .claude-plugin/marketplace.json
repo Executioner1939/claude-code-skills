@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, and meta-tooling.",
-    "version": "5.17.1",
+    "version": "5.18.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -171,6 +171,20 @@
       "version": "0.1.1",
       "category": "development",
       "keywords": ["meta", "skill-evolution", "skill-quality", "skill-eval", "evals", "eval-harness", "regression-testing", "property-based-testing", "transcript-mining", "judge-calibration"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "k8s-deployment-readiness",
+      "source": "./plugins/k8s-deployment-readiness",
+      "description": "Three-gate Kubernetes deployment readiness workflow (develop / staging|uat / production) derived from learnkube.com/production-best-practices. Verifies application code, Kubernetes manifests (Helm/Kustomize/raw YAML), Terraform/OpenTofu modules, and GitOps configs (Argo CD/Flux) against a tiered checklist that grows per gate. Bundles deep OpenTelemetry guidance: semantic conventions, histogram bucket selection, exemplars wired SDK->Collector->Prometheus, head vs tail sampling with trace affinity, and Google-SRE-Table-5-8 multi-burn-rate SLO alerting with worked examples. Two specialized read-only subagents (deployment-verifier, observability-auditor) load six internal skills that are not user-invocable.",
+      "version": "1.0.0",
+      "category": "development",
+      "keywords": ["kubernetes", "k8s", "deployment", "production-readiness", "opentelemetry", "otel", "observability", "slo", "multi-burn-rate", "terraform", "gitops", "argocd", "flux", "helm", "kustomize"],
       "author": {
         "name": "Executioner1939"
       },
