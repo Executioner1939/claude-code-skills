@@ -1,0 +1,72 @@
+{
+  "description": "Per-tool credit cost estimates for the firecrawl-mcp MCP server. Sourced from firecrawl.dev/pricing on 2026-05-13. Values are conservative defaults; the user may tune via .oracle/budget.json in a project or ~/.claude/plugins/oracle/budget.json globally.",
+  "source": "https://www.firecrawl.dev/pricing",
+  "verified_on": "2026-05-13",
+  "default_monthly_budget_credits": 100000,
+  "plan_defaults": {
+    "free": 1000,
+    "hobby": 5000,
+    "standard": 100000,
+    "growth": 500000,
+    "scale": 1000000
+  },
+  "thresholds": {
+    "soft_warning_pct": 80,
+    "ask_threshold_pct": 95,
+    "deny_threshold_pct": 100,
+    "single_call_hard_gate_pct": 15,
+    "rolling_hour_max_credits": 5000
+  },
+  "tool_costs": {
+    "mcp__plugin_oracle_firecrawl__firecrawl_scrape": {
+      "credits_per_call": 1,
+      "scales_with": "fixed",
+      "notes": "1 credit per page scraped"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_batch_scrape": {
+      "credits_per_call": 1,
+      "scales_with": "urls_array_length",
+      "notes": "1 credit per URL in the urls[] argument; multiply by len(urls)"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_check_batch_status": {
+      "credits_per_call": 0,
+      "scales_with": "fixed",
+      "notes": "Status poll; no credits charged"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_map": {
+      "credits_per_call": 1,
+      "scales_with": "fixed",
+      "notes": "1 credit per call (1 page mapped)"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_search": {
+      "credits_per_call": 2,
+      "scales_with": "limit_param",
+      "notes": "2 credits per 10 results; if limit arg is set, ceil(limit/10) * 2; if scrapeOptions present add 1 per scraped result"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_crawl": {
+      "credits_per_call": 1,
+      "scales_with": "limit_param",
+      "notes": "1 credit per page crawled; multiply by the crawl's limit/maxPages arg, defaulting to 100 if unset"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_check_crawl_status": {
+      "credits_per_call": 0,
+      "scales_with": "fixed",
+      "notes": "Status poll; no credits charged"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_extract": {
+      "credits_per_call": 5,
+      "scales_with": "urls_array_length",
+      "notes": "LLM-based; conservative 5 credits per page; multiply by len(urls)"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_agent": {
+      "credits_per_call": 50,
+      "scales_with": "fixed",
+      "notes": "Preview pricing; conservative 50 credits per agent run; actual may vary"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_agent_status": {
+      "credits_per_call": 0,
+      "scales_with": "fixed",
+      "notes": "Status poll; no credits charged"
+    }
+  }
+}

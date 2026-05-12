@@ -1,0 +1,50 @@
+{
+  "description": "Hooks for the oracle plugin. SessionStart injects the verification protocol. PreToolUse on Bash intercepts unpinned install commands. PreToolUse + PostToolUse on the plugin-scoped firecrawl MCP tools enforce budget-aware gating: tiered soft-remind / ask / deny based on monthly + rolling-hour + single-call thresholds, with state persisted at ~/.claude/plugins/oracle/usage.json.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/inject-protocol.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/intercept-install.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_oracle_firecrawl__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/rate-limit-guard.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp__plugin_oracle_firecrawl__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/rate-limit-track.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "oracle",
+  "description": "Truth-verification harness with structured research and budget-aware gating. SessionStart hook injects a verification protocol. PreToolUse hook on Bash intercepts unpinned install commands across thirteen package managers. PreToolUse + PostToolUse hooks on the bundled firecrawl-mcp@3.2.1 surface enforce tiered rate-limit gating (silent allow under 80% monthly budget, soft remind 80-95%, permissionDecision=ask 95-100% or single-call >=15% or rolling-hour over 5000 credits, hard deny over 100%) with state at ~/.claude/plugins/oracle/usage.json. Five slash commands: /oracle:setup, /oracle:verify, /oracle:research [--intensity=quick|standard|exhaustive], /oracle:vet, /oracle:budget. Five Opus-4.7-primed subagents: canon-reader, github-archivist, issue-investigator, forum-anthropologist, cost-rethinker (multi-angle cheaper-alternative dispatch when the rate-limit-guard flags an expensive call). Four auto-triggering knowledge skills: verification-protocol, research-protocol, anti-hype-ranking. All ten active firecrawl MCP tools allow-listed across every silo for citation-backed retrieval. Includes a shellcheck-clean test suite (run via tests/run-tests.sh).",
+  "version": "0.3.0",
+  "author": {
+    "name": "Executioner1939"
+  },
+  "homepage": "https://github.com/Executioner1939/claude-code-skills",
+  "repository": "https://github.com/Executioner1939/claude-code-skills",
+  "license": "MIT",
+  "keywords": [
+    "verification",
+    "fact-checking",
+    "version-pinning",
+    "anti-hallucination",
+    "citations",
+    "package-manager",
+    "firecrawl",
+    "firecrawl-mcp",
+    "mcp",
+    "websearch",
+    "session-hook",
+    "pretooluse",
+    "posttooluse",
+    "rate-limit",
+    "budget-gating",
+    "research",
+    "ecosystem-survey",
+    "library-vetting",
+    "anti-hype",
+    "niche-discovery",
+    "subagents",
+    "opus-4.7",
+    "spec-conformance",
+    "shellcheck"
+  ]
+}

@@ -5,8 +5,8 @@
     "email": "executioner1939@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, and meta-tooling.",
-    "version": "5.20.0",
+    "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, meta-tooling, and truth-verification.",
+    "version": "5.23.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -185,6 +185,20 @@
       "version": "1.0.0",
       "category": "development",
       "keywords": ["kubernetes", "k8s", "deployment", "production-readiness", "opentelemetry", "otel", "observability", "slo", "multi-burn-rate", "terraform", "gitops", "argocd", "flux", "helm", "kustomize"],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "oracle",
+      "source": "./plugins/oracle",
+      "description": "Truth-verification harness with structured research and budget-aware rate-limit gating. SessionStart hook injects a verification protocol; PreToolUse hook on Bash intercepts unpinned installs across 13 package managers; PreToolUse + PostToolUse hooks on the bundled firecrawl-mcp@3.2.1 surface enforce tiered gating (silent under 80% used, soft remind 80-95%, ask 95-100% or single-call >=15% or rolling-hour over 5000 cr, deny over 100%). Five slash commands: /oracle:setup, /oracle:verify, /oracle:research [--intensity], /oracle:vet, /oracle:budget. Five Opus-4.7-primed subagents: canon-reader, github-archivist, issue-investigator, forum-anthropologist, cost-rethinker (multi-angle cheaper-alternative dispatch when an expensive call gates). Four auto-trigger knowledge skills: verification-protocol, research-protocol, anti-hype-ranking. All ten active firecrawl MCP tools allow-listed across every silo. Includes a shellcheck-clean test suite. Requires FIRECRAWL_API_KEY.",
+      "version": "0.3.0",
+      "category": "development",
+      "keywords": ["verification", "fact-checking", "version-pinning", "anti-hallucination", "citations", "package-manager", "firecrawl", "firecrawl-mcp", "mcp", "websearch", "session-hook", "pretooluse", "posttooluse", "rate-limit", "budget-gating", "research", "ecosystem-survey", "library-vetting", "anti-hype", "niche-discovery", "subagents", "opus-4.7", "spec-conformance", "shellcheck"],
       "author": {
         "name": "Executioner1939"
       },
