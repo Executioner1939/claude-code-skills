@@ -114,31 +114,40 @@ wiring instructions.
 
 ## Per-service notes
 
-**Slack.** Uses cookie extraction (`d` cookie + `boot_data.api_token`)
-because Slack's MCP-eligible apps must be Marketplace-published.
-Compatible with `slack-mcp-server` (korotovsky). No app registration
-needed.
+**Slack.** Uses cookie extraction (the `d` cookie is the xoxd token,
+and the xoxc token is read from `localStorage.localConfig_v2.teams.<TEAM_ID>.token`)
+because Slack restricts MCP-eligible apps to the Marketplace and
+internal apps. Compatible with `slack-mcp-server@1.2.3` (korotovsky).
+No app registration needed.
 
 **Linear.** Personal API key per workspace. The Linear UI shows the
 key value once at creation -- the script cannot re-extract a forgotten
-key. Compatible with `@dvcrn/mcp-server-linear`, with `TOOL_PREFIX`
+key. Compatible with `mcp-server-linear@1.6.0` (dvcrn -- note the
+package is unscoped on npm, not `@dvcrn/...`), with `TOOL_PREFIX`
 auto-set to `linear_<label>_` so concurrent workspaces don't collide
 on tool names.
 
-**Notion.** Internal integration token per workspace. The user must
-share at least one page or database with the integration after creating
-it, or the MCP server will see an empty workspace.
+**Notion.** Internal integration token per workspace, prefix `ntn_`
+(older `secret_` prefix is also accepted). The user must share at
+least one page or database with the integration after creating it, or
+the MCP server will see an empty workspace. Compatible with
+`@notionhq/notion-mcp-server@2.2.1`.
 
 **GitHub.** One fine-grained PAT per org, scoped to that org's
 resource owner. Multiple orgs = multiple tokens = multiple MCP server
 instances. Recommended scopes: Contents R, Issues RW, Pull requests RW,
-Metadata R. The matrix uses the official Docker image
-`ghcr.io/github/github-mcp-server`; if Docker is unavailable, swap to
-the Go binary install path manually.
+Metadata R. The matrix uses the official public Docker image
+`ghcr.io/github/github-mcp-server`; **Docker must be installed and
+running** for these entries to start. To swap to the Go binary install
+path, edit the `github-pat` spec in `build-matrix.mjs`.
 
 **Atlassian.** API token + email + site URL per Cloud site. Uses
-`mcp-atlassian` (sooperset) for per-instance auth, sidestepping
-`atlassian/atlassian-mcp-server#23`.
+`mcp-atlassian==0.21.1` (sooperset) via **`uvx`** for per-instance
+auth, sidestepping `atlassian/atlassian-mcp-server#23`. **Requires
+`uv` on PATH** -- install via
+`curl -LsSf https://astral.sh/uv/install.sh | sh`. Note: the npm
+package named `mcp-atlassian` is by a different author and is not
+what we use.
 
 ## Storage layout
 

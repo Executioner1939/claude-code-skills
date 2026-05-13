@@ -43,30 +43,44 @@ export async function probe({ label }) {
     return persist(wsLabel, { xoxd: manualXoxd, xoxc: manualXoxc });
   }
 
-  // The d cookie value IS the xoxd token (Slack prefixes it during set-cookie).
-  // The xoxc token is workspace-keyed and lives in the page's bootData JSON --
-  // accessible via window.boot_data.api_token after the workspace loads.
+  // The `d` cookie value IS the xoxd token (Slack set-cookies it pre-prefixed).
+  // The xoxc token is workspace-keyed and lives in localStorage under the
+  // localConfig_v2 key, indexed by the team ID parsed from the URL path.
+  // Source: korotovsky/slack-mcp-server docs/01-authentication-setup.md
+  // (verified 2026-05-13). Earlier `window.boot_data.api_token` paths are
+  // stale.
   let xoxc = "";
   try {
-    const { context: ctx2, page: page2, close: close2 } = await launchProfile({
+    const { page: page2, close: close2 } = await launchProfile({
       service: "slack",
       workspace: wsLabel,
       startUrl: "https://app.slack.com/client",
     });
-    await page2.waitForLoadState("domcontentloaded");
+    // Wait for the URL to actually load a team -- the path becomes
+    // /client/<TEAM_ID>/... once Slack picks the workspace.
+    await page2.waitForURL(/\/client\/[A-Z0-9]+/, { timeout: 30000 }).catch(() => {});
     xoxc = await page2.evaluate(() => {
-      // eslint-disable-next-line no-undef
-      return (window.boot_data && window.boot_data.api_token) || "";
+      try {
+        // eslint-disable-next-line no-undef
+        const cfg = JSON.parse(localStorage.localConfig_v2);
+        // eslint-disable-next-line no-undef
+        const m = document.location.pathname.match(/^\/client\/([A-Z0-9]+)/);
+        if (!m) return "";
+        const team = cfg.teams && cfg.teams[m[1]];
+        return (team && team.token) || "";
+      } catch { return ""; }
     }).catch(() => "");
     await close2();
-    void ctx2;
   } catch { /* fall through to manual paste */ }
 
   if (!xoxc) {
     process.stderr.write(
-      "Could not auto-extract xoxc token from boot_data. " +
+      "Could not auto-extract xoxc token from localStorage. " +
       "Open https://app.slack.com/client in the same profile, open DevTools, " +
-      "run `window.boot_data.api_token`, and paste the result here.\n",
+      "and run:\n" +
+      "  JSON.parse(localStorage.localConfig_v2).teams[" +
+      "document.location.pathname.match(/^\\/client\\/([A-Z0-9]+)/)[1]].token\n" +
+      "Paste the resulting xoxc-... token here.\n",
     );
     xoxc = await askSecret("Paste xoxc token (input hidden): ");
   }

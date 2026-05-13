@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Oracle harness values",
+  "description": "Validated against values.yaml and any project-level oracle.local.yaml override before rendering.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project", "verification", "research", "budget", "firecrawl", "agents", "mcp_fleet", "style"],
+  "properties": {
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "ci_runner", "doc_registry"],
+      "properties": {
+        "language":     { "enum": ["rust", "typescript", "python", "go", "multi"] },
+        "ci_runner":    { "enum": ["github-actions", "gitlab-ci", "circleci", "none"] },
+        "doc_registry": {
+          "oneOf": [
+            { "const": "auto" },
+            { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 }
+          ]
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strictness", "require_citations", "citation_format", "forbid_speculation"],
+      "properties": {
+        "strictness":         { "enum": ["loose", "standard", "strict"] },
+        "require_citations":  { "type": "boolean" },
+        "citation_format":    { "enum": ["url", "url-and-line", "url-line-and-quote"] },
+        "forbid_speculation": { "type": "boolean" }
+      }
+    },
+    "research": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default_intensity", "max_parallel_subagents", "prefer_primary_sources"],
+      "properties": {
+        "default_intensity":      { "enum": ["quick", "standard", "exhaustive"] },
+        "max_parallel_subagents": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "prefer_primary_sources": { "type": "boolean" }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["monthly_credits", "thresholds", "single_call_ask_pct", "rolling_hour_ask_credits"],
+      "properties": {
+        "monthly_credits":          { "type": "integer", "minimum": 1 },
+        "single_call_ask_pct":      { "type": "integer", "minimum": 1, "maximum": 100 },
+        "rolling_hour_ask_credits": { "type": "integer", "minimum": 1 },
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["soft_remind_at_pct", "ask_permission_at_pct", "hard_deny_at_pct"],
+          "properties": {
+            "soft_remind_at_pct":    { "type": "integer", "minimum": 0, "maximum": 100 },
+            "ask_permission_at_pct": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "hard_deny_at_pct":      { "type": "integer", "minimum": 0, "maximum": 200 }
+          }
+        }
+      }
+    },
+    "firecrawl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["api_key_env_var"],
+      "properties": {
+        "api_key_env_var": { "type": "string", "pattern": "^[A-Z_][A-Z0-9_]*$" }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["enabled", "effort"],
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "effort":  { "enum": ["low", "medium", "high", "xhigh"] }
+        }
+      }
+    },
+    "mcp_fleet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "services"],
+      "properties": {
+        "enabled":  { "type": "boolean" },
+        "services": {
+          "type": "array",
+          "items": { "enum": ["slack", "linear", "notion", "github", "atlassian"] },
+          "uniqueItems": true
+        }
+      }
+    },
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_emojis", "prose_over_bullets"],
+      "properties": {
+        "no_emojis":          { "type": "boolean" },
+        "prose_over_bullets": { "type": "boolean" }
+      }
+    }
+  }
+}

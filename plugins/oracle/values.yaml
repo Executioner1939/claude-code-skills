@@ -1,0 +1,50 @@
+# Oracle harness defaults.
+#
+# These values are baked into the rendered skill / agent / command bodies
+# at install time. Override them per-project by creating
+# `<project>/.claude/oracle.local.yaml` with any subset of these keys.
+#
+# Render with: python3 plugins/oracle/scripts/oracle-render.py
+
+project:
+  language: multi                      # rust | typescript | python | go | multi
+  ci_runner: github-actions            # github-actions | gitlab-ci | circleci | none
+  doc_registry: auto                   # auto = derived from `language`; or explicit list
+
+verification:
+  strictness: standard                 # loose | standard | strict
+  require_citations: true
+  citation_format: url-and-line        # url | url-and-line | url-line-and-quote
+  forbid_speculation: true
+
+research:
+  default_intensity: standard          # quick | standard | exhaustive
+  max_parallel_subagents: 5
+  prefer_primary_sources: true
+
+budget:
+  monthly_credits: 5000
+  thresholds:
+    soft_remind_at_pct: 80
+    ask_permission_at_pct: 95
+    hard_deny_at_pct: 100
+  single_call_ask_pct: 15
+  rolling_hour_ask_credits: 5000
+
+firecrawl:
+  api_key_env_var: FIRECRAWL_API_KEY
+
+agents:
+  canon_reader:         { enabled: true,  effort: high  }
+  github_archivist:     { enabled: true,  effort: high  }
+  issue_investigator:   { enabled: true,  effort: high  }
+  forum_anthropologist: { enabled: true,  effort: high  }
+  cost_rethinker:       { enabled: true,  effort: xhigh }
+
+mcp_fleet:
+  enabled: false
+  services: []                         # subset of: slack linear notion github atlassian
+
+style:
+  no_emojis: true
+  prose_over_bullets: false

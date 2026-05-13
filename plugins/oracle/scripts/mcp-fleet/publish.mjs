@@ -43,13 +43,17 @@ function main() {
   process.stdout.write(`Mode 2 -- user-scoped via the CLI:\n`);
   for (const n of names) {
     const s = config.mcpServers[n];
+    // claude mcp add: -e accepts KEY=VALUE pairs (variadic). stdio is
+    // the default transport so we omit --transport. The -- separates
+    // the server command from claude's own flags. Verified against
+    // `claude mcp add --help` on 2026-05-13.
     const envFlags = Object.entries(s.env)
       .filter(([, v]) => v !== "")
-      .map(([k, v]) => `--env ${k}='${String(v).replace(/'/g, "'\\''")}'`)
+      .map(([k, v]) => `-e ${k}='${String(v).replace(/'/g, "'\\''")}'`)
       .join(" ");
     const argFlags = s.args.map((a) => `'${a.replace(/'/g, "'\\''")}'`).join(" ");
     process.stdout.write(
-      `  claude mcp add --scope user --transport stdio ${n} ${envFlags} -- ${s.command} ${argFlags}\n`,
+      `  claude mcp add -s user ${envFlags} ${n} -- ${s.command} ${argFlags}\n`,
     );
   }
   process.stdout.write(`\n`);

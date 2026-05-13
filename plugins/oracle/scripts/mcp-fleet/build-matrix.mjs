@@ -14,40 +14,51 @@ import { join } from "node:path";
 import { list } from "./lib/workspaces-store.mjs";
 import { fleetHome } from "./lib/profile-dir.mjs";
 
-// Per-kind upstream MCP server spec. Pinned versions verified 2026-05-13;
-// bump deliberately when upstream releases something material. Each spec
-// returns the stdio command + args + env-passthrough keys. The actual env
-// values are the workspace's credentials object.
+// Per-kind upstream MCP server spec. Pinned versions verified against
+// the npm/PyPI registries on 2026-05-13:
+//   slack-mcp-server@1.2.3            (korotovsky)
+//   mcp-server-linear@1.6.0           (dvcrn -- note: NOT scoped @dvcrn/)
+//   @notionhq/notion-mcp-server@2.2.1 (official Notion)
+//   ghcr.io/github/github-mcp-server  (official GitHub, public OCI image)
+//   mcp-atlassian (PyPI, sooperset)   (Python -- uvx, NOT npx; the npm
+//                                      package of the same name is by
+//                                      a different author)
+// Bump deliberately. Each spec returns the stdio command + args + the
+// env-passthrough keys; the actual values come from the workspace's
+// credentials object.
 
 const SPECS = {
   "slack-cookie": (_creds, _label) => ({
     command: "npx",
-    args: ["-y", "slack-mcp-server@latest"],
+    args: ["-y", "slack-mcp-server@1.2.3"],
     envKeys: ["SLACK_MCP_XOXC_TOKEN", "SLACK_MCP_XOXD_TOKEN"],
   }),
   "linear-api-key": (_creds, label) => ({
     command: "npx",
-    args: ["-y", "@dvcrn/mcp-server-linear@latest"],
+    args: ["-y", "mcp-server-linear@1.6.0"],
     envKeys: ["LINEAR_API_KEY"],
     extraEnv: { TOOL_PREFIX: `linear_${label}_` },
   }),
   "notion-integration": (_creds, _label) => ({
     command: "npx",
-    args: ["-y", "@notionhq/notion-mcp-server@latest"],
+    args: ["-y", "@notionhq/notion-mcp-server@2.2.1"],
     envKeys: ["NOTION_TOKEN"],
   }),
   "github-pat": (_creds, _label) => ({
     command: "docker",
     args: [
-      "run", "--rm", "-i",
+      "run", "-i", "--rm",
       "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
-      "ghcr.io/github/github-mcp-server:latest",
+      "ghcr.io/github/github-mcp-server",
     ],
     envKeys: ["GITHUB_PERSONAL_ACCESS_TOKEN"],
   }),
   "atlassian-api-token": (_creds, _label) => ({
-    command: "npx",
-    args: ["-y", "mcp-atlassian@latest"],
+    // sooperset/mcp-atlassian is Python; uvx fetches and runs from PyPI
+    // without a permanent install. Requires `uv` on PATH; install via
+    // `curl -LsSf https://astral.sh/uv/install.sh | sh`.
+    command: "uvx",
+    args: ["mcp-atlassian==0.21.1"],
     envKeys: [
       "CONFLUENCE_URL", "CONFLUENCE_USERNAME", "CONFLUENCE_API_TOKEN",
       "JIRA_URL", "JIRA_USERNAME", "JIRA_API_TOKEN",
