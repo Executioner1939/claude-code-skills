@@ -115,19 +115,28 @@ estimate_cost() {
 #   1. .oracle/budget.json in the current project (project override)
 #   2. ~/.claude/plugins/oracle/budget.json (user override)
 #   3. cost-table.json default_monthly_budget_credits
+# Returns the first non-empty positive integer it resolves.
 get_monthly_budget() {
   local project_cfg=".oracle/budget.json"
   local user_cfg="$ORACLE_DIR/budget.json"
+  local val=""
 
-  if [ -f "$project_cfg" ]; then
-    jq -r '.monthly_credits // empty' "$project_cfg" 2>/dev/null && return
-  fi
-  if [ -f "$user_cfg" ]; then
-    jq -r '.monthly_credits // empty' "$user_cfg" 2>/dev/null && return
-  fi
+  for cfg in "$project_cfg" "$user_cfg"; do
+    if [ -f "$cfg" ]; then
+      val=$(jq -r '.monthly_credits // empty' "$cfg" 2>/dev/null)
+      if [ -n "$val" ] && [ "$val" -gt 0 ] 2>/dev/null; then
+        echo "$val"
+        return
+      fi
+    fi
+  done
+
   if [ -f "$COST_TABLE" ]; then
-    jq -r '.default_monthly_budget_credits // 100000' "$COST_TABLE"
-    return
+    val=$(jq -r '.default_monthly_budget_credits // 100000' "$COST_TABLE" 2>/dev/null)
+    if [ -n "$val" ] && [ "$val" -gt 0 ] 2>/dev/null; then
+      echo "$val"
+      return
+    fi
   fi
   echo 100000
 }

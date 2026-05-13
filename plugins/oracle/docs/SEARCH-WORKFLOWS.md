@@ -117,14 +117,29 @@ the end.
 - Bundled `firecrawl-mcp@3.2.1` MCP server giving every silo
   citation-backed retrieval.
 
+## Shipped (recap of capabilities the workflow relies on)
+
+- Rate-limit-aware gating on firecrawl MCP calls (v0.3.0).
+  Tracks hourly / weekly / monthly quota at
+  `~/.claude/plugins/oracle/usage.json`. Tiered decisions: silent
+  allow under 80% used, soft remind 80-95%, ask 95-100% or
+  single-call >= 15% of monthly or rolling-hour over 5000
+  credits, deny over 100%. Dispatches the `cost-rethinker` agent
+  for multi-angle cheaper alternatives when a single call gates.
+- Cost-table at `scripts/cost-table.json` versioned with the
+  plugin; project / user overrides at `.oracle/budget.json` or
+  `~/.claude/plugins/oracle/budget.json`.
+- `/oracle:budget` slash command for show / reset / set.
+
 ## Roadmap (visible to the user)
 
-- **v0.3.0** -- rate-limit-aware gating on firecrawl MCP calls.
-  Tracks hourly / weekly / monthly quota. Auto-routes to cheaper
-  tool when budget tight. Hard-gates highly-expensive single
-  calls (>= 15% of monthly quota) with typed-phrase confirmation
-  + dispatched multi-angle rethink agents.
-- **v0.4.0** -- streaming-as-available subagent findings.
-  Subagents post interim summaries to a shared artifact that the
+- **v0.4.0** -- corpus-wide discipline guards. PostToolUse
+  parallel-tool-discipline hook + auto-trigger skill addressing
+  the 0% parallel-batch rate observed in the user's session
+  corpus. PreToolUse `safe-edit` hook addressing the
+  Write-before-Read + stale-Edit class. Path / URL pre-flight
+  auto-trigger skill addressing speculative-fetch errors.
+- **v0.5.0** -- streaming-as-available subagent findings.
+  Subagents post interim summaries to a shared artefact that the
   orchestrator surfaces in real time, so absorption can begin
   before full synthesis.

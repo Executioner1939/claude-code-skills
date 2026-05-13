@@ -1,7 +1,7 @@
 {
   "name": "oracle",
-  "description": "Truth-verification harness with structured research and budget-aware gating. SessionStart hook injects a verification protocol. PreToolUse hook on Bash intercepts unpinned install commands across thirteen package managers. PreToolUse + PostToolUse hooks on the bundled firecrawl-mcp@3.2.1 surface enforce tiered rate-limit gating (silent allow under 80% monthly budget, soft remind 80-95%, permissionDecision=ask 95-100% or single-call >=15% or rolling-hour over 5000 credits, hard deny over 100%) with state at ~/.claude/plugins/oracle/usage.json. Five slash commands: /oracle:setup, /oracle:verify, /oracle:research [--intensity=quick|standard|exhaustive], /oracle:vet, /oracle:budget. Five Opus-4.7-primed subagents: canon-reader, github-archivist, issue-investigator, forum-anthropologist, cost-rethinker (multi-angle cheaper-alternative dispatch when the rate-limit-guard flags an expensive call). Four auto-triggering knowledge skills: verification-protocol, research-protocol, anti-hype-ranking. All ten active firecrawl MCP tools allow-listed across every silo for citation-backed retrieval. Includes a shellcheck-clean test suite (run via tests/run-tests.sh).",
-  "version": "0.3.0",
+  "description": "Truth-verification harness with structured research and budget-aware gating. SessionStart hook injects a verification protocol. PreToolUse hook on Bash intercepts unpinned install commands across thirteen package managers. PreToolUse + PostToolUse hooks on the bundled firecrawl-mcp@3.2.1 surface enforce tiered rate-limit gating (silent allow under 80% monthly budget, soft remind 80-95%, permissionDecision=ask 95-100% or single-call >=15% or rolling-hour over 5000 credits, hard deny over 100%) with state at ~/.claude/plugins/oracle/usage.json. Six slash commands: /oracle:setup, /oracle:verify, /oracle:research [--intensity=quick|standard|exhaustive], /oracle:vet, /oracle:budget, /oracle:mcp-fleet. Five Opus-4.7-primed subagents: canon-reader, github-archivist, issue-investigator, forum-anthropologist, cost-rethinker (multi-angle cheaper-alternative dispatch when the rate-limit-guard flags an expensive call). Four auto-triggering knowledge skills: verification-protocol, research-protocol, anti-hype-ranking. All ten active firecrawl MCP tools allow-listed across every silo for citation-backed retrieval. Bundled mcp-fleet utility (scripts/mcp-fleet/) handles multi-workspace MCP onboarding via Chrome-profile-isolated OAuth probes for Slack, Linear, Notion, GitHub orgs, and Atlassian sites; sidesteps the OAuth-token-collision bugs in anthropics/claude-code#39952 and microsoft/vscode#293533 by extracting per-instance API tokens and generating a Claude-Code-native multi-server .mcp.json. Includes a shellcheck-clean test suite (run via tests/run-tests.sh).",
+  "version": "0.4.0",
   "author": {
     "name": "Executioner1939"
   },
@@ -32,6 +32,11 @@
     "subagents",
     "opus-4.7",
     "spec-conformance",
-    "shellcheck"
+    "shellcheck",
+    "mcp-fleet",
+    "multi-workspace",
+    "oauth-isolation",
+    "chrome-profile",
+    "playwright"
   ]
 }

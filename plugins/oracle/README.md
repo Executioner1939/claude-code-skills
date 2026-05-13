@@ -36,7 +36,7 @@ The cascade has three tiers, in order:
 
 ## Components
 
-### Slash commands (three, namespace `/oracle:`)
+### Slash commands (six, namespace `/oracle:`)
 
 `/oracle:verify <claim>`
 : Single-claim verification through the three-tier cascade.
@@ -52,12 +52,34 @@ The cascade has three tiers, in order:
   conversation grounds to "Next.js-compatible datagrid options".
 
 `/oracle:vet <library>`
-: Single-target exhaustive vetting. Dispatches all four subagents
-  in parallel. Returns a `strong-yes / yes / conditional / no /
-  strong-no` verdict with named alternatives and a license-risk
-  check.
+: Single-target exhaustive vetting. Dispatches all four research
+  subagents in parallel. Returns a `strong-yes / yes /
+  conditional / no / strong-no` verdict with named alternatives
+  and a license-risk check.
 
-### Subagents (four, Opus-4.7-primed, effort high)
+`/oracle:setup`
+: One-time, idempotent. Adds a single `@-import` line to your
+  `~/.claude/CLAUDE.md` pointing at `docs/SEARCH-WORKFLOWS.md`.
+  Reports `FIRECRAWL_API_KEY` presence.
+
+`/oracle:budget [show | reset | set <key>=<value>]`
+: View / reset / configure firecrawl-MCP budget tracking.
+  Default subcommand is `show` (current usage, recent calls,
+  month-end projection).
+
+`/oracle:mcp-fleet [list | add <service> [label] | remove <service> <label> | build | publish]`
+: Multi-workspace MCP onboarding via Chrome-profile-isolated
+  OAuth probes. Per-instance API tokens get extracted (or
+  pasted) per workspace and stored in
+  `~/.claude/oracle/mcp-fleet/workspaces.json`; the matrix
+  builder generates a Claude-Code-native multi-server
+  `.mcp.json` with one stdio MCP server per workspace named
+  `<service>__<label>`. Sidesteps the OAuth-token-collision
+  bugs in anthropics/claude-code#39952, microsoft/vscode#293533,
+  atlassian/atlassian-mcp-server#23. Supports Slack, Linear,
+  Notion, GitHub orgs, Atlassian sites.
+
+### Subagents (five, Opus-4.7-primed, effort high)
 
 `canon-reader` (blue)
 : Authoritative source material. RFC / W3C / IETF / ECMA specs,
@@ -82,6 +104,12 @@ The cascade has three tiers, in order:
 : Reddit, Hacker News, Stack Overflow, Lobsters, dev.to, Discord
   mirrors. Quotes lived experience verbatim with URLs. Surfaces
   switching narratives, gotchas, and user-named alternatives.
+
+`cost-rethinker` (red)
+: Read-only multi-angle rethinker. When the rate-limit-guard
+  flags an expensive firecrawl call, returns 2-4 cheaper
+  alternatives with credit estimates and trade-offs. Pure
+  reasoning silo -- no web access, no Bash.
 
 ### Auto-triggering knowledge skills (three)
 
@@ -256,6 +284,58 @@ When the rate-limit-guard hook flags a single call as expensive
 (>= 15% of monthly budget), the orchestrator should dispatch the
 `cost-rethinker` agent to surface 2-4 cheaper alternatives with
 credit estimates before approving.
+
+## Multi-workspace MCP onboarding (`/oracle:mcp-fleet`)
+
+OAuth-keyed MCP servers (Slack, Linear, Notion, GitHub, Atlassian)
+share a single credential entry per server name in Claude Code's
+keyring, so authenticating into a second workspace overwrites the
+first. The `mcp-fleet` utility sidesteps this by performing OAuth
+in isolated Chromium profiles, extracting per-workspace API
+tokens, and emitting a Claude-Code-native multi-server
+`.mcp.json` where each workspace is its own stdio server named
+`<service>__<label>` with the token passed via env.
+
+On-disk shape:
+
+- `~/.claude/oracle/mcp-fleet/chrome-profiles/<service>/<label>/`
+  -- isolated Chromium `--user-data-dir` per workspace.
+- `~/.claude/oracle/mcp-fleet/workspaces.json` -- source of truth,
+  mode `600`, schema version `1`.
+- `~/.claude/oracle/mcp-fleet/mcp-fleet.json` -- generated
+  multi-server `.mcp.json`, one stdio entry per workspace.
+
+Per-service auth strategy:
+
+- **Slack** -- cookie extraction (`d` cookie + `boot_data.api_token`).
+  Slack restricts MCP-eligible apps to the Marketplace and
+  internal apps, so cookie-extraction is the workable path.
+- **Linear / Notion / GitHub / Atlassian** -- API-token paste
+  prompts. Their UIs reveal secrets via flash modals or one-time
+  displays that cannot be reliably re-extracted by automation.
+
+Every probe falls back to a manual paste prompt if
+auto-extraction fails.
+
+Upstream MCP server packages (pinned per service):
+`slack-mcp-server` (korotovsky), `@dvcrn/mcp-server-linear`,
+`@notionhq/notion-mcp-server`,
+`ghcr.io/github/github-mcp-server` (Docker), `mcp-atlassian`
+(sooperset).
+
+Three publish modes via `/oracle:mcp-fleet publish`:
+
+1. Project-scoped merge (copy-pasteable instructions).
+2. User-scoped `claude mcp add` per server.
+3. Direct `jq`-based merge into `~/.claude.json`.
+
+Playwright Chromium is lazy-installed on first probe via `npx`
+(~300MB, one-time). The library handles cross-platform profile
+directory resolution.
+
+`mcp-fleet` is structurally orthogonal to the verification
+harness and is bundled here as a convenience while it
+stabilises. Future maintainers may extract it to its own plugin.
 
 ## Tests
 

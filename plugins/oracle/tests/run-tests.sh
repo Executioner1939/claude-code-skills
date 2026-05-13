@@ -12,6 +12,12 @@ set -u
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$TEST_DIR/.." && pwd)"
 
+# Run from the plugin root so shellcheck -x can resolve the
+# `# shellcheck source=...` directives relative to the plugin
+# tree (they use plugin-relative paths). Running from any other
+# cwd breaks source-following with SC1091.
+cd "$PLUGIN_ROOT" || exit 1
+
 # Track aggregate counts.
 TOTAL_PASS=0
 TOTAL_FAIL=0

@@ -97,24 +97,27 @@ mkdir -p "$(dirname "$CFG")"
 [ ! -f "$CFG" ] && echo '{}' > "$CFG"
 
 KEY="$1"   # e.g. monthly_credits or thresholds.soft_warning_pct
-VAL="$2"   # e.g. 50000 or 75
+VAL="$2"   # e.g. 50000 or 75 or "some-string"
 
-# jq path syntax: '.thresholds.soft_warning_pct'  (the user-supplied
-# dot-separated form). Quote-and-convert as needed; numeric values
-# pass --argjson, string values pass --arg.
-
-jq --arg key "$KEY" --argjson val "$VAL" '
-  setpath(($key | split(".")); $val)
-' "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
+# Detect numeric-vs-string. Numeric values pass --argjson so jq
+# stores them as numbers; non-numeric pass --arg so jq stores
+# them as strings. The case statement is the guard the original
+# pattern was missing.
+case "$VAL" in
+  ''|*[!0-9.-]*)
+    # Contains non-numeric or is empty -> string
+    jq --arg key "$KEY" --arg val "$VAL" '
+      setpath(($key | split(".")); $val)
+    ' "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
+    ;;
+  *)
+    # Pure numeric -> json number
+    jq --arg key "$KEY" --argjson val "$VAL" '
+      setpath(($key | split(".")); $val)
+    ' "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
+    ;;
+esac
 echo "Set $KEY = $VAL in $CFG."
-```
-
-If the value is non-numeric, fall back to `--arg`:
-
-```bash
-jq --arg key "$KEY" --arg val "$VAL" '
-  setpath(($key | split(".")); $val)
-' "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
 ```
 
 Verify the write succeeded by reading the new value back and

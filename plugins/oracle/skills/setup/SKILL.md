@@ -23,19 +23,36 @@ step so the user can stop you if anything looks wrong.
 
 ### Step 1 -- Locate the plugin docs file
 
-Use `Bash` to resolve the absolute path of the docs file:
+Use `Bash` to resolve the absolute path of the docs file. Prefer
+`$CLAUDE_PLUGIN_ROOT` first (set by the harness when the plugin
+is active, marketplace-agnostic), then fall back to any installed
+oracle plugin cache regardless of marketplace alias:
 
 ```bash
-# Find any installed oracle plugin cache, prefer the highest version
-PLUGIN_PATH=$(find "$HOME/.claude/plugins/cache/skunkworks/oracle" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | sort -V | tail -1)
-DOC_PATH="${PLUGIN_PATH}/docs/SEARCH-WORKFLOWS.md"
-```
+DOC_PATH=""
 
-If the docs file is not at that path (because the plugin is
-loaded via `--plugin-dir` rather than a marketplace install),
-resolve the path from `$CLAUDE_PLUGIN_ROOT/docs/SEARCH-WORKFLOWS.md`
-if that environment variable is set, otherwise ask the user to
-provide the absolute path manually.
+# 1. Prefer the plugin root the harness gave us (works regardless
+#    of which marketplace installed the plugin, and works for
+#    --plugin-dir ad-hoc loads).
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -f "$CLAUDE_PLUGIN_ROOT/docs/SEARCH-WORKFLOWS.md" ]; then
+  DOC_PATH="$CLAUDE_PLUGIN_ROOT/docs/SEARCH-WORKFLOWS.md"
+fi
+
+# 2. Fall back to the marketplace cache. Glob `cache/*/oracle/*`
+#    so any marketplace alias works (skunkworks, dev, fork, etc.).
+if [ -z "$DOC_PATH" ]; then
+  PLUGIN_PATH=$(find "$HOME/.claude/plugins/cache" -maxdepth 3 -type d -path "*/oracle/*" 2>/dev/null | sort -V | tail -1)
+  if [ -n "$PLUGIN_PATH" ] && [ -f "$PLUGIN_PATH/docs/SEARCH-WORKFLOWS.md" ]; then
+    DOC_PATH="$PLUGIN_PATH/docs/SEARCH-WORKFLOWS.md"
+  fi
+fi
+
+# 3. Ask the user if neither resolved.
+if [ -z "$DOC_PATH" ]; then
+  echo "Could not resolve the oracle docs file. Provide the absolute path manually." >&2
+  exit 1
+fi
+```
 
 State the resolved absolute path before proceeding.
 

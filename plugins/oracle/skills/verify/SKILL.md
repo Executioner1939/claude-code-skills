@@ -2,7 +2,7 @@
 name: verify
 description: This skill should be used when the user explicitly invokes `/oracle:verify <claim>` to verify an externally-grounded claim on demand -- a version, library, citation, article link, statistic, or forum reference. Triggers on the literal slash-command form. Runs the oracle three-tier verification cascade (package-manager CLI -> firecrawl-search -> WebSearch) against the supplied claim and reports the findings with source citations.
 argument-hint: <claim or topic to verify>
-allowed-tools: Bash, WebSearch, WebFetch, Skill, Read, mcp__plugin_oracle_firecrawl__firecrawl_search, mcp__plugin_oracle_firecrawl__firecrawl_scrape, mcp__plugin_oracle_firecrawl__firecrawl_map, mcp__plugin_oracle_firecrawl__firecrawl_extract, mcp__plugin_oracle_firecrawl__firecrawl_crawl, mcp__plugin_oracle_firecrawl__firecrawl_check_crawl_status, mcp__plugin_oracle_firecrawl__firecrawl_batch_scrape, mcp__plugin_oracle_firecrawl__firecrawl_check_batch_status, mcp__plugin_oracle_firecrawl__firecrawl_agent, mcp__plugin_oracle_firecrawl__firecrawl_agent_status
+allowed-tools: Bash, WebSearch, WebFetch, Skill, Read, mcp__plugin_oracle_firecrawl__firecrawl_search, mcp__plugin_oracle_firecrawl__firecrawl_scrape, mcp__plugin_oracle_firecrawl__firecrawl_map
 ---
 
 # /oracle:verify

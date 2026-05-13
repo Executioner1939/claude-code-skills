@@ -67,6 +67,11 @@
       "credits_per_call": 0,
       "scales_with": "fixed",
       "notes": "Status poll; no credits charged"
+    },
+    "mcp__plugin_oracle_firecrawl__firecrawl_interact": {
+      "credits_per_call": 2,
+      "scales_with": "fixed",
+      "notes": "2 credits per browser-minute; conservative 2-credit estimate per interaction call"
     }
   }
 }

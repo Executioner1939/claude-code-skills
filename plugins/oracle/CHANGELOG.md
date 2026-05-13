@@ -5,6 +5,155 @@ All notable changes to the `oracle` plugin will be documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-05-13
+
+### Added
+
+- **`mcp-fleet` -- multi-workspace MCP onboarding utility.** Bundled
+  out-of-band per user request; out of theme with the verification
+  harness but kept here as a convenience while it stabilises. Lives at
+  `scripts/mcp-fleet/` (Node ESM) plus `skills/mcp-fleet/SKILL.md` (the
+  user-facing `/oracle:mcp-fleet` entry).
+  - **Per-workspace Chromium profile isolation.** Each (service,
+    workspace) pair gets its own `--user-data-dir` under
+    `~/.claude/oracle/mcp-fleet/chrome-profiles/<service>/<label>/`.
+    Sidesteps `anthropics/claude-code#39952`,
+    `microsoft/vscode#293533`, and `atlassian/atlassian-mcp-server#23`
+    -- all three collapse OAuth tokens across workspaces by keying on
+    server-name or URL-origin. Mirrors Atlassian's official
+    "use-separate-browser-profiles-per-site" recommendation.
+  - **Five service probes.** `services/{slack,linear,notion,github,
+    atlassian}.mjs`. Slack uses cookie-extraction (`d` cookie +
+    `boot_data.api_token`) since Slack restricts MCP-eligible apps to
+    the Marketplace and internal apps. Linear, Notion, GitHub, and
+    Atlassian use API-token paste-prompts because their UIs reveal
+    secrets via flash modals or one-time displays that can't be
+    re-extracted reliably. Every probe always falls back to a manual
+    paste prompt if auto-extraction fails.
+  - **Source-of-truth store.** `~/.claude/oracle/mcp-fleet/workspaces.json`
+    (mode 600), schema versioned at `1`. Service-specific `credentials`
+    object so the matrix builder drops fields straight into env.
+  - **Matrix builder.** `build-matrix.mjs` reads the store and writes
+    a Claude-Code-native `.mcp.json` to
+    `~/.claude/oracle/mcp-fleet/mcp-fleet.json`, one stdio MCP server
+    per workspace, named `<service>__<label>`. Pinned upstream
+    server packages: `slack-mcp-server` (korotovsky),
+    `@dvcrn/mcp-server-linear` (with auto-set `TOOL_PREFIX`),
+    `@notionhq/notion-mcp-server`, `ghcr.io/github/github-mcp-server`
+    (Docker), `mcp-atlassian` (sooperset).
+  - **Three publish modes.** `publish.mjs` prints copy-pasteable
+    instructions for project-scoped merge, user-scoped
+    `claude mcp add` per server, or direct `jq`-based merge into
+    `~/.claude.json`.
+  - **Cross-platform.** Pure Node ESM (no bash/PowerShell split).
+    `lib/profile-dir.mjs` resolves the isolated profile root per OS;
+    `lib/playwright-launcher.mjs` lazy-installs `playwright-core`
+    via `npx` on first use (~300MB Chromium download, one-time).
+- **`/oracle:mcp-fleet` slash command.** Subcommands: `list`, `add
+  <service> [label]`, `remove <service> <label>`, `build`, `publish`.
+  Stream-mode output -- the discovery flow is interactive and prompts
+  must reach the user in real time.
+- **Experimental MetaMCP scaffold** at
+  `scripts/mcp-fleet/templates/docker-compose.yml.tmpl`. Not wired by
+  v0; preserved for v1 footprint optimisation when N concurrent stdio
+  MCP children become a real cost.
+
+### Notes
+
+- v0 deliberately uses Claude Code's native multi-server `.mcp.json`
+  rather than a router. We're handing per-instance API tokens via env,
+  so Claude Code's OAuth-keyring-collision bug is irrelevant. The
+  router (MetaMCP) is a v1 footprint optimisation, not a correctness
+  fix.
+- `mcp-fleet` is structurally orthogonal to the truth-verification
+  harness. Future maintainers should consider extracting it to its own
+  plugin (`mcp-fleet`) once it stabilises.
+
+## [0.3.1] - 2026-05-13
+
+### Fixed
+
+- `agents/cost-rethinker.md` referenced `firecrawl_interact` which
+  was missing from `scripts/cost-table.json`. Added the tool with
+  the canonical 2-credit-per-call estimate. The rate-limit hook
+  was silently treating unknown tools as cost 0, masking the
+  inconsistency.
+- `scripts/budget-lib.sh` `get_monthly_budget` could return an
+  empty string when a config file existed but lacked a
+  `monthly_credits` key, leaving the rate-limit hook's `BUDGET`
+  variable empty and masking misconfiguration. Now explicitly
+  validates non-empty and positive before returning.
+- `skills/setup/SKILL.md` hardcoded the `skunkworks` marketplace
+  alias in the docs-path resolution. Now prefers
+  `$CLAUDE_PLUGIN_ROOT` (marketplace-agnostic) and falls back to
+  `cache/*/oracle/*` so any marketplace alias resolves.
+- `agents/cost-rethinker.md` had `Bash` in its tool list despite
+  the body declaring it a pure-reasoning silo. Dropped `Bash`
+  from the allow-list to match the declared posture.
+- `hooks/rate-limit-track.sh` `rolling_hour` array had no
+  length safety net. Added a `.[-500:]` cap; the time-based
+  filter remains the primary trim mechanism.
+- `skills/budget/SKILL.md` `set` subcommand showed `--argjson`
+  and `--arg` jq invocations without a numeric-vs-string guard.
+  Wrapped both in a `case` statement that detects numeric values
+  and dispatches accordingly.
+- `README.md` claimed "three slash commands" and "Hooks (two)";
+  actual counts at v0.3.0 are five slash commands and four
+  hooks. Updated the section headers and added missing entries
+  for `/oracle:setup`, `/oracle:budget`, and the cost-rethinker
+  agent.
+- `docs/SEARCH-WORKFLOWS.md` roadmap advertised v0.3.0 as
+  upcoming. Moved to a "Shipped" recap, advanced the roadmap to
+  v0.4.0 (corpus-wide discipline guards) and v0.5.0 (streaming-
+  as-available findings).
+
+### Changed
+
+- `skills/research-protocol/SKILL.md` parallel-dispatch language
+  hardened from prose to imperative. Explicit "FIRST assistant
+  turn MUST contain N parallel `Agent` tool-call blocks" where N
+  matches the chosen intensity. Pass-2 corpus audit found 0
+  parallel batches across 10 newest sessions of 3,340 tool-
+  bearing assistant messages -- the previous "Run independent
+  lookups in parallel" prose was too soft for Opus 4.7's
+  under-spawn default.
+- `skills/research-protocol/SKILL.md` quick-intensity output
+  contract now mandates filling the `Niche but mature` slot or
+  explicitly stating "no niche-but-mature option surfaced".
+  Previously the niche-surfacing rule was only binding on
+  `standard` and `exhaustive`.
+- Every research subagent's `tools` allow-list narrowed to the
+  firecrawl MCP tools each silo actually uses.
+  `canon-reader` keeps search / scrape / map / extract / crawl /
+  batch_scrape + status pairs (drops `firecrawl_agent`,
+  `firecrawl_interact`). `github-archivist` keeps search /
+  scrape / extract / batch_scrape (drops map / crawl / agent /
+  interact). `issue-investigator` keeps search / scrape (drops
+  everything else). `forum-anthropologist` keeps search / scrape
+  / batch_scrape (drops the rest). The `firecrawl_agent` tool
+  (50 credits per run) is no longer in any subagent's allow-list
+  by default; re-add per-silo if a workflow needs it.
+- `skills/verify/SKILL.md` allow-list dropped the expensive
+  firecrawl tools (`firecrawl_crawl`, `firecrawl_extract`,
+  `firecrawl_agent`, `firecrawl_batch_scrape` and their status
+  pairs). A `/oracle:verify` call should be cheap; complex
+  retrieval belongs in `/oracle:research`.
+- Every research subagent body now correctly states that the
+  oracle plugin's auto-trigger skills (`verification-protocol`,
+  `anti-hype-ranking`) load automatically when their trigger
+  phrases match -- not via explicit `Skill` invocation. The
+  previous "do not skip the load" language read as a no-op
+  invocation directive.
+- Every research subagent body now distinguishes `WebSearch`
+  (returns snippets) from `WebFetch` (returns page content) on
+  the citation discipline. A URL appearing in a WebSearch result
+  is not a citable source until `WebFetch` has read the page in
+  the same invocation.
+- `agents/cost-rethinker.md` cost-table reference replaced with
+  a directive to `Read` the source-of-truth
+  `scripts/cost-table.json` at the start of every invocation.
+  The previous inline table was already drifting from the JSON.
+
 ## [0.3.0] - 2026-05-13
 
 ### Added

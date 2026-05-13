@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, meta-tooling, and truth-verification.",
-    "version": "5.23.0",
+    "version": "5.24.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -195,10 +195,10 @@
     {
       "name": "oracle",
       "source": "./plugins/oracle",
-      "description": "Truth-verification harness with structured research and budget-aware rate-limit gating. SessionStart hook injects a verification protocol; PreToolUse hook on Bash intercepts unpinned installs across 13 package managers; PreToolUse + PostToolUse hooks on the bundled firecrawl-mcp@3.2.1 surface enforce tiered gating (silent under 80% used, soft remind 80-95%, ask 95-100% or single-call >=15% or rolling-hour over 5000 cr, deny over 100%). Five slash commands: /oracle:setup, /oracle:verify, /oracle:research [--intensity], /oracle:vet, /oracle:budget. Five Opus-4.7-primed subagents: canon-reader, github-archivist, issue-investigator, forum-anthropologist, cost-rethinker (multi-angle cheaper-alternative dispatch when an expensive call gates). Four auto-trigger knowledge skills: verification-protocol, research-protocol, anti-hype-ranking. All ten active firecrawl MCP tools allow-listed across every silo. Includes a shellcheck-clean test suite. Requires FIRECRAWL_API_KEY.",
-      "version": "0.3.0",
+      "description": "Truth-verification harness with structured research, budget-aware rate-limit gating, and multi-workspace MCP onboarding. Verification: SessionStart hook injects a protocol; PreToolUse hook on Bash intercepts unpinned installs across 13 package managers; tiered PreToolUse + PostToolUse gating on the bundled firecrawl-mcp@3.2.1 surface (silent under 80% used, soft remind 80-95%, ask 95-100% or single-call >=15% or rolling-hour over 5000 cr, deny over 100%). Six slash commands: /oracle:setup, /oracle:verify, /oracle:research [--intensity], /oracle:vet, /oracle:budget, /oracle:mcp-fleet. Five Opus-4.7 subagents: canon-reader, github-archivist, issue-investigator, forum-anthropologist, cost-rethinker. Four auto-trigger knowledge skills: verification-protocol, research-protocol, anti-hype-ranking. New in 0.4.0: bundled mcp-fleet utility (scripts/mcp-fleet/) for multi-workspace MCP onboarding via Chrome-profile-isolated OAuth probes (Slack, Linear, Notion, GitHub orgs, Atlassian). Sidesteps OAuth-token-collision bugs in anthropics/claude-code#39952, microsoft/vscode#293533, atlassian/atlassian-mcp-server#23. Includes a shellcheck-clean test suite. Requires FIRECRAWL_API_KEY.",
+      "version": "0.4.0",
       "category": "development",
-      "keywords": ["verification", "fact-checking", "version-pinning", "anti-hallucination", "citations", "package-manager", "firecrawl", "firecrawl-mcp", "mcp", "websearch", "session-hook", "pretooluse", "posttooluse", "rate-limit", "budget-gating", "research", "ecosystem-survey", "library-vetting", "anti-hype", "niche-discovery", "subagents", "opus-4.7", "spec-conformance", "shellcheck"],
+      "keywords": ["verification", "fact-checking", "version-pinning", "anti-hallucination", "citations", "package-manager", "firecrawl", "firecrawl-mcp", "mcp", "websearch", "session-hook", "pretooluse", "posttooluse", "rate-limit", "budget-gating", "research", "ecosystem-survey", "library-vetting", "anti-hype", "niche-discovery", "subagents", "opus-4.7", "spec-conformance", "shellcheck", "mcp-fleet", "multi-workspace", "oauth-isolation", "chrome-profile", "playwright"],
       "author": {
         "name": "Executioner1939"
       },

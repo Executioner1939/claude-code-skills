@@ -227,6 +227,23 @@ For repo-internal tooling that is **not** a published plugin, see [`_codify/`](_
 
 ---
 
+## Notes
+
+**TODO — merge custom Contactable design-system tooling into the harness as design-system sub-tools.**
+
+Source repo: `~/Documents/Work/Personal/Contactable/skunkworks-kyc-ts` (the `@athena/ui` package and its root `CLAUDE.md`). The rebuild from scratch uses Chakra UI v3 + Chakra UI Pro on a TanStack stack (Form, Table, Virtual) with Keycloakify auth. Patterns worth extracting into the marketplace:
+
+- atoms / molecules / organisms inventory convention with barrel exports per tier
+- compound component pattern (`Card.Title` style via `Object.assign`)
+- Form mode context pattern (view / edit with `EditableInput`)
+- Chakra system + brand-token + semantic-token theme layout (`packages/ui/src/theme/system.ts`)
+- component-creation hooks (barrel update + `CLAUDE.md` inventory update + story + pattern doc, all in the same commit)
+- Chakra Pro block-preference rule (prefer Pro recipes over custom implementations)
+
+Likely landing place: extend `plugins/anvil/` with a Chakra-specific sub-track (atoms/molecules/organisms scaffolds + Chakra Pro reference skill), or split into a new `design-system-chakra` knowledge plugin if the surface area justifies it. Decide once the Contactable rebuild stabilises.
+
+---
+
 ## Attribution
 
 The marketplace is **MIT** for original content. Two plugins bundle Apache-2.0 third-party content, fully attributed:

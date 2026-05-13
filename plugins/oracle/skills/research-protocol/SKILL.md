@@ -54,10 +54,28 @@ The four research subagents:
   narratives, gotchas, user-named alternatives. Sentiment verdicts.
 
 **Parallel dispatch is mandatory** when intensity is `standard` or
-`exhaustive`. Spawn the required subagents in a single message with
-multiple `Agent` tool-call blocks. Never chain them; they share no
-state and waiting on the first does not inform the second. This is
-the single most under-applied Opus 4.7 idiom in research workflows.
+`exhaustive`. Follow this rule literally:
+
+- `standard` intensity: the FIRST assistant turn after parsing
+  arguments MUST contain exactly **two** `Agent` tool-call blocks
+  in a single message -- one for `canon-reader`, one for
+  `github-archivist`. Not one, not three, not chained.
+- `exhaustive` intensity: the FIRST assistant turn after parsing
+  arguments MUST contain exactly **four** `Agent` tool-call
+  blocks in a single message -- `canon-reader`,
+  `github-archivist`, `issue-investigator`,
+  `forum-anthropologist`.
+- Chained dispatch (`Agent` followed by waiting for the result,
+  then another `Agent`) is a regression and must be corrected
+  mid-flight if observed: kill the partial run and re-dispatch
+  the full batch in one message.
+
+This is the single most under-applied Opus 4.7 idiom in research
+workflows. The default behaviour is to under-spawn; the rule above
+exists because the default is wrong. Audit your first assistant
+turn: it should contain N parallel tool-call blocks where N
+matches the intensity (1 for quick, 2 for standard, 4 for
+exhaustive).
 
 ## Output contracts
 
@@ -72,7 +90,9 @@ Popular default
 1. <name> -- <one-line>. <url>
 2. <name> -- <one-line>. <url>
 
-Niche but mature
+Niche but mature  (MANDATORY: at least one entry; if none
+                  genuinely applies, state "no niche-but-mature
+                  option surfaced for this topic" explicitly)
 1. <name> -- <one-line>. <url>
 
 Spec-conforming

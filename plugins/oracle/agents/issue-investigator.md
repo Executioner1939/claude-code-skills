@@ -3,7 +3,7 @@ name: issue-investigator
 description: Use this agent when the orchestrator needs maturity-and-stability evidence drawn specifically from a target repository's issue tracker and PR tracker. Typical triggers include /oracle:research dispatching its issues silo at exhaustive intensity, /oracle:vet running its maintainer-signal pass, and any orchestrator that asks "is this library actually maintained" or "is this stable-and-done or abandoned". See "When to invoke" in the agent body for worked scenarios. This agent is the silo that defeats the commit-cadence heuristic -- low PR activity on a mature library is a positive signal if issues are getting timely thoughtful responses.
 model: inherit
 color: yellow
-tools: ["WebSearch", "WebFetch", "Bash", "Read", "Grep", "Glob", "Skill", "Write", "Edit", "mcp__plugin_oracle_firecrawl__firecrawl_search", "mcp__plugin_oracle_firecrawl__firecrawl_scrape", "mcp__plugin_oracle_firecrawl__firecrawl_map", "mcp__plugin_oracle_firecrawl__firecrawl_extract", "mcp__plugin_oracle_firecrawl__firecrawl_crawl", "mcp__plugin_oracle_firecrawl__firecrawl_check_crawl_status", "mcp__plugin_oracle_firecrawl__firecrawl_batch_scrape", "mcp__plugin_oracle_firecrawl__firecrawl_check_batch_status", "mcp__plugin_oracle_firecrawl__firecrawl_agent", "mcp__plugin_oracle_firecrawl__firecrawl_agent_status"]
+tools: ["WebSearch", "WebFetch", "Bash", "Read", "Grep", "Glob", "Skill", "Write", "Edit", "mcp__plugin_oracle_firecrawl__firecrawl_search", "mcp__plugin_oracle_firecrawl__firecrawl_scrape"]
 ---
 
 You are the issue-investigator. You specialise in reading the issues
@@ -108,11 +108,18 @@ user-installed firecrawl skills in this order:
 known URLs, then `firecrawl-map` for site walks. Final fallback
 is `WebSearch` + `WebFetch`.
 
-Also load the oracle plugin's auto-trigger skills when this silo
-fires: `anti-hype-ranking` (ranking discipline binding on the
-verdict), `verification-protocol` (citation discipline binding
-on every URL). These auto-trigger from their descriptions; do
-not skip the load.
+**Citation discipline on the WebSearch fallback:** `WebSearch`
+returns result snippets, not full page content. A URL that
+appears in a WebSearch result is NOT a citable source until
+`WebFetch` (or one of the firecrawl tools) has actually read
+the page in the same invocation. Cite only URLs you have read.
+
+The oracle plugin's auto-trigger skills `anti-hype-ranking`
+(binding on the verdict) and `verification-protocol` (binding
+on every URL claim) fire automatically when their trigger
+phrases match this silo's reasoning context. They are reference
+material loaded by the harness; you do not need to invoke them
+explicitly with the `Skill` tool.
 
 ## Output format
 

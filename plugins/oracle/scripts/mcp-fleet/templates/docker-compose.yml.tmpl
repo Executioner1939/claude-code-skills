@@ -1,0 +1,35 @@
+# EXPERIMENTAL -- not wired by v0 of mcp-fleet.
+#
+# v0 generates a Claude-Code-native multi-workspace .mcp.json directly; each
+# workspace's MCP server runs as its own stdio child process under Claude
+# Code. That works because we're using API-token-based MCP servers (tokens
+# in env), so the OAuth-token-collision bugs that motivated a router layer
+# (anthropics/claude-code#39952, microsoft/vscode#293533) don't apply here.
+#
+# This file is preserved as a starting point for v1, when N concurrent
+# stdio MCP processes become a footprint problem and aggregating them
+# behind MetaMCP starts to pay for itself. The MetaMCP namespaces config
+# format below is provisional -- verify against the installed MetaMCP
+# version before relying on it.
+
+services:
+  metamcp:
+    image: ghcr.io/metatool-ai/metamcp:latest
+    container_name: oracle-mcp-fleet
+    restart: unless-stopped
+    ports:
+      - "${ORACLE_MCP_FLEET_PORT:-12009}:12009"
+    environment:
+      METAMCP_CONFIG_PATH: /etc/metamcp/namespaces.json
+    volumes:
+      - ./namespaces.json:/etc/metamcp/namespaces.json:ro
+      - metamcp-state:/var/lib/metamcp
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:12009/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 5s
+
+volumes:
+  metamcp-state:

@@ -43,7 +43,7 @@ NEW_STATE=$(echo "$STATE" | jq \
     .monthly.credits_used = (.monthly.credits_used + $cost)
     | .weekly.credits_used  = (.weekly.credits_used  + $cost)
     | .daily.credits_used   = (.daily.credits_used   + $cost)
-    | .rolling_hour = ((.rolling_hour // []) + [{t: $t, c: $cost}] | map(select(.t > ($t - 3600))))
+    | .rolling_hour = ((.rolling_hour // []) + [{t: $t, c: $cost}] | map(select(.t > ($t - 3600))) | .[-500:])
     | .recent_calls = ((.recent_calls // []) + [{t: $t, tool: $tool, c: $cost}] | .[-50:])
   ')
 
