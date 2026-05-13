@@ -5,6 +5,71 @@ All notable changes to the `oracle` plugin will be documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-05-13
+
+### Added
+
+- **`safe-edit-guard` PreToolUse hook on Edit / Write / MultiEdit /
+  NotebookEdit.** Cross-session transcript audit of 1,186 sessions on
+  this machine surfaced ~1,128 failures of the form `File has not been
+  read yet`, `File has been modified since read`, and `String to
+  replace not found in file` -- the single largest preventable
+  tool-error class. The guard consults a per-session reads state file
+  (`~/.claude/plugins/oracle/reads-<session>.tsv`) and emits a
+  non-blocking reminder when the target path has not been Read within
+  a 30-minute freshness window. Silent on Write-to-nonexistent-path
+  (new file creation), silent on jq/json-parse failures (fail-silent
+  policy). Companion `track-reads.sh` PostToolUse hook records the
+  state.
+- **`parallel-tools` auto-trigger skill.** Same audit found 0 parallel
+  tool batches across 3,340 tool-bearing assistant messages in the ten
+  most recent sessions. Reverses Opus 4.7's documented under-spawning
+  bias at the point of dispatch; encodes when to parallelise, when not
+  to, and how the dispatch is phrased.
+- **`path-preflight` auto-trigger skill.** Same audit found ~300
+  events per recent-ten sessions of `File does not exist` plus HTTP
+  404 plus HTTP 403 -- almost all from speculative paths and URLs.
+  Encodes the list-before-read discipline with a tool-by-surface
+  reference table.
+- **`session-checkpoint` auto-trigger skill.** Same audit found 676
+  user interrupts across 221 sessions, concentrated in long Rust and
+  TS monorepo sessions (one RedactedCo session received 24 interrupts).
+  Encodes the mirror-back-progress habit at phase boundaries and at
+  twenty-tool-call intervals.
+- **YAML frontmatter validation (`tests/run-tests.sh` Stage 2b).**
+  Catches the class of skill-frontmatter parse error that previously
+  silently disabled the `anti-hype-ranking` and `vet` skills in
+  0.2.0. Uses `python3 -c yaml.safe_load`.
+- **POSIX `[ ... == ... ]` lint (`tests/run-tests.sh` Stage 2c).**
+  Catches `==` inside single-bracket tests, which explodes under zsh
+  with `(eval):1: == not found`. Cross-session audit: 17 hits.
+- **`tests/test-safe-edit-guard.sh`** -- ten integration cases against
+  the new hook pair, using an isolated `$HOME` so the production
+  state file is untouched.
+
+### Changed
+
+- `hooks/hooks.json` now wires two additional hooks: a PreToolUse
+  matcher `Edit|Write|MultiEdit|NotebookEdit` for the safe-edit
+  guard, and a PostToolUse matcher `Read` for the reads tracker.
+
+### Rationale
+
+This release acts on findings from a structural audit of every Claude
+Code transcript on this machine. The three new skills + one new
+hook + two new test stages target the highest-frequency preventable
+failure modes surfaced by that audit, in descending order of
+recurrence x severity:
+
+1. Write-before-Read errors (~1,128 events) -> `safe-edit-guard` hook.
+2. Zero parallel-tool dispatch -> `parallel-tools` skill.
+3. Speculative paths / URLs (~300 events) -> `path-preflight` skill.
+4. Long-session drift / interrupts (676 events) -> `session-checkpoint`
+   skill.
+5. YAML frontmatter parse errors (2 events in this codebase) -> Stage
+   2b YAML validation.
+6. zsh-vs-bash `==` inside `[ ]` (17 events) -> Stage 2c lint.
+
 ## [0.4.0] - 2026-05-13
 
 ### Added
@@ -23,13 +88,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     server-name or URL-origin. Mirrors Atlassian's official
     "use-separate-browser-profiles-per-site" recommendation.
   - **Five service probes.** `services/{slack,linear,notion,github,
-    atlassian}.mjs`. Slack uses cookie-extraction (`d` cookie +
-    `boot_data.api_token`) since Slack restricts MCP-eligible apps to
-    the Marketplace and internal apps. Linear, Notion, GitHub, and
-    Atlassian use API-token paste-prompts because their UIs reveal
-    secrets via flash modals or one-time displays that can't be
-    re-extracted reliably. Every probe always falls back to a manual
-    paste prompt if auto-extraction fails.
+    atlassian}.mjs`. Slack uses cookie-extraction (the `d` cookie is
+    the xoxd token, the xoxc token is read from
+    `localStorage.localConfig_v2.teams.<TEAM_ID>.token`) since Slack
+    restricts MCP-eligible apps to the Marketplace and internal apps.
+    Linear, Notion, GitHub, and Atlassian use API-token paste-prompts
+    because their UIs reveal secrets via flash modals or one-time
+    displays that can't be re-extracted reliably. Every probe always
+    falls back to a manual paste prompt if auto-extraction fails.
   - **Source-of-truth store.** `~/.claude/oracle/mcp-fleet/workspaces.json`
     (mode 600), schema versioned at `1`. Service-specific `credentials`
     object so the matrix builder drops fields straight into env.
@@ -37,10 +103,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     a Claude-Code-native `.mcp.json` to
     `~/.claude/oracle/mcp-fleet/mcp-fleet.json`, one stdio MCP server
     per workspace, named `<service>__<label>`. Pinned upstream
-    server packages: `slack-mcp-server` (korotovsky),
-    `@dvcrn/mcp-server-linear` (with auto-set `TOOL_PREFIX`),
-    `@notionhq/notion-mcp-server`, `ghcr.io/github/github-mcp-server`
-    (Docker), `mcp-atlassian` (sooperset).
+    server packages (registry-verified 2026-05-13):
+    `slack-mcp-server@1.2.3` (korotovsky),
+    `mcp-server-linear@1.6.0` (dvcrn -- unscoped on npm, with
+    auto-set `TOOL_PREFIX` for tool-name disambiguation across
+    workspaces), `@notionhq/notion-mcp-server@2.2.1`,
+    `ghcr.io/github/github-mcp-server` (official Docker image), and
+    `mcp-atlassian==0.21.1` (sooperset, run via `uvx` -- the
+    PyPI/Python canonical port; the npm package of the same name is
+    by a different author).
   - **Three publish modes.** `publish.mjs` prints copy-pasteable
     instructions for project-scoped merge, user-scoped
     `claude mcp add` per server, or direct `jq`-based merge into

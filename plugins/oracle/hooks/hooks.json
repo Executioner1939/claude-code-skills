@@ -1,5 +1,5 @@
 {
-  "description": "Hooks for the oracle plugin. SessionStart injects the verification protocol. PreToolUse on Bash intercepts unpinned install commands. PreToolUse + PostToolUse on the plugin-scoped firecrawl MCP tools enforce budget-aware gating: tiered soft-remind / ask / deny based on monthly + rolling-hour + single-call thresholds, with state persisted at ~/.claude/plugins/oracle/usage.json.",
+  "description": "Hooks for the oracle plugin. SessionStart injects the verification protocol. PreToolUse on Bash intercepts unpinned install commands. PreToolUse on Edit/Write/MultiEdit/NotebookEdit warns when the target path has not been Read recently (transcript-corpus evidence: ~1,100 'File has not been read yet' / 'File has been modified since read' / 'String to replace not found' errors). PostToolUse on Read records the path into a per-session state file so the guard above can consult it. PreToolUse + PostToolUse on the plugin-scoped firecrawl MCP tools enforce budget-aware gating: tiered soft-remind / ask / deny based on monthly + rolling-hour + single-call thresholds, with state persisted at ~/.claude/plugins/oracle/usage.json.",
   "hooks": {
     "SessionStart": [
       {
@@ -24,6 +24,16 @@
         ]
       },
       {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/safe-edit-guard.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "mcp__plugin_oracle_firecrawl__.*",
         "hooks": [
           {
@@ -35,6 +45,16 @@
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/track-reads.sh",
+            "timeout": 5
+          }
+        ]
+      },
       {
         "matcher": "mcp__plugin_oracle_firecrawl__.*",
         "hooks": [

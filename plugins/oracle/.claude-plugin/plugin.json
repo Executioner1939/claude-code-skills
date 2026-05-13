@@ -1,7 +1,7 @@
 {
   "name": "oracle",
-  "description": "Truth-verification harness with structured research and budget-aware gating. SessionStart hook injects a verification protocol. PreToolUse hook on Bash intercepts unpinned install commands across thirteen package managers. PreToolUse + PostToolUse hooks on the bundled firecrawl-mcp@3.2.1 surface enforce tiered rate-limit gating (silent allow under 80% monthly budget, soft remind 80-95%, permissionDecision=ask 95-100% or single-call >=15% or rolling-hour over 5000 credits, hard deny over 100%) with state at ~/.claude/plugins/oracle/usage.json. Six slash commands: /oracle:setup, /oracle:verify, /oracle:research [--intensity=quick|standard|exhaustive], /oracle:vet, /oracle:budget, /oracle:mcp-fleet. Five Opus-4.7-primed subagents: canon-reader, github-archivist, issue-investigator, forum-anthropologist, cost-rethinker (multi-angle cheaper-alternative dispatch when the rate-limit-guard flags an expensive call). Four auto-triggering knowledge skills: verification-protocol, research-protocol, anti-hype-ranking. All ten active firecrawl MCP tools allow-listed across every silo for citation-backed retrieval. Bundled mcp-fleet utility (scripts/mcp-fleet/) handles multi-workspace MCP onboarding via Chrome-profile-isolated OAuth probes for Slack, Linear, Notion, GitHub orgs, and Atlassian sites; sidesteps the OAuth-token-collision bugs in anthropics/claude-code#39952 and microsoft/vscode#293533 by extracting per-instance API tokens and generating a Claude-Code-native multi-server .mcp.json. Includes a shellcheck-clean test suite (run via tests/run-tests.sh).",
-  "version": "0.4.0",
+  "description": "Truth-verification harness with structured research, budget-aware gating, and transcript-corpus-derived behavioural guards. SessionStart hook injects a verification protocol. PreToolUse hook on Bash intercepts unpinned install commands across thirteen package managers. PreToolUse on Edit/Write/MultiEdit/NotebookEdit warns when the target path has not been Read within a thirty-minute freshness window (transcript-corpus evidence: ~1,128 'File has not been read yet' / 'File has been modified since read' / 'String to replace not found' errors across 1,186 sessions). PostToolUse on Read records read state to ~/.claude/plugins/oracle/reads-<session>.tsv. PreToolUse + PostToolUse hooks on the bundled firecrawl-mcp@3.2.1 surface enforce tiered rate-limit gating (silent allow under 80% monthly budget, soft remind 80-95%, permissionDecision=ask 95-100% or single-call >=15% or rolling-hour over 5000 credits, hard deny over 100%) with state at ~/.claude/plugins/oracle/usage.json. Six slash commands: /oracle:setup, /oracle:verify, /oracle:research [--intensity=quick|standard|exhaustive], /oracle:vet, /oracle:budget, /oracle:mcp-fleet. Five Opus-4.7-primed subagents: canon-reader, github-archivist, issue-investigator, forum-anthropologist, cost-rethinker. Seven auto-triggering knowledge skills: verification-protocol, research-protocol, anti-hype-ranking, parallel-tools, path-preflight, session-checkpoint. All ten active firecrawl MCP tools allow-listed across every silo for citation-backed retrieval. Bundled mcp-fleet utility (scripts/mcp-fleet/) handles multi-workspace MCP onboarding via Chrome-profile-isolated OAuth probes for Slack, Linear, Notion, GitHub orgs, and Atlassian sites; sidesteps the OAuth-token-collision bugs in anthropics/claude-code#39952 and microsoft/vscode#293533. Test suite (tests/run-tests.sh): shellcheck, JSON syntax, YAML frontmatter, POSIX-test lint, plus per-hook integration tests.",
+  "version": "0.5.0",
   "author": {
     "name": "Executioner1939"
   },
@@ -14,6 +14,11 @@
     "version-pinning",
     "anti-hallucination",
     "citations",
+    "safe-edit",
+    "read-before-edit",
+    "parallel-tools",
+    "path-preflight",
+    "session-checkpoint",
     "package-manager",
     "firecrawl",
     "firecrawl-mcp",

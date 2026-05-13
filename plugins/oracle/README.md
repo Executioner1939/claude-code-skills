@@ -111,7 +111,7 @@ The cascade has three tiers, in order:
   alternatives with credit estimates and trade-offs. Pure
   reasoning silo -- no web access, no Bash.
 
-### Auto-triggering knowledge skills (three)
+### Auto-triggering knowledge skills (six)
 
 `verification-protocol`
 : Loads whenever the assistant is about to assert anything
@@ -132,7 +132,29 @@ The cascade has three tiers, in order:
   signals. Requires a niche-but-mature option to be surfaced by
   name on every comparison output.
 
-### Hooks (four)
+`parallel-tools`
+: Loads whenever multiple independent tool calls are about to be
+  issued. Reverses Opus 4.7's documented under-spawning bias at
+  the point of dispatch. Added in 0.5.0 in response to a
+  cross-corpus audit showing 0% parallel-batch rate across 3,340
+  tool-bearing messages in the ten newest sessions.
+
+`path-preflight`
+: Loads whenever a Read, WebFetch, or path-consuming Bash call is
+  about to run against a path or URL that has not surfaced in a
+  prior tool result. Encodes the list-before-read discipline.
+  Added in 0.5.0 in response to ~300 speculative-path failures
+  (File-does-not-exist, HTTP 404, HTTP 403) per recent-ten
+  sessions.
+
+`session-checkpoint`
+: Loads whenever a long session has crossed a phase boundary or
+  accumulated twenty-plus tool calls. Encodes the
+  mirror-back-progress habit. Added in 0.5.0 in response to 676
+  user interrupts across 221 sessions clustered in long Rust / TS
+  monorepo work.
+
+### Hooks (six)
 
 `SessionStart` -> `hooks/inject-protocol.sh`
 : Injects the verification protocol into every session as
@@ -161,6 +183,19 @@ The cascade has three tiers, in order:
 : Increments monthly / weekly / daily / rolling-hour counters by
   the estimated cost of the just-executed call. Caps the
   recent-calls audit list at 50.
+
+`PreToolUse` on `Edit|Write|MultiEdit|NotebookEdit` ->
+`hooks/safe-edit-guard.sh`
+: Consults the per-session reads state file
+  (`~/.claude/plugins/oracle/reads-<session>.tsv`) and emits a
+  non-blocking reminder when the target path has not been Read
+  within a 30-minute freshness window. Silent on Write to a path
+  that does not yet exist (creation case). Added in 0.5.0.
+
+`PostToolUse` on `Read` -> `hooks/track-reads.sh`
+: Records every Read to the per-session state file consumed by
+  `safe-edit-guard.sh`. Trims at 1,000 lines, keeps the most
+  recent 500. Added in 0.5.0.
 
 ## Installation
 
@@ -346,15 +381,28 @@ the plugin root:
 bash tests/run-tests.sh
 ```
 
-It runs three stages: shellcheck on every `.sh` file (with `-x`
-source-following), `jq empty` on every `.json` / `.mcp.json`, and
-four test files exercising the budget library and the three
-shell hooks (intercept-install, rate-limit-guard,
-rate-limit-track). Tests use isolated `HOME` and project
-directories; they do not touch the user's real config.
+It runs these stages:
+
+1. **shellcheck** on every `.sh` file with `-x` source-following.
+2. **JSON syntax** (`jq empty`) on every `.json` and `.mcp.json`.
+3. **YAML frontmatter** on every `skills/*/SKILL.md` via
+   `python3 -c yaml.safe_load` (catches the parse-error class
+   that previously disabled `anti-hype-ranking` and `vet` in
+   0.2.0).
+4. **POSIX test-operator lint** -- fails when `==` appears inside
+   single-bracket `[ ... ]` tests. Bash tolerates this; zsh emits
+   `(eval):1: == not found`. Use `=` for POSIX equality or
+   `[[ ... == ... ]]` for the bash extension.
+5. **Per-hook integration tests** under `tests/test-*.sh`:
+   `intercept-install`, `rate-limit-guard`, `rate-limit-track`,
+   `budget-lib`, `safe-edit-guard`. Tests use isolated `HOME`
+   and project directories; they do not touch the user's real
+   config.
 
 Install `shellcheck` first: `brew install shellcheck` (macOS) or
-`apt install shellcheck` (Debian).
+`apt install shellcheck` (Debian). The YAML stage uses the
+system `python3 -c yaml.safe_load`; PyYAML ships in macOS
+`/usr/bin/python3` and most Linux distros' python3.
 
 ## Limitations
 
