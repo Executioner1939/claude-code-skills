@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, meta-tooling, and truth-verification.",
-    "version": "5.27.0",
+    "version": "5.27.1",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -14,7 +14,7 @@
       "name": "ci-moonrepo",
       "source": "./plugins/ci-moonrepo",
       "description": "moonrepo v2.2 (v2.2.4) expert -- workspace setup, task orchestration, CI/CD pipelines (with a comprehensive moon-ci guide weaving production failure modes into prescriptive patterns), Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, v1-to-v2 migration, and a curated catalogue of real-world gotchas from production monorepos.",
-      "version": "3.5.0",
+      "version": "3.5.1",
       "category": "development",
       "keywords": [
         "moonrepo",

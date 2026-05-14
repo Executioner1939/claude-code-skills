@@ -5,13 +5,24 @@ All notable changes to the `ci-moonrepo` plugin are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.1] - 2026-05-14
+
+### Added
+
+- **Mandatory: explicit task inheritance via `inheritedBy` + tags.** New `references/ci-guide.md` §3 (210 lines) makes explicit-inheritance a repo-wide rule. Every `.moon/tasks/**/*` file must begin with an `inheritedBy:` block declaring at least one condition; projects opt in via explicit `tags:` in their `moon.yml`. Forbidden patterns enumerated (top-level `.moon/tasks.yml`, toolchain-named files without `inheritedBy:`, tasks with `runInCI:` unset). The "why" subsection ties the chaos to three concrete failure modes (six-axis merge archaeology, `runInCI` polarity flip, affected-detection graph drift). Includes worked YAML for the three prebuilt CI-lane tag files (`ci-pull-request.yml`, `ci-merge-develop.yml`, `ci-merge-production.yml`) and the toolchain-conditioned developer-command files (`rust-developer.yml`). Source: https://moonrepo.dev/docs/concepts/task-inheritance and https://moonrepo.dev/docs/config/tasks#inheritedby. Body sections 3-13 renumbered to 4-14.
+- New SKILL.md Rule 2 step 0 (inserted ahead of the existing step 1): one-paragraph mandatory inheritance-discipline directive pointing to the guide.
+
+### Fixed
+
+- **Stale `/docs/v2/` URL prefix** repaired across 13 citations in SKILL.md, ci-guide.md, advanced.md, and CHANGELOG.md. Canonical moon docs are at `https://moonrepo.dev/docs/...`, not `https://moonrepo.dev/docs/v2/...`. The `v2/` paths returned 404 (verified via firecrawl on 2026-05-14).
+
 ## [3.5.0] - 2026-05-14
 
 Comprehensive rewrite anchored on real-use friction: "not understanding moon ci". Applies the oracle verification verdict from `phase-04c-oracle-verification.md`, refreshes all moon facts to v2.2.4 (April 2026), surfaces v2.1 and v2.2 features that replace older patterns in the body rules, and ships a new 1224-line comprehensive moon-ci guide at `references/ci-guide.md`. SKILL.md body shrinks from 303 to 304 lines net while moving procedural detail to the guide.
 
 ### Added
 
-- **`references/ci-guide.md`** -- comprehensive moon-ci walkthrough (~1220 lines) anchored on the canonical docs (https://moonrepo.dev/docs/v2/guides/ci). Thirteen sections: seven steps of `moon ci`, `runInCI` semantics, the explicit-target filtering rule (with verbatim canon quote), MOON_BASE/MOON_HEAD/github.event.before discipline (including the all-zero SHA trap and double-fallback expression), affected-detection edges and the `^:check` primitive, parallelism via `--job` / `--job-total` + per-provider shard envs, remote-caching schema and the fast-fail probe, the three toolchain-bootstrap strategies (manual rustup / proto auto-install / moon v2 native) with detection grep and worked YAML, reporting via run-report-action and community alternatives, v2.1 + v2.2 features mapped to failure modes, two worked examples (PR validate workflow + deploy workflow with image-push + ArgoCD verify step), and eight anti-patterns mapped one-to-one to the six failure modes plus the `CARGO_TARGET_DIR` corollary.
+- **`references/ci-guide.md`** -- comprehensive moon-ci walkthrough (~1220 lines) anchored on the canonical docs (https://moonrepo.dev/docs/guides/ci). Thirteen sections: seven steps of `moon ci`, `runInCI` semantics, the explicit-target filtering rule (with verbatim canon quote), MOON_BASE/MOON_HEAD/github.event.before discipline (including the all-zero SHA trap and double-fallback expression), affected-detection edges and the `^:check` primitive, parallelism via `--job` / `--job-total` + per-provider shard envs, remote-caching schema and the fast-fail probe, the three toolchain-bootstrap strategies (manual rustup / proto auto-install / moon v2 native) with detection grep and worked YAML, reporting via run-report-action and community alternatives, v2.1 + v2.2 features mapped to failure modes, two worked examples (PR validate workflow + deploy workflow with image-push + ArgoCD verify step), and eight anti-patterns mapped one-to-one to the six failure modes plus the `CARGO_TARGET_DIR` corollary.
 - v2.1 (March 2026) release-notes coverage in `references/advanced.md`: `moon exec --plan`, three new `affectedFiles` settings, `runInSyncPhase`, `inheritAliases` / `installDependencies`, MCP `generate` JSON schema fix, `$projectTitle` / `$projectAliases` token fixes. Each row maps to the failure mode it addresses where applicable.
 - v2.2.4 update (was v2.2.1) per `npm view @moonrepo/cli version` -- skill body, references, and changelog all carry the verified current version.
 - `[C9]` Quote from canonical docs in Rule 2 body: "When providing targets, `moon ci` will still only run them if affected by changed files, but will still filter with the `runInCI` option." This is the load-bearing semantic for both failure shapes; elevating the quote into the rule body removes ambiguity.

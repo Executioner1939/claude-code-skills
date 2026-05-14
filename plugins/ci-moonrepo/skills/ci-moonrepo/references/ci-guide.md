@@ -2,7 +2,7 @@
 
 This guide weaves the six production failure modes catalogued in
 `SKILL.md` into prescriptive `moon ci` patterns, grounded in the
-canonical moon v2 docs (https://moonrepo.dev/docs/v2/guides/ci) and the
+canonical moon v2 docs (https://moonrepo.dev/docs/guides/ci) and the
 user's incident corpus across three Rust monorepos.
 
 Every prescriptive pattern is anchored either to (a) a moon docs URL,
@@ -14,23 +14,24 @@ noted.
 
 1. [The seven steps of `moon ci`](#1-the-seven-steps-of-moon-ci-what-actually-happens)
 2. [When to set `runInCI` and what the defaults mean](#2-when-to-set-runinci-and-what-the-defaults-mean)
-3. [The explicit-target filtering rule](#3-the-explicit-target-filtering-rule)
-4. [Revision comparison: MOON_BASE, MOON_HEAD, github.event.before](#4-revision-comparison-moon_base-moon_head-githubeventbefore)
-5. [Affected-detection: edges, propagation, the `^:check` primitive](#5-affected-detection-edges-propagation-and-the-check-primitive)
-6. [Parallelism via `--job` / `--job-total` and GitHub matrix](#6-parallelism-via---job-and---job-total)
-7. [Remote caching configuration and fail-fast probes](#7-remote-caching-configuration-and-fail-fast-probes)
-8. [Toolchain install: prototools, setup-toolchain, three strategies](#8-the-toolchain-install-step-prototools-setup-toolchain-the-three-strategies)
-9. [Reporting and observability](#9-reporting-and-observability-run-report-action-ci-retrospect-ci-booster)
-10. [v2.1 and v2.2 features that replace older patterns](#10-v21-and-v22-features-that-replace-older-patterns)
-11. [Worked example: PR validate workflow for a Rust monorepo](#11-worked-example-pr-validate-workflow)
-12. [Worked example: deploy workflow with image-push + ArgoCD sync](#12-worked-example-deploy-workflow)
-13. [Anti-patterns observed in production (the six failure modes)](#13-anti-patterns-observed-in-production)
+3. [MANDATORY: explicit task inheritance via `inheritedBy` and tags](#3-mandatory-explicit-task-inheritance-via-inheritedby-and-tags)
+4. [The explicit-target filtering rule](#4-the-explicit-target-filtering-rule)
+5. [Revision comparison: MOON_BASE, MOON_HEAD, github.event.before](#5-revision-comparison-moon_base-moon_head-githubeventbefore)
+6. [Affected-detection: edges, propagation, the `^:check` primitive](#6-affected-detection-edges-propagation-and-the-check-primitive)
+7. [Parallelism via `--job` / `--job-total` and GitHub matrix](#7-parallelism-via---job-and---job-total)
+8. [Remote caching configuration and fail-fast probes](#8-remote-caching-configuration-and-fail-fast-probes)
+9. [Toolchain install: prototools, setup-toolchain, three strategies](#9-the-toolchain-install-step-prototools-setup-toolchain-the-three-strategies)
+10. [Reporting and observability](#10-reporting-and-observability-run-report-action-ci-retrospect-ci-booster)
+11. [v2.1 and v2.2 features that replace older patterns](#11-v21-and-v22-features-that-replace-older-patterns)
+12. [Worked example: PR validate workflow for a Rust monorepo](#12-worked-example-pr-validate-workflow)
+13. [Worked example: deploy workflow with image-push + ArgoCD sync](#13-worked-example-deploy-workflow)
+14. [Anti-patterns observed in production (the six failure modes)](#14-anti-patterns-observed-in-production)
 
 ---
 
 ## 1. The seven steps of `moon ci` (what actually happens)
 
-Source: https://moonrepo.dev/docs/v2/guides/ci ("How it works"), captured
+Source: https://moonrepo.dev/docs/guides/ci ("How it works"), captured
 2026-05-14.
 
 `moon ci` is a single command that internally orchestrates seven steps,
@@ -55,7 +56,7 @@ in order:
    graph for performance.
 5. **Install the toolchain and applicable dependencies.** This is where
    `setup-toolchain` (the GHA action) and proto's auto-install
-   interact. See section 8.
+   interact. See section 9.
 6. **Run all actions within the graph using a thread pool.** Concurrency
    defaults to the number of cores; override via `MOON_CONCURRENCY` or
    `--concurrency`.
@@ -82,13 +83,13 @@ defaults:
 - `--downstream=direct` — walk dependents one hop
 
 `moon ci :build` is exactly equivalent to `moon exec :build` plus those
-defaults plus the `runInCI` filter described in section 3.
+defaults plus the `runInCI` filter described in section 4.
 
 ---
 
 ## 2. When to set `runInCI` and what the defaults mean
 
-Source: https://moonrepo.dev/docs/v2/guides/ci ("Configuring tasks") and
+Source: https://moonrepo.dev/docs/guides/ci ("Configuring tasks") and
 https://moonrepo.dev/docs/config/project#runinci.
 
 Every task has an implicit `runInCI: true` unless one of these
@@ -165,9 +166,166 @@ mechanics" for the full mechanics including `mergeDeps`, `mergeEnv`,
 
 ---
 
-## 3. The explicit-target filtering rule
+## 3. MANDATORY: explicit task inheritance via `inheritedBy` and tags
 
-Source: https://moonrepo.dev/docs/v2/guides/ci ("Choosing targets"),
+> **Rule (mandatory, repo-wide).** Every file under `.moon/tasks/**/*` MUST begin with an `inheritedBy:` block declaring at least one condition (`tags`, `toolchains`, `layers`, `stacks`, `languages`, or `files`). Projects opt in to a tag-conditioned task file by listing the tag in their `moon.yml` `tags:` array -- **never** by language match alone, never by implicit toolchain. A `.moon/tasks/*.yml` file without `inheritedBy:` is forbidden because it inherits to every project in the workspace.
+
+Source: https://moonrepo.dev/docs/concepts/task-inheritance and https://moonrepo.dev/docs/config/tasks#inheritedby (v2.0.0+).
+
+### Why this is mandatory
+
+Implicit inheritance creates compounding chaos that the failure-mode corpus has paid for repeatedly:
+
+1. **You cannot read a single project's `moon.yml` and know which tasks fire.** The actual task set is a fan-in from (top-level `.moon/tasks.yml`, every `.moon/tasks/<anything>.yml` that matches the project's language / toolchain / stack / layer / tags / files, and the project's own `moon.yml`). Each contributor is then merged according to `mergeArgs`, `mergeDeps`, `mergeEnv`, `mergeInputs`, `mergeOutputs`, `mergeToolchains` -- six independent merge axes, each defaulting to `append`. Tracing a "where did `build-release` get `--release` from?" question becomes a six-file archaeology pass.
+2. **`runInCI` inheritance silently flips polarity per merge.** A task that's `runInCI: 'affected'` globally and `runInCI: true` locally collapses to the local value because `runInCI` is scalar (the per-key merge strategies apply to maps and arrays, not scalars). A reader who only sees the global file assumes `'affected'` and is wrong; a reader who only sees the local does not know the global ever set anything. Both produce silent over-fire (PR validate schedules `docker-push`) or silent skip (`moon ci :build-release` returns success without running) -- exactly the failure modes anchored by `moon-task-run-in-ci-misconfiguration`.
+3. **Affected detection traverses the merged graph, not the file you're reading.** If `build-release`'s `deps: ['^:check']` is inherited from a global file and the project's local override uses `mergeDeps: 'replace'`, the propagation edge silently disappears -- and the `moon-affected-detection-misses-targets` failure mode fires.
+
+Explicit `inheritedBy:` + explicit `tags:` reverses every one of these: the project's `tags:` line is the single source of truth for what files inherit to it, and the file's `inheritedBy:` is the single source of truth for which projects it applies to. The mental model collapses to one direction, both ends typed.
+
+### The architecture: workspace orchestration via CI tags; developer commands via toolchain
+
+The policy: configure as much as possible at workspace level via **CI-lane tags**; only developer ergonomic commands (`dev`, `lint`, `build`, `check`) ride on toolchain conditions because those are language-shaped, not lane-shaped.
+
+#### Prebuilt CI-lane tag files (one per CI lane)
+
+```yaml
+# .moon/tasks/ci-pull-request.yml
+inheritedBy:
+  tags: ['ci-pull-request']
+tasks:
+  lint:
+    command: 'cargo clippy --all-targets -- -D warnings'
+    runInCI: 'affected'
+  typecheck:
+    command: 'cargo check --all-targets --workspace'
+    runInCI: 'affected'
+  test-unit:
+    command: 'cargo nextest run --lib'
+    runInCI: 'affected'
+```
+
+```yaml
+# .moon/tasks/ci-merge-develop.yml
+inheritedBy:
+  tags: ['ci-merge-develop']
+tasks:
+  test-integration:
+    command: 'cargo nextest run --test "*"'
+    runInCI: 'affected'
+  build-debug:
+    command: 'cargo build --workspace'
+    runInCI: 'affected'
+  docker-push-dev:
+    command: 'docker buildx build --push --tag $DOCKER_IMAGE:dev-$MOON_HEAD .'
+    runInCI: 'affected'
+    deps: ['^:check', '~:build-debug']
+```
+
+```yaml
+# .moon/tasks/ci-merge-production.yml
+inheritedBy:
+  tags: ['ci-merge-production']
+tasks:
+  build-release:
+    command: 'cargo build --release --workspace'
+    runInCI: 'affected'
+    deps: ['^:check']
+    options:
+      mergeArgs: 'replace'   # never accumulate args across inheritance
+  docker-push-prod:
+    command: 'docker buildx build --push --tag $DOCKER_IMAGE:prod-$MOON_HEAD .'
+    runInCI: 'affected'
+    deps: ['^:check', '~:build-release']
+  argocd-sync:
+    command: '.ci/argocd-sync.sh $DOCKER_IMAGE prod-$MOON_HEAD'
+    runInCI: 'affected'
+    deps: ['~:docker-push-prod']
+```
+
+#### Developer-command tag files (one per toolchain)
+
+```yaml
+# .moon/tasks/rust-developer.yml
+inheritedBy:
+  toolchains: ['rust']
+tasks:
+  dev:
+    command: 'cargo watch -x run'
+    runInCI: false           # explicit; never inherit
+  build:
+    command: 'cargo build'
+    runInCI: false
+  lint:
+    command: 'cargo clippy'
+    runInCI: false           # the CI lane has its own stricter `lint`
+  check:
+    command: 'cargo check'
+    runInCI: false
+```
+
+Same shape for `.moon/tasks/typescript-developer.yml` with `inheritedBy: { toolchains: ['node'] }` (or `deno`), `.moon/tasks/python-developer.yml`, etc.
+
+#### Per-project `moon.yml` -- the only file a reader needs
+
+```yaml
+# services/users/moon.yml
+tags:
+  - 'ci-pull-request'
+  - 'ci-merge-develop'
+  - 'ci-merge-production'
+
+toolchain:
+  default: 'rust'
+
+# That's it. No `tasks:` block. No overrides. The `tags` + `toolchain`
+# are the complete declaration of what this project does in CI and at
+# the developer command line. Tasks live in workspace tag files.
+```
+
+Reading the four lines above tells you: this project runs the full PR / develop / prod CI lane and inherits Rust developer commands. To find out exactly which tasks fire, you read four workspace files (three CI lanes + one toolchain) -- never six.
+
+### Forbidden patterns
+
+| Pattern | Why forbidden | What to do instead |
+|---|---|---|
+| `.moon/tasks.yml` (top-level shared file) | Applies to every project; no opt-out without per-project exclude lists | Split into tag-conditioned files under `.moon/tasks/*.yml` with explicit `inheritedBy:` |
+| `.moon/tasks/rust.yml` (toolchain-named, no `inheritedBy:` block) | Matches every project with `toolchain: rust` whether they want it or not | Rename to `rust-developer.yml` AND add `inheritedBy: { toolchains: ['rust'] }`; restrict its scope to developer commands only |
+| Any task with `runInCI:` unset | Inheritance silence -- defaults to `true` for non-`dev/start/serve` task names; produces "Resolved targets: 0" surprises when combined with affected detection | Set `runInCI` explicitly to `true`, `false`, or `'affected'` on every task |
+| Project `moon.yml` with `tasks:` overrides of inherited tasks | Each override is a new merge axis; one slip on `mergeArgs` / `mergeDeps` and the graph silently changes | Move the override into a new tag-conditioned file; have the project opt in via tag |
+
+### Per-project opt-out for one-off cases
+
+When a project legitimately needs to skip one inherited task (e.g. a no-test library that should not get `test-integration` from `ci-merge-develop`):
+
+```yaml
+# libs/shared-types/moon.yml
+tags:
+  - 'ci-pull-request'
+  - 'ci-merge-develop'
+workspace:
+  inheritedTasks:
+    exclude: ['test-integration']
+```
+
+`workspace.inheritedTasks` supports `include` (whitelist), `exclude` (denylist), `rename` (map). Source: https://moonrepo.dev/docs/config/project#inheritedtasks.
+
+### Smoke test: enumerate what a project will actually run
+
+```bash
+# What tasks does this project have (after inheritance)?
+moon project users --json | jq '.tasks | keys'
+
+# What tasks will moon ci actually run for this project on the current diff?
+moon query tasks --affected --json | jq '.tasks[] | select(.project.id == "users") | .id'
+```
+
+If either output surprises you, the inheritance is doing something you did not declare. That is the bug, not the symptom.
+
+---
+
+## 4. The explicit-target filtering rule
+
+Source: https://moonrepo.dev/docs/guides/ci ("Choosing targets"),
 captured verbatim 2026-05-14:
 
 > "When providing targets, `moon ci` will still only run them if
@@ -230,9 +388,9 @@ from moon ci to prevent disk exhaustion".
 
 ---
 
-## 4. Revision comparison: MOON_BASE, MOON_HEAD, github.event.before
+## 5. Revision comparison: MOON_BASE, MOON_HEAD, github.event.before
 
-Source: https://moonrepo.dev/docs/v2/guides/ci ("Comparing revisions").
+Source: https://moonrepo.dev/docs/guides/ci ("Comparing revisions").
 
 `moon ci` detects base and head automatically from the CI provider
 (via the `ci_env` Rust crate). If detection fails, it falls back to
@@ -325,9 +483,9 @@ becomes a silent `Resolved targets: 0`.
 
 ---
 
-## 5. Affected-detection: edges, propagation, and the `^:check` primitive
+## 6. Affected-detection: edges, propagation, and the `^:check` primitive
 
-Source: https://moonrepo.dev/docs/v2/concepts/project#dependson and the
+Source: https://moonrepo.dev/docs/concepts/project#dependson and the
 graph behaviour documented at
 https://moonrepo.dev/docs/how-it-works/action-graph.
 
@@ -438,9 +596,9 @@ moon query projects --affected | jq '.projects | length'
 
 ---
 
-## 6. Parallelism via `--job` and `--job-total`
+## 7. Parallelism via `--job` and `--job-total`
 
-Source: https://moonrepo.dev/docs/v2/guides/ci ("Parallelizing tasks").
+Source: https://moonrepo.dev/docs/guides/ci ("Parallelizing tasks").
 
 `moon ci --job <index> --job-total <total>` shards the affected target
 set across N CI jobs. `--job` is 0-indexed.
@@ -478,13 +636,13 @@ as above.
 - If one shard runs zero affected tasks, it still consumes a runner.
   Failure-mode anchor: the production transcript corpus — "shards finish in
   seconds and nothing gets built or pushed" — this can be either
-  affected-detection miss (section 5) or `moon ci` correctly reporting
+  affected-detection miss (section 6) or `moon ci` correctly reporting
   no affected work for that shard. Distinguish by checking the other
   shards in the same run.
 
 ---
 
-## 7. Remote caching configuration and fail-fast probes
+## 8. Remote caching configuration and fail-fast probes
 
 Source: https://moonrepo.dev/docs/config/workspace#remote (workspace.yml
 remote block) and https://moonrepo.dev/docs/guides/remote-cache.
@@ -619,9 +777,9 @@ jobs:
 
 ---
 
-## 8. The toolchain-install step: prototools, setup-toolchain, the three strategies
+## 9. The toolchain-install step: prototools, setup-toolchain, the three strategies
 
-Source: https://moonrepo.dev/docs/proto + https://moonrepo.dev/docs/v2/config/toolchain
+Source: https://moonrepo.dev/docs/proto + https://moonrepo.dev/docs/config/toolchain
 + https://github.com/moonrepo/setup-toolchain.
 
 Failure-mode anchor: `moon-toolchain-prototools-drift`. in production
@@ -751,9 +909,9 @@ sccache, not to unset `RUSTC_WRAPPER`.
 
 ---
 
-## 9. Reporting and observability (run-report-action, ci-retrospect, ci-booster)
+## 10. Reporting and observability (run-report-action, ci-retrospect, ci-booster)
 
-Source: https://moonrepo.dev/docs/v2/guides/ci ("Reporting run
+Source: https://moonrepo.dev/docs/guides/ci ("Reporting run
 results") + https://github.com/moonrepo/run-report-action.
 
 ### moonrepo/run-report-action
@@ -801,7 +959,7 @@ moon query changed-files --status modified | jq
 
 ---
 
-## 10. v2.1 and v2.2 features that replace older patterns
+## 11. v2.1 and v2.2 features that replace older patterns
 
 Sources verified via npm + https://moonrepo.dev/blog/moon-v2.1 (March
 16, 2026) and https://moonrepo.dev/blog/moon-v2.2 (April 13, 2026).
@@ -892,7 +1050,7 @@ four are **rebutted**: moon does not ship these as of 2.2.4.
 
 ---
 
-## 11. Worked example: PR validate workflow
+## 12. Worked example: PR validate workflow
 
 A real PR-validate workflow for a Rust monorepo, drawn from the
 canonical docs and adapted to the user's Rust-service-deploys-via-image-push
@@ -1003,7 +1161,7 @@ tasks:
 
 ---
 
-## 12. Worked example: deploy workflow
+## 13. Worked example: deploy workflow
 
 The deploy lane runs on push to `main`. It must NOT use bare `moon ci`
 because `docker-push` is `runInCI: false`. It uses `moon run` after
@@ -1127,7 +1285,7 @@ task explicitly.
 
 ---
 
-## 13. Anti-patterns observed in production
+## 14. Anti-patterns observed in production
 
 Each row maps a failure mode from the user's corpus to the wrong
 pattern, the right pattern from this guide, and a smoke-test diff
@@ -1140,7 +1298,7 @@ that proves the fix.
   service did not rebuild despite changed files (observed in production).
 - **Wrong pattern**: silent rerun, or `if: success()` swallowing the
   empty resolve.
-- **Right pattern**: section 5 + section 11 fail-fast snippet. If
+- **Right pattern**: section 6 + section 12 fail-fast snippet. If
   `git diff` is non-empty AND `moon query projects --affected` returns
   `[]`, `exit 1`.
 - **Smoke test**: locally run
@@ -1171,7 +1329,7 @@ that proves the fix.
   expecting it to bypass `runInCI: false`. It does not. Canon:
   "moon ci will still only run them if affected by changed files, but
   will still filter with the runInCI option."
-- **Right pattern**: section 3. Use `moon run :build-release
+- **Right pattern**: section 4. Use `moon run :build-release
   --affected` or `moon exec :build-release --affected --ci` from the
   deploy lane.
 - **Smoke test**: deploy lane should run at least one build per
@@ -1183,7 +1341,7 @@ that proves the fix.
 - **Evidence**: an observed production incident — three image-name realignments over six weeks.
 - **Wrong pattern**: assume `id:` in `moon.yml` automatically matches
   the Cargo `[package].name` and the ArgoCD `kustomize.images` entry.
-- **Right pattern**: section 12 "Verify pushed tag matches deploy
+- **Right pattern**: section 13 "Verify pushed tag matches deploy
   manifest" step. Grep all four names at PR-merge time; assert
   equality.
 - **Smoke test**:
@@ -1204,7 +1362,7 @@ that proves the fix.
 - **Wrong pattern**: drop `setup-rust`, re-add it, set
   `MOON_SKIP_SETUP_TOOLCHAIN`, change `.prototools`, change
   `.moon/toolchains.yml`, all in a 60-minute panic.
-- **Right pattern**: section 8 detection grep first. Identify which
+- **Right pattern**: section 9 detection grep first. Identify which
   of the three strategies the repo is on. Commit to one. Migrate
   explicitly, not as a "fix".
 - **Smoke test**: only one of `.prototools`, `.moon/toolchains.yml`,
@@ -1218,7 +1376,7 @@ that proves the fix.
 - **Wrong pattern**: cache flake -> disable cache -> build slows ->
   re-enable cache -> next flake -> disable again. Each toggle is a
   commit; over six weeks this generates noise without fixing anything.
-- **Right pattern**: section 7 fast-fail probe. Keep cache
+- **Right pattern**: section 8 fast-fail probe. Keep cache
   configured. Probe before `moon ci`. Unset env vars on probe
   failure. Build degrades silently to local-only.
 - **Smoke test**: kill the cache server temporarily, push a branch;

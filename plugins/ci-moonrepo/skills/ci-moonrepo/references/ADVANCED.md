@@ -375,7 +375,7 @@ Verified 2026-05-14 via `npm view @moonrepo/cli versions` (latest **2.2.4**) plu
 
 ### Features the verification cascade could not verify
 
-These were checked against https://moonrepo.dev/blog/moon-v2.2 and https://moonrepo.dev/docs/v2/guides/ci on 2026-05-14:
+These were checked against https://moonrepo.dev/blog/moon-v2.2 and https://moonrepo.dev/docs/guides/ci on 2026-05-14:
 
 - A built-in fail-fast assertion for affected-detection no-op (e.g., `moon ci --fail-on-no-affected`). **[unverified]** -- not in 2.2.4 release notes. The fail-fast contract remains a CI-script wrapper.
 - `moon ci --explain` / `moon ci --dry-run` flags. **[unverified]** -- `moon exec --plan` (v2.1.0) is the closest documented equivalent.
