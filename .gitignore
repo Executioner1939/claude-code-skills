@@ -32,3 +32,6 @@ venv/
 # Secrets
 .env
 .env.*
+
+# Per-run eval artefacts (raw transcript content + name-map; never commit)
+evals/

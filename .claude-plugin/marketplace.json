@@ -6,17 +6,24 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, meta-tooling, and truth-verification.",
-    "version": "5.24.0",
+    "version": "5.27.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
     {
       "name": "ci-moonrepo",
       "source": "./plugins/ci-moonrepo",
-      "description": "moonrepo v2.2 expert -- workspace setup, task orchestration, CI/CD pipelines, Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, v1-to-v2 migration, and a curated catalogue of real-world gotchas from production monorepos.",
-      "version": "3.2.0",
+      "description": "moonrepo v2.2 (v2.2.4) expert -- workspace setup, task orchestration, CI/CD pipelines (with a comprehensive moon-ci guide weaving production failure modes into prescriptive patterns), Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, v1-to-v2 migration, and a curated catalogue of real-world gotchas from production monorepos.",
+      "version": "3.5.0",
       "category": "development",
-      "keywords": ["moonrepo", "moon", "monorepo", "build-system", "task-runner", "ci-cd"],
+      "keywords": [
+        "moonrepo",
+        "moon",
+        "monorepo",
+        "build-system",
+        "task-runner",
+        "ci-cd"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -30,7 +37,14 @@
       "description": "Rust OpenAPI documentation with utoipa v5.4. Complete macro reference, path attributes, security schemes, enum handling, validation, and integrations for Axum, Actix-web, Rocket.",
       "version": "2.0.2",
       "category": "development",
-      "keywords": ["rust", "openapi", "swagger", "utoipa", "api-documentation", "axum"],
+      "keywords": [
+        "rust",
+        "openapi",
+        "swagger",
+        "utoipa",
+        "api-documentation",
+        "axum"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -44,7 +58,13 @@
       "description": "Document event-driven architectures with EventCatalog. Covers all 13 resource types (including Data Products), the full SDK (snapshots, DSL builders, custom docs), 15+ generator integrations, MCP server, visualizations, and schema support.",
       "version": "2.2.0",
       "category": "development",
-      "keywords": ["eventcatalog", "event-driven-architecture", "eda", "asyncapi", "openapi"],
+      "keywords": [
+        "eventcatalog",
+        "event-driven-architecture",
+        "eda",
+        "asyncapi",
+        "openapi"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -58,7 +78,16 @@
       "description": "Functional domain modeling in Rust with fmodel-rust v0.9 (MSRV 1.75+, native async-fn-in-trait). Decider, View, Saga domain types, algebraic composition via combine/merge/map, and application-layer wiring (aggregates, MaterializedView, SagaManager).",
       "version": "1.0.3",
       "category": "development",
-      "keywords": ["rust", "fmodel", "event-sourcing", "cqrs", "domain-modeling", "functional", "decider", "saga"],
+      "keywords": [
+        "rust",
+        "fmodel",
+        "event-sourcing",
+        "cqrs",
+        "domain-modeling",
+        "functional",
+        "decider",
+        "saga"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -72,7 +101,13 @@
       "description": "Deep structural analysis of any codebase -- extracts business rules, maps data flows, traces dependencies, assesses risk, and produces transformation plans. 7 analysis lenses, 2 specialized subagents, 1 slash-command workflow (/analysis-codebase-archaeology:archaeology).",
       "version": "1.2.0",
       "category": "development",
-      "keywords": ["code-analysis", "reverse-engineering", "business-rules", "technical-debt", "migration"],
+      "keywords": [
+        "code-analysis",
+        "reverse-engineering",
+        "business-rules",
+        "technical-debt",
+        "migration"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -86,7 +121,15 @@
       "description": "Curated reference library of canonical design principles (Dieter Rams, Joshua Porter, Bruce Tognazzini, inclusive design, Postel's law, principle of least surprise) for UI, product, and crosscutting design judgment.",
       "version": "1.0.1",
       "category": "design",
-      "keywords": ["design", "ui", "ux", "product-design", "design-principles", "dieter-rams", "design-review"],
+      "keywords": [
+        "design",
+        "ui",
+        "ux",
+        "product-design",
+        "design-principles",
+        "dieter-rams",
+        "design-review"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -100,7 +143,19 @@
       "description": "Brutal, structured audit of a Terraform or OpenTofu module repository. Detects cross-module composition smells (overlap, duplication, thin wrappers, scope-discriminator primitives, copy-pasted module blocks, tier misplacement), cross-project / cross-account linking flaws, missing validations, dead code, version-pinning drift, and provider-specific landing-zone gaps (GCP, AWS, Azure, OCI). Produces an 8-section critique with per-module grades and a concrete defect list, with optional baseline diff. Workflow at /terraform-audit:audit [path]. Bundles Anton Babenko's terraform-skill v1.6.0 (Apache-2.0) for canonical Terraform best-practices context.",
       "version": "1.1.0",
       "category": "development",
-      "keywords": ["terraform", "opentofu", "audit", "iac", "infrastructure-as-code", "code-review", "module-review", "landing-zone", "gcp", "aws", "azure"],
+      "keywords": [
+        "terraform",
+        "opentofu",
+        "audit",
+        "iac",
+        "infrastructure-as-code",
+        "code-review",
+        "module-review",
+        "landing-zone",
+        "gcp",
+        "aws",
+        "azure"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -111,10 +166,28 @@
     {
       "name": "anvil",
       "source": "./plugins/anvil",
-      "description": "Atomic design + Storybook 10 expert toolkit. CSF Factories only (no exceptions). TanStack-ecosystem-centric. Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Ships `@anvil/inspector` — a structurally precise TS toolkit (TypeScript Compiler API + ast-grep) with 24 CLI verbs: per-component cards (props/stories/variants/consumers/tokens/issues), full design-system inventory via the structural import graph, body-tree archaeology pipeline (NDJSON-piping verbs + 10 project-extensible JSON presets for raw HTML containers, hardcoded spacing/colour, inline styles, untokenised classes, image-no-alt, link-no-href, button-no-label, data-attr-without-testid), and structural mutations (rename-component / rename-prop / rename-story-title / rename-jsx-prop / remove-import / safe-delete / verify-mdx / orphan-exports — all dry-run by default). The `safe-code-mutation` skill encodes the no-regex-on-.ts/.tsx rule that the inspector embodies. 19 slash-command workflows including 10 inspector commands plus the existing audit/add/merge suite. Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history.",
+      "description": "Atomic design + Storybook 10 expert toolkit. CSF Factories only (no exceptions). TanStack-ecosystem-centric. Web (Tailwind 4) + native (NativeWind / Expo / Reanimated). Ships `@anvil/inspector` \u2014 a structurally precise TS toolkit (TypeScript Compiler API + ast-grep) with 24 CLI verbs: per-component cards (props/stories/variants/consumers/tokens/issues), full design-system inventory via the structural import graph, body-tree archaeology pipeline (NDJSON-piping verbs + 10 project-extensible JSON presets for raw HTML containers, hardcoded spacing/colour, inline styles, untokenised classes, image-no-alt, link-no-href, button-no-label, data-attr-without-testid), and structural mutations (rename-component / rename-prop / rename-story-title / rename-jsx-prop / remove-import / safe-delete / verify-mdx / orphan-exports \u2014 all dry-run by default). The `safe-code-mutation` skill encodes the no-regex-on-.ts/.tsx rule that the inspector embodies. 19 slash-command workflows including 10 inspector commands plus the existing audit/add/merge suite. Inter-agent HANDOFF.md contract. Tier-1 baseline diff + Tier-2 dated audit history.",
       "version": "4.0.0",
       "category": "design",
-      "keywords": ["atomic-design", "storybook", "storybook-10", "csf-factories", "design-system", "design-tokens", "tanstack", "tanstack-form", "tanstack-table", "tanstack-db", "tanstack-query", "tailwind", "nativewind", "react-native", "audit", "wcag", "brad-frost"],
+      "keywords": [
+        "atomic-design",
+        "storybook",
+        "storybook-10",
+        "csf-factories",
+        "design-system",
+        "design-tokens",
+        "tanstack",
+        "tanstack-form",
+        "tanstack-table",
+        "tanstack-db",
+        "tanstack-query",
+        "tailwind",
+        "nativewind",
+        "react-native",
+        "audit",
+        "wcag",
+        "brad-frost"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -128,7 +201,22 @@
       "description": "Methodology-first multi-agent refactoring orchestrator for monorepos. Context-aware: scripts/discover-workspace.sh walks up from cwd to find the workspace and detects services + aggregates automatically; commands take zero path arguments by default. Service-level by default: /audit-domain <service> drills ALL aggregates in parallel; /plan-refactor <service> produces ONE unified PLAN.md with cross-aggregate depends_on and de-duplicated shared-infrastructure tickets; /run-wave-ralph <service> drives a single inbox. New /migrate command runs /init -> /audit -> /plan -> decisions gate -> /run end-to-end with reasoning gates at each phase. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top-to-bottom (HTTP -> events -> views -> inter-service events), document violations, author ast-grep rules, then run isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, dead-letter on failure. Two wave runners: /run-wave (subagent-driven) and /run-wave-ralph (bash Ralph loop, no nested-Agent dispatch, disk-resumable, live monitor). Ralph mode side-loads five per-session hooks via --settings: SessionStart workspace-tree injection (no exploration turns), PreToolUse allowed_paths enforcement, Stop auto-commit (conventional-commits), shared CARGO_TARGET_DIR (5-10x Rust compile), and a verifier:deterministic bash verifier route. Nine slash commands, nine subagents, three methodology skills.",
       "version": "0.7.0",
       "category": "development",
-      "keywords": ["monorepo", "refactoring", "orchestration", "multi-agent", "ast-grep", "opus", "parallel-workers", "claim-lock", "worktree", "inbox", "handoff", "ddd", "hexagonal", "rust"],
+      "keywords": [
+        "monorepo",
+        "refactoring",
+        "orchestration",
+        "multi-agent",
+        "ast-grep",
+        "opus",
+        "parallel-workers",
+        "claim-lock",
+        "worktree",
+        "inbox",
+        "handoff",
+        "ddd",
+        "hexagonal",
+        "rust"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -142,7 +230,26 @@
       "description": "Carbon Solana indexing framework reference. Auto-loaded knowledge for the carbon-core pipeline (datasources, pipes, processors, decoders, schema matching) and per-protocol sub-skills for 64 Solana programs (Raydium AMM v4 / CLMM / CPMM / Launchpad, Pumpfun, Pump Swap, Meteora DLMM / DAMM v2 / DBC / Pools / Vault, Orca Whirlpool, Phoenix v1, OpenBook v2, Jupiter Swap / DCA / Limit / Perpetuals / Lend, Drift v2, Zeta, Marginfi v2, Kamino lending / vault / farms / limit-order, Lifinity, Stabble, Sharky, Marinade, Solayer, Bubblegum, MPL Core / Token Metadata, SPL Token / Token-2022 / ATA, ALT, Stake, System, Memo, Name Service, Swig, Wavebreak, Gavel, OKX DEX, DFlow, Circle CCTP v2, and more). Bundled scripts/carbon.py extracts struct fields, discriminators, and account variants on demand from your local cargo registry cache (or $CARBON_SRC) -- no stale snapshots.",
       "version": "0.1.0",
       "category": "development",
-      "keywords": ["carbon", "carbon-core", "solana", "indexer", "yellowstone-grpc", "helius-laserstream", "raydium", "pumpfun", "meteora", "orca", "jupiter", "drift", "kamino", "phoenix", "openbook", "marginfi", "spl-token", "mpl"],
+      "keywords": [
+        "carbon",
+        "carbon-core",
+        "solana",
+        "indexer",
+        "yellowstone-grpc",
+        "helius-laserstream",
+        "raydium",
+        "pumpfun",
+        "meteora",
+        "orca",
+        "jupiter",
+        "drift",
+        "kamino",
+        "phoenix",
+        "openbook",
+        "marginfi",
+        "spl-token",
+        "mpl"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -156,7 +263,17 @@
       "description": "Meta-plugin: optimize the Claude Code harness for a project. Reads session transcripts to digest recurring user friction, audits CLAUDE.md / skills / rules / commands / hooks / monitors across the hierarchy, and recommends additions / edits / removals -- never touching the root CLAUDE.md. Hierarchy-aware (parent-but-not-root); uses @ imports for cwd-relative content; for monorepos, can author a per-service summary CLAUDE.md that autoloads when working in that subtree. Four-phase pipeline: /digest -> /audit -> /plan -> /tune. Hard rules: never edits root CLAUDE.md, never edits ~/.claude/, refuses CLAUDE.md changes that exceed 200 lines or path-scoped rule changes that exceed 150 lines, validates @ imports resolve, appends one line to .claude/CHANGELOG.md per applied change.",
       "version": "0.4.0",
       "category": "development",
-      "keywords": ["claude-md", "harness", "meta", "tuner", "transcript-mining", "audit", "monorepo", "hierarchy", "claude-code"],
+      "keywords": [
+        "claude-md",
+        "harness",
+        "meta",
+        "tuner",
+        "transcript-mining",
+        "audit",
+        "monorepo",
+        "hierarchy",
+        "claude-code"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -168,9 +285,20 @@
       "name": "meta-skill-improver",
       "source": "./plugins/meta-skill-improver",
       "description": "Evidence-grounded skill evolution. Mines transcripts and git history across one or many repos for recurring user friction on a topic, clusters the friction into anonymized failure-mode reproducers, synthesizes a four-class prompt matrix per failure mode, runs a sandbox harness with and without the candidate skill loaded, and produces a mathematically-graded scorecard with a promote-or-block verdict. Treats the skill-under-test as a non-deterministic SUT and uses property-based-testing-with-N-runs methodology to separate signal from noise. Builds on the /codify pipeline (transcript-analyzer, skill-author, skill-auditor) and adds the missing executor-and-grader stages.",
-      "version": "0.1.1",
+      "version": "0.1.3",
       "category": "development",
-      "keywords": ["meta", "skill-evolution", "skill-quality", "skill-eval", "evals", "eval-harness", "regression-testing", "property-based-testing", "transcript-mining", "judge-calibration"],
+      "keywords": [
+        "meta",
+        "skill-evolution",
+        "skill-quality",
+        "skill-eval",
+        "evals",
+        "eval-harness",
+        "regression-testing",
+        "property-based-testing",
+        "transcript-mining",
+        "judge-calibration"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -184,7 +312,23 @@
       "description": "Three-gate Kubernetes deployment readiness workflow (develop / staging|uat / production) derived from learnkube.com/production-best-practices. Verifies application code, Kubernetes manifests (Helm/Kustomize/raw YAML), Terraform/OpenTofu modules, and GitOps configs (Argo CD/Flux) against a tiered checklist that grows per gate. Bundles deep OpenTelemetry guidance: semantic conventions, histogram bucket selection, exemplars wired SDK->Collector->Prometheus, head vs tail sampling with trace affinity, and Google-SRE-Table-5-8 multi-burn-rate SLO alerting with worked examples. Two specialized read-only subagents (deployment-verifier, observability-auditor) load six internal skills that are not user-invocable.",
       "version": "1.0.0",
       "category": "development",
-      "keywords": ["kubernetes", "k8s", "deployment", "production-readiness", "opentelemetry", "otel", "observability", "slo", "multi-burn-rate", "terraform", "gitops", "argocd", "flux", "helm", "kustomize"],
+      "keywords": [
+        "kubernetes",
+        "k8s",
+        "deployment",
+        "production-readiness",
+        "opentelemetry",
+        "otel",
+        "observability",
+        "slo",
+        "multi-burn-rate",
+        "terraform",
+        "gitops",
+        "argocd",
+        "flux",
+        "helm",
+        "kustomize"
+      ],
       "author": {
         "name": "Executioner1939"
       },
@@ -198,7 +342,42 @@
       "description": "Truth-verification harness with structured research, budget-aware rate-limit gating, multi-workspace MCP onboarding, and transcript-corpus-derived behavioural guards. Verification: SessionStart hook injects a protocol; PreToolUse hook on Bash intercepts unpinned installs across 13 package managers; tiered PreToolUse + PostToolUse gating on the bundled firecrawl-mcp@3.2.1 surface (silent under 80% used, soft remind 80-95%, ask 95-100% or single-call >=15% or rolling-hour over 5000 cr, deny over 100%). Six slash commands: /oracle:setup, /oracle:verify, /oracle:research [--intensity], /oracle:vet, /oracle:budget, /oracle:mcp-fleet. Five Opus-4.7 subagents: canon-reader, github-archivist, issue-investigator, forum-anthropologist, cost-rethinker. Seven auto-trigger knowledge skills: verification-protocol, research-protocol, anti-hype-ranking, parallel-tools, path-preflight, session-checkpoint. New in 0.5.0: safe-edit-guard PreToolUse hook on Edit/Write/MultiEdit/NotebookEdit reminds when target path has not been Read within a 30-minute freshness window; track-reads PostToolUse hook records read state per session. Targets ~1,128 'File has not been read yet' / 'File has been modified' / 'String to replace not found' errors plus ~300 speculative-path failures plus 676 long-session interrupts observed across the local 1,186-transcript corpus. Test suite now also validates YAML frontmatter and lints POSIX `[ ... == ... ]` test operators. Requires FIRECRAWL_API_KEY.",
       "version": "0.5.0",
       "category": "development",
-      "keywords": ["verification", "fact-checking", "version-pinning", "anti-hallucination", "citations", "safe-edit", "read-before-edit", "parallel-tools", "path-preflight", "session-checkpoint", "package-manager", "firecrawl", "firecrawl-mcp", "mcp", "websearch", "session-hook", "pretooluse", "posttooluse", "rate-limit", "budget-gating", "research", "ecosystem-survey", "library-vetting", "anti-hype", "niche-discovery", "subagents", "opus-4.7", "spec-conformance", "shellcheck", "mcp-fleet", "multi-workspace", "oauth-isolation", "chrome-profile", "playwright"],
+      "keywords": [
+        "verification",
+        "fact-checking",
+        "version-pinning",
+        "anti-hallucination",
+        "citations",
+        "safe-edit",
+        "read-before-edit",
+        "parallel-tools",
+        "path-preflight",
+        "session-checkpoint",
+        "package-manager",
+        "firecrawl",
+        "firecrawl-mcp",
+        "mcp",
+        "websearch",
+        "session-hook",
+        "pretooluse",
+        "posttooluse",
+        "rate-limit",
+        "budget-gating",
+        "research",
+        "ecosystem-survey",
+        "library-vetting",
+        "anti-hype",
+        "niche-discovery",
+        "subagents",
+        "opus-4.7",
+        "spec-conformance",
+        "shellcheck",
+        "mcp-fleet",
+        "multi-workspace",
+        "oauth-isolation",
+        "chrome-profile",
+        "playwright"
+      ],
       "author": {
         "name": "Executioner1939"
       },

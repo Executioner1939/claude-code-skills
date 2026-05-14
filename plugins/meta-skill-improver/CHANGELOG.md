@@ -8,6 +8,18 @@ Convention: every version bump touches this file in the same commit. New entries
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-05-14
+
+### Fixed
+
+- Phases 0.5, 1, and 7 of `/meta-skill-improver:improve-skill` no longer crash the command preprocessor. The dependency-map build block, the post-mine validation block, and the `eval_score.py` invocation block were all `!`-prefixed (executed by the slash-command preprocessor at command-load time) but referenced `$REPO_ROOT`, `$EVALS_ROOT`, `$RUN_ID`, `$SKILL`, `$NEW_SKILL_VERSION`, and `$PREV_SCORECARD` — variables resolved only at orchestrator runtime by Phase 0. Each `!` fence runs in its own shell, so those vars expanded to the empty string and the python3 invocation aborted on a `/plugins/...` path that did not exist. Converted all three fences to plain code blocks; the orchestrator runs them via the Bash tool after the values are set. Phase 0's bootstrap block remains `!`-prefixed because that is where the variables are first produced.
+
+## [0.1.2] - 2026-05-14
+
+### Fixed
+
+- Phase 4 of `/meta-skill-improver:improve-skill` no longer crashes the command preprocessor. The `git log` snippet that captures `SKILL_BODY_SHA` was previously written as a `!`-prefixed shell block containing literal `<host>` and `<name>` placeholders; zsh interpreted `<host>` as input redirection and aborted with `no such file or directory: host` before the command body ever reached the orchestrator. The block is now a plain documentation fence — the orchestrator runs it via the Bash tool after resolving the values.
+
 ## [0.1.1] - 2026-05-10
 
 ### Fixed

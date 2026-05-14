@@ -339,3 +339,45 @@ moon task-graph app:build
 - `utility` preset, `data` stack
 - Stabilized remote caching and `moonx`
 - Interactive prompts for commands without identifiers
+
+## Release notes -- v2.1 and v2.2 mapped to failure modes
+
+Verified 2026-05-14 via `npm view @moonrepo/cli versions` (latest **2.2.4**) plus https://moonrepo.dev/blog/moon-v2.1 (March 16, 2026) and https://moonrepo.dev/blog/moon-v2.2 (April 13, 2026). Each release-note item is paired with the failure mode it addresses, if any.
+
+### v2.1 highlights (2.1.0 -- 2.1.4, March 2026)
+
+| Feature | Failure mode addressed |
+|---|---|
+| `moon exec --plan` (dry-run preview of the affected action graph) | `moon-affected-detection-misses-targets` -- preview the affected set before running CI. |
+| New `affectedFiles.filter`, `affectedFiles.ignoreProjectBoundary`, `affectedFiles.passDotWhenNoResults` settings | `moon-affected-detection-misses-targets` -- refines step-2 affected computation; `passDotWhenNoResults: true` for repo-wide tasks. |
+| `runInSyncPhase` task option | `moon-task-run-in-ci-misconfiguration` -- alternative to bolting setup work into `deps`. |
+| `inheritAliases` and `installDependencies` per-toolchain settings | `moon-toolchain-prototools-drift` -- reduces toolchain-interference surface. |
+| Improved local/remote env detection (Codespaces, Gitpod) | -- (step 1 base-detection improvements only) |
+| Duplicate project aliases no longer hard error | -- |
+| `--plan` option for `moon exec` | `moon-affected-detection-misses-targets` (diagnostic surface) |
+| Fixed JSON schema in MCP `generate` tool | -- |
+| Fixed `$projectTitle` and `$projectAliases` token substitution | `moon-project-id-image-name-divergence` -- corrects token-driven materialisation. |
+| Fixed `bash` availability fallback (falls back to `sh`) | -- |
+
+### v2.2 highlights (2.2.0 -- 2.2.4, April 2026)
+
+| Feature | Failure mode addressed |
+|---|---|
+| **Background daemon** (`unstable_daemon` workspace setting, `moon daemon {start,stop,status}`) | -- (latency only; opt-in while unstable) |
+| **`experiments.asyncGraphBuilding`** (100-170% faster graph builds) | -- (latency only) |
+| **`experiments.asyncAffectedTracking`** | -- (latency only; reduces step-2 latency) |
+| Older `experiments.fasterGlobWalk` and `experiments.gitV2` stabilised and removed | -- |
+| New pipeline env vars: `MOON_PIPELINE_AUTO_CLEAN_CACHE`, `MOON_PIPELINE_CACHE_LIFETIME`, `MOON_PIPELINE_KILL_PROCESS_THRESHOLD` | `moon-remote-cache-and-sccache-flakiness` -- finer cache-lifetime control. |
+| **Graph JSON format changed** (integer node IDs + separate `data` object on `moon action-graph --json` etc.) | -- (breaking change; update any parsers) |
+| **Proto 0.56.x** bundled; automatic retry on transient rate-limit errors (3x exponential backoff) | `moon-toolchain-prototools-drift` -- reduces toolchain-install flakiness. |
+| PowerShell tasks use `-EncodedCommand` rather than `-Command` | -- |
+| pnpm v10 multi-document lockfile parsing fixed in 2.2.1 | -- |
+
+### Features the verification cascade could not verify
+
+These were checked against https://moonrepo.dev/blog/moon-v2.2 and https://moonrepo.dev/docs/v2/guides/ci on 2026-05-14:
+
+- A built-in fail-fast assertion for affected-detection no-op (e.g., `moon ci --fail-on-no-affected`). **[unverified]** -- not in 2.2.4 release notes. The fail-fast contract remains a CI-script wrapper.
+- `moon ci --explain` / `moon ci --dry-run` flags. **[unverified]** -- `moon exec --plan` (v2.1.0) is the closest documented equivalent.
+- New `moon query` schema additions in 2.1/2.2 beyond what was already documented. **[unverified]** -- release notes do not call out query-schema additions.
+- Direct S3 / GCS remote-cache backends without bazel-remote in front. **[unverified]** -- `.moon/workspace.yml::remote` documents gRPC only.

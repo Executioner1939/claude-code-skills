@@ -294,3 +294,53 @@ If a moon behaviour looks wrong — task resolution, affected detection, task in
 - `references/migration-v1-to-v2.md` for anything that looks like v1 syntax
 
 moon has a lot of subtle semantic distinctions (additive vs narrowing, upstream vs downstream, direct vs deep). A minute in the docs beats an hour debugging a silent no-op.
+
+---
+
+## Task-inheritance override mechanics
+
+Lifted from SKILL.md body in v3.4.0 (Rule 2 sub-rules 4 and 5). These are reference-grade procedural details that the agent does not need until it is actively writing a per-project `moon.yml` override or designing the deploy-lane invocation.
+
+### `mergeArgs` / `mergeOutputs` default behaviour silently doubles inherited definitions
+
+When a per-project `moon.yml` overrides an inherited task's `args` or `outputs`, the default merge strategy *appends* rather than *replaces*. Concretely: if `.moon/tasks/rust.yml` defines
+
+```yaml
+tasks:
+  build-release:
+    command: cargo
+    args: ['build', '--release', '--package', '$project']
+```
+
+and a per-project `moon.yml` adds
+
+```yaml
+tasks:
+  build-release:
+    args: ['--release', '--package', 'svc']
+```
+
+the resolved cargo argv becomes `cargo build --release --package svc --release --package svc` -- duplicated. The fix is `options.mergeArgs: replace` (and `mergeOutputs: replace` when the same applies to outputs):
+
+```yaml
+tasks:
+  build-release:
+    args: ['--release', '--package', 'svc']
+    outputs: ['target/release/svc']
+    options:
+      mergeArgs: replace
+      mergeOutputs: replace
+```
+
+A duplicate `mergeOutputs:` key inside `options:` -- typed twice by accident in the same file -- has caused real YAML silent-override incidents because YAML parsers take the last value with no warning.
+
+### Canonical CI pattern: bare `moon ci` for validate, `moon run` / `moon exec` for deploy
+
+`moon ci <explicit-targets>` filters explicit targets by their `runInCI` setting. If a deploy lane needs to fire tasks whose `runInCI` is `false` (or `'affected'` evaluating to false), passing them as explicit targets to `moon ci` will silently skip them.
+
+Recommended split:
+
+- **PR-validate lane:** bare `moon ci` (no explicit targets). Runs every affected task with `runInCI: true`. Predictable.
+- **Deploy lane:** `moon query projects --affected --json` to materialise the affected set, then `moon run :<task>` or `moon exec ...` per project, bypassing the `runInCI` filter entirely.
+
+Do not pass `runInCI: false` tasks as explicit targets to `moon ci`; the filter will eat them. Use `moon run` / `moon exec` instead.

@@ -137,9 +137,9 @@ If a previous scorecard exists, find the most recent one in `$EVALS_ROOT/scoreca
 
 ## Phase 0.5 -- Build the marketplace dependency map
 
-The skill-author and skill-auditor agents need a structured view of every plugin / command / agent / skill in the marketplace, plus the list of existing skill names (for collision detection). Build it inline:
+The skill-author and skill-auditor agents need a structured view of every plugin / command / agent / skill in the marketplace, plus the list of existing skill names (for collision detection). Run this block via the Bash tool (it depends on `$REPO_ROOT` / `$EVALS_ROOT` resolved in Phase 0; preprocessing it at command-load time would fail):
 
-```!
+```
 DEP_MAP="$EVALS_ROOT/_dep-map.yaml"
 EXISTING_SKILLS="$EVALS_ROOT/_existing-skills.txt"
 
@@ -247,9 +247,9 @@ must_not:
 - handoff_path exists and announces with `HANDOFF: ...`
 ```
 
-After it returns, validate:
+After it returns, validate by running via the Bash tool (orchestrator-runtime, not a `!`-preprocessed block):
 
-```!
+```
 test -f $EVALS_ROOT/failure-modes.json && jq empty $EVALS_ROOT/failure-modes.json
 N_MODES=$(jq '.failure_modes | length' $EVALS_ROOT/failure-modes.json)
 echo "N_MODES=$N_MODES"
@@ -376,9 +376,9 @@ Revise <SKILL> grounded in the clustered failure modes and the previous scorecar
 - plugin and marketplace versions bumped (in sync)
 ```
 
-Capture `NEW_SKILL_VERSION` from the agent's HANDOFF. Capture `SKILL_BODY_SHA` via:
+Capture `NEW_SKILL_VERSION` from the agent's HANDOFF. Capture `SKILL_BODY_SHA` by running (after substituting `<host>` and `<name>` with the resolved values) via the Bash tool, NOT as a `!`-prefixed preprocessed block:
 
-```!
+```
 git -C $REPO_ROOT log -n 1 --format=%H -- plugins/<host>/skills/<name>/SKILL.md
 ```
 
@@ -443,7 +443,9 @@ Also re-grade `gold.jsonl` (if it exists) with the same rubric -- this is what t
 
 ## Phase 7 -- Grade
 
-```!
+Run via the Bash tool (orchestrator-runtime, not a `!`-preprocessed block — it depends on `$REPO_ROOT` / `$EVALS_ROOT` / `$RUN_ID` / `$SKILL` / `$NEW_SKILL_VERSION` / `$PREV_SCORECARD` resolved in earlier phases):
+
+```
 python3 $REPO_ROOT/plugins/meta-skill-improver/scripts/eval_score.py \
   --runs $EVALS_ROOT/runs/$RUN_ID/runs.jsonl \
   --config $EVALS_ROOT/grading.yaml \
