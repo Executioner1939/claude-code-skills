@@ -5,6 +5,50 @@ All notable changes to the `oracle` plugin will be documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-05-14
+
+### Added
+
+- **Session-summary checkpoint loop.** A CodeRabbit-style periodic summary mechanism with active-vs-idle time accounting. Three new hooks (`UserPromptSubmit` -> `session-tick-start.sh`, `Stop` -> `session-tick-end.sh`, `SessionEnd` -> `session-cleanup.sh`) plus the emitter at `scripts/session-summary.sh`. Per-session state persists at `~/.claude/plugins/oracle/sessions/<session_id>/` and survives across hook fires within the session.
+
+  - **Active-vs-idle time accounting.** Cumulative agent-active milliseconds (`active-ms`) is incremented only by the `Stop` hook, computed as `now - turn-start.ts` where `turn-start.ts` is written by the preceding `UserPromptSubmit`. The interval between `Stop` and the next `UserPromptSubmit` (i.e. user-AFK time) is structurally excluded -- a user who leaves the keyboard for three hours does not register three hours of work. Clock-skew negatives are clamped to zero.
+
+  - **Trigger thresholds.** The `UserPromptSubmit` hook fires `session-summary.sh` when `(active_ms_delta >= 30 min)` OR `(turn_count_delta >= 50)` since the last summary, whichever lands first. Both thresholds are overridable via env vars `ORACLE_SUMMARY_ACTIVE_MS` and `ORACLE_SUMMARY_TURNS`. The very first turn never fires a summary even at degenerate threshold values.
+
+  - **Tier 1 -- deterministic ship-receipt block.** Always emitted. Reads the `transcript_path` JSONL slice since the last summary's recorded line index, counts tool-use blocks by name (`Edit` + `Write` + `MultiEdit` -> file edits, `Read` -> reads, `Bash` -> command invocations, `TaskCreate` / `TaskUpdate`, `Agent` -> subagent dispatches, `Grep` + `Glob`, `WebFetch` + `WebSearch`), formats as a bordered ASCII checkpoint showing timing (active / wall / idle minutes), activity counts, top-10 files touched, and top-10 bash verbs.
+
+  - **Tier 2 -- LLM narrative.** When the narrator is not `off`, shells out to `claude --model "$NARRATOR" -p` (60s timeout) with a structured prompt that includes the deterministic counts and a tail of the agent's own text output (last 8 KB). Returns a CodeRabbit-style review with four fixed sections: "What was accomplished", "Notable decisions", "Quality concerns and friction", "Three review questions for the agent". Silently falls back to Tier 1 if `claude` is unavailable or the call times out.
+
+- **`/oracle:narrator` slash command.** Modelled on the Claude Code `/model` UX. Persists the narrator choice at `~/.claude/plugins/oracle/narrator.conf` (per-machine, not per-project, not per-session). Forms:
+
+  ```
+  /oracle:narrator                     # show current
+  /oracle:narrator show                # show current
+  /oracle:narrator sonnet              # alias for claude-sonnet-4-6 (default)
+  /oracle:narrator opus                # alias for claude-opus-4-7
+  /oracle:narrator haiku               # alias for claude-haiku-4-5-20251001
+  /oracle:narrator <claude-model-id>   # literal model ID
+  /oracle:narrator off                 # disable LLM tier (Tier 1 only)
+  ```
+
+  Marked `disable-model-invocation: true` so Claude cannot trigger it autonomously (per the marketplace command-with-side-effects convention).
+
+- **`SessionEnd` cleanup.** `session-cleanup.sh` prunes session state dirs under `~/.claude/plugins/oracle/sessions/` last touched more than 30 days ago, plus legacy `reads-<session>.tsv` files from the 0.5.0 safe-edit-guard. Best-effort; never blocks session termination.
+
+### Design notes
+
+- **Why the slash command instead of a static `prompt` handler.** The hooks-doc `prompt` handler type accepts a `model` field, but it is statically declared at hook-registration time in `hooks.json` -- it cannot read user runtime state. Using a `command` handler that shells out to `claude --model "$MODEL" -p` gives full dynamic control; the slash command writes the state file, the hook reads it at fire time.
+
+- **Why `UserPromptSubmit` rather than `Stop` for the summary trigger.** `UserPromptSubmit` fires exactly once per user prompt with clean turn semantics. `Stop` fires once per agent stop but can overfire when subagents stop, and the `stop_hook_active` loop-breaker contract adds ceremony. The turn-start anchor lands cleanly on `UserPromptSubmit`; the active-interval close lands cleanly on `Stop`. Each event does the thing it is structurally good at.
+
+- **Hook timeout.** `session-tick-start.sh` is tagged with a 90s timeout in `hooks.json` to accommodate the narrator's 60s ceiling plus deterministic-tier work plus state-file I/O. The Tier 1 path alone is ~5 ms; the cost is paid only when a threshold is crossed (every 30 min or 50 turns).
+
+- **Global install.** Oracle is already a marketplace plugin; to make the session-summary loop fire across every project, add `oracle` to `~/.claude/settings.json` under the plugins block (or enable the marketplace globally). The state directory under `~/.claude/plugins/oracle/sessions/` is per-machine, so it accumulates across projects naturally and is pruned by `session-cleanup.sh`.
+
+### Why this exists (corpus evidence)
+
+The 0.5.0 transcript-corpus audit surfaced **676 long-session interrupts** across 1,186 sessions on this machine: pattern is user gets lost in a long Claude Code session, loses track of what was decided, asks Claude to summarise but the summary is generic, or aborts the session and starts over. The session-summary loop targets this directly: structured checkpoints at 30-minute active intervals so the user (and the agent) never has more than 30 minutes of work to back-track over.
+
 ## [0.5.0] - 2026-05-13
 
 ### Added

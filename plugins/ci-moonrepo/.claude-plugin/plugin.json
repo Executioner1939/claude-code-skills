@@ -1,7 +1,7 @@
 {
   "name": "ci-moonrepo",
-  "description": "moonrepo v2.2 (v2.2.4) expert -- workspace setup, task orchestration, CI/CD pipelines (with a comprehensive moon-ci guide weaving production failure modes into prescriptive patterns), Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, v1-to-v2 migration, and a curated catalogue of real-world gotchas from production monorepos.",
-  "version": "3.5.1",
+  "description": "moonrepo v2.2 (v2.2.4) expert -- workspace setup, task orchestration, CI/CD pipelines (with a comprehensive moon-ci guide weaving production failure modes into prescriptive patterns), Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, v1-to-v2 migration, and a curated catalogue of real-world gotchas from production monorepos. Five reactive hooks (SessionStart workspace-orientation, PreToolUse Edit|Write|MultiEdit moon-config guard, PreToolUse Bash moon-ci guard, UserPromptSubmit topic tagger) bring the skill to the agent at edit-time and command-time, with hard denies on .moon/tasks.yml (singular) and on moon-ci invocations referencing github.event.before. Standalone scripts/lint-moon-config.sh for CI use.",
+  "version": "3.6.0",
   "author": {
     "name": "Executioner1939"
   },

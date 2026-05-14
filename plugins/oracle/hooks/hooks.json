@@ -1,5 +1,5 @@
 {
-  "description": "Hooks for the oracle plugin. SessionStart injects the verification protocol. PreToolUse on Bash intercepts unpinned install commands. PreToolUse on Edit/Write/MultiEdit/NotebookEdit warns when the target path has not been Read recently (transcript-corpus evidence: ~1,100 'File has not been read yet' / 'File has been modified since read' / 'String to replace not found' errors). PostToolUse on Read records the path into a per-session state file so the guard above can consult it. PreToolUse + PostToolUse on the plugin-scoped firecrawl MCP tools enforce budget-aware gating: tiered soft-remind / ask / deny based on monthly + rolling-hour + single-call thresholds, with state persisted at ~/.claude/plugins/oracle/usage.json.",
+  "description": "Hooks for the oracle plugin. SessionStart injects the verification protocol. PreToolUse on Bash intercepts unpinned install commands. PreToolUse on Edit/Write/MultiEdit/NotebookEdit warns when the target path has not been Read recently (transcript-corpus evidence: ~1,100 'File has not been read yet' / 'File has been modified since read' / 'String to replace not found' errors). PostToolUse on Read records the path into a per-session state file so the guard above can consult it. PreToolUse + PostToolUse on the plugin-scoped firecrawl MCP tools enforce budget-aware gating: tiered soft-remind / ask / deny based on monthly + rolling-hour + single-call thresholds, with state persisted at ~/.claude/plugins/oracle/usage.json. UserPromptSubmit + Stop + SessionEnd implement the session-summary checkpoint loop: cumulative agent-active milliseconds accrue on Stop only (user-idle time is structurally excluded); UserPromptSubmit checks whether 30 minutes of active work or 50 turns have elapsed since the last summary and, if so, invokes scripts/session-summary.sh to emit a CodeRabbit-style review (deterministic counts + LLM narrative via the model selected by /oracle:narrator, defaulting to Sonnet 4.6). SessionEnd prunes state dirs older than 30 days.",
   "hooks": {
     "SessionStart": [
       {
@@ -8,6 +8,39 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/inject-protocol.sh",
             "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-tick-start.sh",
+            "timeout": 90
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-tick-end.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-cleanup.sh",
+            "timeout": 10
           }
         ]
       }

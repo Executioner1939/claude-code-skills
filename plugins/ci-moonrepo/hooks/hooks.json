@@ -1,0 +1,49 @@
+{
+  "description": "Hooks for the ci-moonrepo plugin. SessionStart injects a moonrepo-workspace orientation when .moon/ is detected. PreToolUse on Edit|Write|MultiEdit guards moon-config edits: hard-denies the forbidden top-level .moon/tasks.yml, soft-warns when a .moon/tasks/*.yml lacks an 'inheritedBy:' block, and emits a generic skill-pointer context for any other .moon/, moon.yml, .prototools, or rust-toolchain.toml edit. PreToolUse on Bash hard-denies moon ci/run/exec/query invocations that reference \\${{ github.event.before }} (the zero-SHA production trap), and soft-warns moon ci invocations missing explicit --base/--head or MOON_BASE/MOON_HEAD. UserPromptSubmit pattern-matches the prompt for moon-CI topics and injects the skill pointer plus the four key rules. Wired via ${CLAUDE_PLUGIN_ROOT}; all hot paths short-circuit in <5ms when no moon context is present.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/orient.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/moon-edit-guard.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/moon-ci-guard.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/moon-prompt-tagger.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

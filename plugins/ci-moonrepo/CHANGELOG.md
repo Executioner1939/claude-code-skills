@@ -5,6 +5,33 @@ All notable changes to the `ci-moonrepo` plugin are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2026-05-14
+
+### Added
+
+- **Reactive hook layer.** Five hooks across three lifecycle events bring the skill to the agent at the moment of need -- workspace detection, file-edit-time guards, command-time guards, and prompt-time topic tagging. Wired via plugin-scoped `hooks/hooks.json`; fire whenever the plugin is enabled regardless of whether the skill body has been explicitly loaded. Uses the same `${CLAUDE_PLUGIN_ROOT}` conventions and `set -u` + `trap fail_silent ERR` discipline as the oracle hook fleet.
+
+  - `hooks/orient.sh` (SessionStart). Walks up from the session cwd looking for a `.moon/` directory; if found and not located directly at `$HOME` (which holds moon's own tool-state cache, not a workspace), injects a four-line orientation pointing at the skill, the three CI lanes (`ci-pull-request` / `ci-merge-develop` / `ci-merge-production`), the mandatory `inheritedBy:` rule, and the always-explicit `--base/--head` rule. No-op when no moonrepo workspace is present. Walk capped at 8 parent directories.
+
+  - `hooks/moon-edit-guard.sh` (PreToolUse on `Edit|Write|MultiEdit`). Three tiers. **Tier 1 hard deny** (exit 2): writes to `.moon/tasks.yml` or `.moon/tasks.yaml` (singular, top-level) -- this is the implicit-inheritance pattern catalogued as the root cause of the runInCI polarity flip, six-axis merge archaeology, and affected-detection graph drift failure modes. **Tier 2 soft warn** via `hookSpecificOutput.additionalContext`: writes to `.moon/tasks/*.{yml,yaml}` whose proposed content lacks an `inheritedBy:` block (Rule 2 step 0 directive). **Tier 3 skill pointer**: any other moon-relevant edit -- `.moon/**`, `*/moon.yml`, `.prototools`, `rust-toolchain.toml` -- emits a generic context reminder. Parses Edit/Write/MultiEdit tool-input payloads via `jq` (handles Edit's `new_string`, Write's `content`, MultiEdit's `edits[].new_string` concatenation).
+
+  - `hooks/moon-ci-guard.sh` (PreToolUse on `Bash`). Two tiers. **Tier 1 hard deny** (exit 2): any `moon ci|run|exec|query` invocation that references `${{ github.event.before }}` -- the zero-SHA production trap that makes revision-comparison silently degrade to "no diff" -> "no affected" -> CI green on broken code. Documented in the skill's revision-comparison rule; no defensible legitimate use case. **Tier 2 soft warn** via `additionalContext`: `moon ci` invoked without `--base/--head` and without `MOON_BASE/MOON_HEAD` in the same command line. Hot-path short-circuit on `*moon*` substring before any grep.
+
+  - `hooks/moon-prompt-tagger.sh` (UserPromptSubmit). Single regex pass against the submitted prompt; hits on `moon (ci|run|exec|query|migrate)`, `runInCI`, `inheritedBy`, `moon.yml`, `task inheritance`, `github.event.before`, `moonrepo`, `.moon/`, `MOON_BASE`, `MOON_HEAD`. On match, prints the skill pointer plus the four load-bearing rules to stdout (UserPromptSubmit consumes stdout as `additionalContext` per the hooks-guide exit-code semantics). POSIX-portable -- uses `[[:space:]]` not `\b`.
+
+- **`scripts/lint-moon-config.sh`.** Standalone deterministic linter for moonrepo configs, invokable from CI (`./scripts/lint-moon-config.sh <workspace-root>`). Three rules: **R1** no top-level `.moon/tasks.{yml,yaml}`; **R2** every `.moon/tasks/*.{yml,yaml}` declares `inheritedBy:`; **R3** `.moon/workspace.{yml,yaml}` uses canonical camelCase `localReadOnly` (catches `localreadonly`, `local_read_only`, `LocalReadOnly`, `LOCAL_READ_ONLY`). Exit codes: 0 clean, 2 violations (printed to stdout), 1 script error.
+
+- **Plugin manifest now ships a `hooks/` directory.** Auto-discovered via the conventional `plugins/ci-moonrepo/hooks/hooks.json` path. `plugin.json` description updated to mention the hook surface.
+
+### Notes
+
+- The `paths:` frontmatter at `SKILL.md:12-21` (introduced in 3.5.0) covers the cwd-at-root auto-load case. The new hooks cover the cwd-deep-in-subdirectory case that `paths:` cannot reach per the documented cwd-glob caveat (`docs/claude-code/skills.md:89`).
+- Hot-path performance budget: <5ms when no moon context is present. Each hook short-circuits on a single shell `case` against the tool input before any grep or jq is invoked beyond initial parse. Hook `timeout` set to 5s in `hooks.json` (generous; the actual hot path is sub-millisecond).
+- Decision combination follows the documented contract (`docs/claude-code/hooks.md:153`): `additionalContext` from every matching hook is concatenated and passed to Claude; most restrictive `permissionDecision` wins. The Tier 3 generic pointer can co-occur with Tier 2's missing-inheritedBy warning, by design.
+- Hard denies are reserved for unambiguous production traps with no defensible legitimate use case: `.moon/tasks.yml` (singular, top-level) and `${{ github.event.before }}` reaching a moon command. Everything else flows through `additionalContext` so the agent retains autonomy.
+- The PreToolUse JSON output shape follows the canonical `hookSpecificOutput.{hookEventName, additionalContext}` form used by the oracle plugin's `safe-edit-guard.sh`; no `permissionDecision` is set on the soft-warn tiers so user-configured permission rules are not perturbed.
+- Marketplace `metadata.version` bumped 5.28.1 -> 5.29.0 (minor: new feature surface in ci-moonrepo).
+
 ## [3.5.1] - 2026-05-14
 
 ### Added
