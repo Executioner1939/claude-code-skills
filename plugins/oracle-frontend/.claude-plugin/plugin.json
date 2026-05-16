@@ -1,6 +1,6 @@
 {
   "name": "oracle-frontend",
-  "description": "Frontend-engineering bundle for Claude Code: the three official Chakra UI v3 skills (chakra-ui-builder, chakra-ui-migrate, chakra-ui-refactor) repackaged from chakra-ui/chakra-ui@main plus the @chakra-ui/react-mcp server pre-wired. Install once per FE sub-directory (--scope local) and Claude Code auto-loads the skills and the MCP server. Replaces the per-dir 'npx skills add' workflow with a single 'claude plugin install' call. Chakra Pro blocks are opt-in via CHAKRA_PRO_API_KEY env var in the consuming project's .env.",
+  "description": "Install in FE sub-dirs (--scope local). Bundles 3 Chakra UI v3 skills (chakra-ui-builder, chakra-ui-migrate, chakra-ui-refactor) and the @chakra-ui/react-mcp server. Chakra Pro opt-in via CHAKRA_PRO_API_KEY env var.",
   "version": "1.0.0",
   "author": {
     "name": "Executioner1939"

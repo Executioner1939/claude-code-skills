@@ -1,0 +1,22 @@
+{
+  "name": "oracle-rust",
+  "description": "Install in Rust repos. Bundles the rust-utoipa OpenAPI skill (utoipa v5.4: Axum/Actix-web/Rocket) and wires rust-analyzer as the LSP for .rs files. Prereq: rust-analyzer on PATH (`mise use rust-analyzer@latest`).",
+  "version": "1.0.0",
+  "author": {
+    "name": "Executioner1939"
+  },
+  "homepage": "https://github.com/Executioner1939/claude-code-skills",
+  "repository": "https://github.com/Executioner1939/claude-code-skills",
+  "license": "MIT",
+  "keywords": [
+    "rust",
+    "rust-analyzer",
+    "lsp",
+    "language-server",
+    "utoipa",
+    "openapi",
+    "axum",
+    "actix-web",
+    "rocket"
+  ]
+}

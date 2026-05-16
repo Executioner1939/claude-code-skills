@@ -1,7 +1,7 @@
 {
   "name": "oracle-devops",
-  "description": "DevOps sub-plugin of the oracle harness. Bundles Anton Babenko's terraform-skill@v1.8.0 (Terraform / OpenTofu modules, tests, CI, scans, state ops, with version-aware guards diagnosing identity churn, secrets, blast radius, CI drift, and state corruption) plus four cherry-picked Firecrawl workflow skills useful for DevOps work (knowledge-base build, knowledge-ingest, web-content QA, website-design-clone for extracting design systems from running sites). Install per project root or per DevOps repo to get the terraform skill + the four research-into-implementation workflows in one shot.",
-  "version": "1.0.0",
+  "description": "Install in DevOps repos. Bundles terraform-skill (Terraform/OpenTofu modules, tests, CI, scans, state ops), moonrepo v2.2 (with reactive hooks: tasks.yml guard, moon-ci safety, workspace orient), and four Firecrawl workflow skills (knowledge-base, knowledge-ingest, qa, website-design-clone).",
+  "version": "1.1.0",
   "author": {
     "name": "Executioner1939"
   },
