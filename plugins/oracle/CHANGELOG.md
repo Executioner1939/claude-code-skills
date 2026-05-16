@@ -5,6 +5,31 @@ All notable changes to the `oracle` plugin will be documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-05-16
+
+### Added
+
+- **Firecrawl skills baked in.** Fourteen skills repackaged verbatim from
+  `firecrawl/cli@main` (CLI-side: firecrawl-cli + firecrawl-agent,
+  firecrawl-search, firecrawl-scrape, firecrawl-map, firecrawl-crawl,
+  firecrawl-interact, firecrawl-parse, firecrawl-download) and
+  `firecrawl/skills@main` (build-side: firecrawl-build + four
+  firecrawl-build-* skills for integrating Firecrawl into product code).
+  Installing oracle now gives Claude Code full Firecrawl coverage in a
+  single `claude plugin install` call — no separate `npx skills add` step.
+- Note: the heavier outcome-focused workflow skills
+  (`firecrawl-deep-research`, `firecrawl-seo-audit`,
+  `firecrawl-competitive-intel`, etc.) live at the upstream
+  `firecrawl/firecrawl-workflows` marketplace and are opt-in via
+  `claude plugin marketplace add firecrawl/firecrawl-workflows` +
+  `claude plugin install firecrawl-workflows@firecrawl-workflows`.
+
+### Changed
+
+- `firecrawl-mcp` version pinned in `.mcp.json` bumped from `3.2.1` to
+  `3.16.0` — picks up the v2 API surface (firecrawl_agent, browser sessions,
+  firecrawl_interact, firecrawl_parse) that the new skills assume.
+
 ## [0.6.0] - 2026-05-14
 
 ### Added
