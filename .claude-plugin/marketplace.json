@@ -6,95 +6,10 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, meta-tooling, and truth-verification.",
-    "version": "5.29.0",
+    "version": "5.31.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
-    {
-      "name": "ci-moonrepo",
-      "source": "./plugins/ci-moonrepo",
-      "description": "moonrepo v2.2 (v2.2.4) expert -- workspace setup, task orchestration, CI/CD pipelines (with a comprehensive moon-ci guide weaving production failure modes into prescriptive patterns), Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, v1-to-v2 migration, and a curated catalogue of real-world gotchas from production monorepos. Five reactive hooks (SessionStart workspace-orientation, PreToolUse Edit|Write|MultiEdit moon-config guard, PreToolUse Bash moon-ci guard, UserPromptSubmit topic tagger) bring the skill to the agent at edit-time and command-time, with hard denies on .moon/tasks.yml (singular) and on moon-ci invocations referencing github.event.before. Standalone scripts/lint-moon-config.sh for CI use.",
-      "version": "3.6.0",
-      "category": "development",
-      "keywords": [
-        "moonrepo",
-        "moon",
-        "monorepo",
-        "build-system",
-        "task-runner",
-        "ci-cd"
-      ],
-      "author": {
-        "name": "Executioner1939"
-      },
-      "homepage": "https://github.com/Executioner1939/claude-code-skills",
-      "repository": "https://github.com/Executioner1939/claude-code-skills",
-      "license": "MIT"
-    },
-    {
-      "name": "rust-utoipa",
-      "source": "./plugins/rust-utoipa",
-      "description": "Rust OpenAPI documentation with utoipa v5.4. Complete macro reference, path attributes, security schemes, enum handling, validation, and integrations for Axum, Actix-web, Rocket.",
-      "version": "2.0.2",
-      "category": "development",
-      "keywords": [
-        "rust",
-        "openapi",
-        "swagger",
-        "utoipa",
-        "api-documentation",
-        "axum"
-      ],
-      "author": {
-        "name": "Executioner1939"
-      },
-      "homepage": "https://github.com/Executioner1939/claude-code-skills",
-      "repository": "https://github.com/Executioner1939/claude-code-skills",
-      "license": "MIT"
-    },
-    {
-      "name": "docs-eventcatalog",
-      "source": "./plugins/docs-eventcatalog",
-      "description": "Document event-driven architectures with EventCatalog. Covers all 13 resource types (including Data Products), the full SDK (snapshots, DSL builders, custom docs), 15+ generator integrations, MCP server, visualizations, and schema support.",
-      "version": "2.2.0",
-      "category": "development",
-      "keywords": [
-        "eventcatalog",
-        "event-driven-architecture",
-        "eda",
-        "asyncapi",
-        "openapi"
-      ],
-      "author": {
-        "name": "Executioner1939"
-      },
-      "homepage": "https://github.com/Executioner1939/claude-code-skills",
-      "repository": "https://github.com/Executioner1939/claude-code-skills",
-      "license": "MIT"
-    },
-    {
-      "name": "rust-fmodel",
-      "source": "./plugins/rust-fmodel",
-      "description": "Functional domain modeling in Rust with fmodel-rust v0.9 (MSRV 1.75+, native async-fn-in-trait). Decider, View, Saga domain types, algebraic composition via combine/merge/map, and application-layer wiring (aggregates, MaterializedView, SagaManager).",
-      "version": "1.0.3",
-      "category": "development",
-      "keywords": [
-        "rust",
-        "fmodel",
-        "event-sourcing",
-        "cqrs",
-        "domain-modeling",
-        "functional",
-        "decider",
-        "saga"
-      ],
-      "author": {
-        "name": "Executioner1939"
-      },
-      "homepage": "https://github.com/Executioner1939/claude-code-skills",
-      "repository": "https://github.com/Executioner1939/claude-code-skills",
-      "license": "MIT"
-    },
     {
       "name": "analysis-codebase-archaeology",
       "source": "./plugins/analysis-codebase-archaeology",
@@ -114,54 +29,6 @@
       "homepage": "https://github.com/Executioner1939/claude-code-skills",
       "repository": "https://github.com/Executioner1939/claude-code-skills",
       "license": "MIT"
-    },
-    {
-      "name": "design-principles",
-      "source": "./plugins/design-principles",
-      "description": "Curated reference library of canonical design principles (Dieter Rams, Joshua Porter, Bruce Tognazzini, inclusive design, Postel's law, principle of least surprise) for UI, product, and crosscutting design judgment.",
-      "version": "1.0.1",
-      "category": "design",
-      "keywords": [
-        "design",
-        "ui",
-        "ux",
-        "product-design",
-        "design-principles",
-        "dieter-rams",
-        "design-review"
-      ],
-      "author": {
-        "name": "Executioner1939"
-      },
-      "homepage": "https://github.com/Executioner1939/claude-code-skills",
-      "repository": "https://github.com/Executioner1939/claude-code-skills",
-      "license": "MIT"
-    },
-    {
-      "name": "terraform-audit",
-      "source": "./plugins/terraform-audit",
-      "description": "Brutal, structured audit of a Terraform or OpenTofu module repository. Detects cross-module composition smells (overlap, duplication, thin wrappers, scope-discriminator primitives, copy-pasted module blocks, tier misplacement), cross-project / cross-account linking flaws, missing validations, dead code, version-pinning drift, and provider-specific landing-zone gaps (GCP, AWS, Azure, OCI). Produces an 8-section critique with per-module grades and a concrete defect list, with optional baseline diff. Workflow at /terraform-audit:audit [path]. Bundles Anton Babenko's terraform-skill v1.6.0 (Apache-2.0) for canonical Terraform best-practices context.",
-      "version": "1.1.0",
-      "category": "development",
-      "keywords": [
-        "terraform",
-        "opentofu",
-        "audit",
-        "iac",
-        "infrastructure-as-code",
-        "code-review",
-        "module-review",
-        "landing-zone",
-        "gcp",
-        "aws",
-        "azure"
-      ],
-      "author": {
-        "name": "Executioner1939"
-      },
-      "homepage": "https://github.com/Executioner1939/claude-code-skills",
-      "repository": "https://github.com/Executioner1939/claude-code-skills",
-      "license": "MIT (with bundled Apache-2.0 terraform-skill by Anton Babenko at skills/terraform-skill/)"
     },
     {
       "name": "anvil",
@@ -194,35 +61,6 @@
       "homepage": "https://github.com/Executioner1939/claude-code-skills",
       "repository": "https://github.com/Executioner1939/claude-code-skills",
       "license": "MIT (with Apache-2.0 portions adapted from TheBushidoCollective/han for the 7 atomic-design methodology references)"
-    },
-    {
-      "name": "rust-monorepo-orchestrator",
-      "source": "./plugins/rust-monorepo-orchestrator",
-      "description": "Methodology-first multi-agent refactoring orchestrator for monorepos. Context-aware: scripts/discover-workspace.sh walks up from cwd to find the workspace and detects services + aggregates automatically; commands take zero path arguments by default. Service-level by default: /audit-domain <service> drills ALL aggregates in parallel; /plan-refactor <service> produces ONE unified PLAN.md with cross-aggregate depends_on and de-duplicated shared-infrastructure tickets; /run-wave-ralph <service> drives a single inbox. New /migrate command runs /init -> /audit -> /plan -> decisions gate -> /run end-to-end with reasoning gates at each phase. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top-to-bottom (HTTP -> events -> views -> inter-service events), document violations, author ast-grep rules, then run isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, dead-letter on failure. Two wave runners: /run-wave (subagent-driven) and /run-wave-ralph (bash Ralph loop, no nested-Agent dispatch, disk-resumable, live monitor). Ralph mode side-loads five per-session hooks via --settings: SessionStart workspace-tree injection (no exploration turns), PreToolUse allowed_paths enforcement, Stop auto-commit (conventional-commits), shared CARGO_TARGET_DIR (5-10x Rust compile), and a verifier:deterministic bash verifier route. Nine slash commands, nine subagents, three methodology skills.",
-      "version": "0.7.0",
-      "category": "development",
-      "keywords": [
-        "monorepo",
-        "refactoring",
-        "orchestration",
-        "multi-agent",
-        "ast-grep",
-        "opus",
-        "parallel-workers",
-        "claim-lock",
-        "worktree",
-        "inbox",
-        "handoff",
-        "ddd",
-        "hexagonal",
-        "rust"
-      ],
-      "author": {
-        "name": "Executioner1939"
-      },
-      "homepage": "https://github.com/Executioner1939/claude-code-skills",
-      "repository": "https://github.com/Executioner1939/claude-code-skills",
-      "license": "MIT"
     },
     {
       "name": "carbon-solana",
@@ -258,6 +96,110 @@
       "license": "MIT"
     },
     {
+      "name": "ci-moonrepo",
+      "source": "./plugins/ci-moonrepo",
+      "description": "moonrepo v2.2 (v2.2.4) expert -- workspace setup, task orchestration, CI/CD pipelines (with a comprehensive moon-ci guide weaving production failure modes into prescriptive patterns), Docker integration, remote caching, code generation, WASM plugin toolchains, MQL queries, v1-to-v2 migration, and a curated catalogue of real-world gotchas from production monorepos. Five reactive hooks (SessionStart workspace-orientation, PreToolUse Edit|Write|MultiEdit moon-config guard, PreToolUse Bash moon-ci guard, UserPromptSubmit topic tagger) bring the skill to the agent at edit-time and command-time, with hard denies on .moon/tasks.yml (singular) and on moon-ci invocations referencing github.event.before. Standalone scripts/lint-moon-config.sh for CI use.",
+      "version": "3.6.0",
+      "category": "development",
+      "keywords": [
+        "moonrepo",
+        "moon",
+        "monorepo",
+        "build-system",
+        "task-runner",
+        "ci-cd"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "design-principles",
+      "source": "./plugins/design-principles",
+      "description": "Curated reference library of canonical design principles (Dieter Rams, Joshua Porter, Bruce Tognazzini, inclusive design, Postel's law, principle of least surprise) for UI, product, and crosscutting design judgment.",
+      "version": "1.0.1",
+      "category": "design",
+      "keywords": [
+        "design",
+        "ui",
+        "ux",
+        "product-design",
+        "design-principles",
+        "dieter-rams",
+        "design-review"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "docs-eventcatalog",
+      "source": "./plugins/docs-eventcatalog",
+      "description": "Document event-driven architectures with EventCatalog. Covers all 13 resource types (including Data Products), the full SDK (snapshots, DSL builders, custom docs), 15+ generator integrations, MCP server, visualizations, and schema support.",
+      "version": "2.2.0",
+      "category": "development",
+      "keywords": [
+        "eventcatalog",
+        "event-driven-architecture",
+        "eda",
+        "asyncapi",
+        "openapi"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "harness-sdk",
+      "source": "./plugins/harness-sdk",
+      "description": "Trait-composed authoring SDK for Claude Code plugin artefacts (skills, subagents, slash commands). Source files are `.harness` recipes parsed by a small DSL with a tree-sitter grammar for editor highlighting. The `:` trait stack holds role + domain composition; everything else lives in typed slots -- `rules = [Rules.NoEmojis, Rules.FileLine]`, `protocol = [Protocols.InvestigateBeforeAnswering, Protocols.Citations { file_line: true, web_url: true }]`, `output = Outputs.MarkdownBlock`, `handoff = Handoffs.Standard`. Slot entries are scoped trait references (`Rules.NoEmojis`) optionally with inline key-value blocks for parametric configuration. Nine-kind taxonomy (role / methodology / policy / rigor / domain / output / citation / handoff / style) drives the canonical body assembly. Closed enums via `type`, typed required-and-defaulted fields via `var`, trait inheritance via `extends`. Manifests own frontmatter -- `manifest ReadOnly applies_to [agent, skill, command] { ... }` -- with per-kind translation (`tools` -> `allowed-tools` on skills; `disallowedTools` on agents only). Tool surfaces compose by set algebra. `@`-references resolve into three namespaces (`@harness/`, `@plugin/`, `@./`) plus a virtual `@values.<dotted>` overlay tree (Helm-style: marketplace defaults -> plugin defaults -> machine overrides -> project overrides -> ad-hoc `--values`). The renderer emits the same `.md` Claude Code reads at session start, with a lockfile fingerprint for CI drift checks. Commands: `render`, `lint`, `fmt`, `explain`. Migrated agents: oracle/repo-researcher, oracle/spec-reader, rust-monorepo-orchestrator/architecture-axis-analyzer.",
+      "version": "0.3.0",
+      "category": "development",
+      "keywords": [
+        "harness",
+        "harness-sdk",
+        "prompt-as-code",
+        "dsl",
+        "tree-sitter",
+        "trait-composition",
+        "typed-slots",
+        "parametric-traits",
+        "scoped-refs",
+        "values-overlay",
+        "helm-style",
+        "jinja",
+        "claude-code-plugin",
+        "skill-authoring",
+        "subagent-authoring",
+        "slash-command-authoring",
+        "renderer",
+        "linter",
+        "formatter",
+        "drift-check",
+        "lockfile",
+        "fragment-library",
+        "manifest",
+        "tool-algebra",
+        "namespace",
+        "opus-4-7"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
       "name": "harness-tuner",
       "source": "./plugins/harness-tuner",
       "description": "Meta-plugin: optimize the Claude Code harness for a project. Reads session transcripts to digest recurring user friction, audits CLAUDE.md / skills / rules / commands / hooks / monitors across the hierarchy, and recommends additions / edits / removals -- never touching the root CLAUDE.md. Hierarchy-aware (parent-but-not-root); uses @ imports for cwd-relative content; for monorepos, can author a per-service summary CLAUDE.md that autoloads when working in that subtree. Four-phase pipeline: /digest -> /audit -> /plan -> /tune. Hard rules: never edits root CLAUDE.md, never edits ~/.claude/, refuses CLAUDE.md changes that exceed 200 lines or path-scoped rule changes that exceed 150 lines, validates @ imports resolve, appends one line to .claude/CHANGELOG.md per applied change.",
@@ -273,31 +215,6 @@
         "monorepo",
         "hierarchy",
         "claude-code"
-      ],
-      "author": {
-        "name": "Executioner1939"
-      },
-      "homepage": "https://github.com/Executioner1939/claude-code-skills",
-      "repository": "https://github.com/Executioner1939/claude-code-skills",
-      "license": "MIT"
-    },
-    {
-      "name": "meta-skill-improver",
-      "source": "./plugins/meta-skill-improver",
-      "description": "Evidence-grounded skill evolution. Mines transcripts and git history across one or many repos for recurring user friction on a topic, clusters the friction into anonymized failure-mode reproducers, synthesizes a four-class prompt matrix per failure mode, runs a sandbox harness with and without the candidate skill loaded, and produces a mathematically-graded scorecard with a promote-or-block verdict. Treats the skill-under-test as a non-deterministic SUT and uses property-based-testing-with-N-runs methodology to separate signal from noise. Builds on the /codify pipeline (transcript-analyzer, skill-author, skill-auditor) and adds the missing executor-and-grader stages.",
-      "version": "0.1.3",
-      "category": "development",
-      "keywords": [
-        "meta",
-        "skill-evolution",
-        "skill-quality",
-        "skill-eval",
-        "evals",
-        "eval-harness",
-        "regression-testing",
-        "property-based-testing",
-        "transcript-mining",
-        "judge-calibration"
       ],
       "author": {
         "name": "Executioner1939"
@@ -328,6 +245,31 @@
         "flux",
         "helm",
         "kustomize"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "meta-skill-improver",
+      "source": "./plugins/meta-skill-improver",
+      "description": "Evidence-grounded skill evolution. Mines transcripts and git history across one or many repos for recurring user friction on a topic, clusters the friction into anonymized failure-mode reproducers, synthesizes a four-class prompt matrix per failure mode, runs a sandbox harness with and without the candidate skill loaded, and produces a mathematically-graded scorecard with a promote-or-block verdict. Treats the skill-under-test as a non-deterministic SUT and uses property-based-testing-with-N-runs methodology to separate signal from noise. Builds on the /codify pipeline (transcript-analyzer, skill-author, skill-auditor) and adds the missing executor-and-grader stages.",
+      "version": "0.1.3",
+      "category": "development",
+      "keywords": [
+        "meta",
+        "skill-evolution",
+        "skill-quality",
+        "skill-eval",
+        "evals",
+        "eval-harness",
+        "regression-testing",
+        "property-based-testing",
+        "transcript-mining",
+        "judge-calibration"
       ],
       "author": {
         "name": "Executioner1939"
@@ -384,6 +326,126 @@
       "homepage": "https://github.com/Executioner1939/claude-code-skills",
       "repository": "https://github.com/Executioner1939/claude-code-skills",
       "license": "MIT"
+    },
+    {
+      "name": "oracle-frontend",
+      "source": "./plugins/oracle-frontend",
+      "description": "Frontend-engineering bundle for Claude Code: the three official Chakra UI v3 skills (chakra-ui-builder, chakra-ui-migrate, chakra-ui-refactor) repackaged from chakra-ui/chakra-ui@main plus the @chakra-ui/react-mcp server pre-wired. Install once per FE sub-directory (--scope local).",
+      "version": "1.0.0",
+      "category": "frontend",
+      "keywords": [
+        "chakra-ui",
+        "chakra-ui-v3",
+        "frontend",
+        "design-system",
+        "react",
+        "mcp"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "rust-fmodel",
+      "source": "./plugins/rust-fmodel",
+      "description": "Functional domain modeling in Rust with fmodel-rust v0.9 (MSRV 1.75+, native async-fn-in-trait). Decider, View, Saga domain types, algebraic composition via combine/merge/map, and application-layer wiring (aggregates, MaterializedView, SagaManager).",
+      "version": "1.0.3",
+      "category": "development",
+      "keywords": [
+        "rust",
+        "fmodel",
+        "event-sourcing",
+        "cqrs",
+        "domain-modeling",
+        "functional",
+        "decider",
+        "saga"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "rust-monorepo-orchestrator",
+      "source": "./plugins/rust-monorepo-orchestrator",
+      "description": "Methodology-first multi-agent refactoring orchestrator for monorepos. Context-aware: scripts/discover-workspace.sh walks up from cwd to find the workspace and detects services + aggregates automatically; commands take zero path arguments by default. Service-level by default: /audit-domain <service> drills ALL aggregates in parallel; /plan-refactor <service> produces ONE unified PLAN.md with cross-aggregate depends_on and de-duplicated shared-infrastructure tickets; /run-wave-ralph <service> drives a single inbox. New /migrate command runs /init -> /audit -> /plan -> decisions gate -> /run end-to-end with reasoning gates at each phase. Spawns parallel waves of Opus-orchestrated, Sonnet-implemented subagents that drill a domain top-to-bottom (HTTP -> events -> views -> inter-service events), document violations, author ast-grep rules, then run isolated-worktree workers with claim-lock concurrency, automerge on verifier-pass, dead-letter on failure. Two wave runners: /run-wave (subagent-driven) and /run-wave-ralph (bash Ralph loop, no nested-Agent dispatch, disk-resumable, live monitor). Ralph mode side-loads five per-session hooks via --settings: SessionStart workspace-tree injection (no exploration turns), PreToolUse allowed_paths enforcement, Stop auto-commit (conventional-commits), shared CARGO_TARGET_DIR (5-10x Rust compile), and a verifier:deterministic bash verifier route. Nine slash commands, nine subagents, three methodology skills.",
+      "version": "0.7.0",
+      "category": "development",
+      "keywords": [
+        "monorepo",
+        "refactoring",
+        "orchestration",
+        "multi-agent",
+        "ast-grep",
+        "opus",
+        "parallel-workers",
+        "claim-lock",
+        "worktree",
+        "inbox",
+        "handoff",
+        "ddd",
+        "hexagonal",
+        "rust"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "rust-utoipa",
+      "source": "./plugins/rust-utoipa",
+      "description": "Rust OpenAPI documentation with utoipa v5.4. Complete macro reference, path attributes, security schemes, enum handling, validation, and integrations for Axum, Actix-web, Rocket.",
+      "version": "2.0.2",
+      "category": "development",
+      "keywords": [
+        "rust",
+        "openapi",
+        "swagger",
+        "utoipa",
+        "api-documentation",
+        "axum"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT"
+    },
+    {
+      "name": "terraform-audit",
+      "source": "./plugins/terraform-audit",
+      "description": "Brutal, structured audit of a Terraform or OpenTofu module repository. Detects cross-module composition smells (overlap, duplication, thin wrappers, scope-discriminator primitives, copy-pasted module blocks, tier misplacement), cross-project / cross-account linking flaws, missing validations, dead code, version-pinning drift, and provider-specific landing-zone gaps (GCP, AWS, Azure, OCI). Produces an 8-section critique with per-module grades and a concrete defect list, with optional baseline diff. Workflow at /terraform-audit:audit [path]. Bundles Anton Babenko's terraform-skill v1.6.0 (Apache-2.0) for canonical Terraform best-practices context.",
+      "version": "1.1.0",
+      "category": "development",
+      "keywords": [
+        "terraform",
+        "opentofu",
+        "audit",
+        "iac",
+        "infrastructure-as-code",
+        "code-review",
+        "module-review",
+        "landing-zone",
+        "gcp",
+        "aws",
+        "azure"
+      ],
+      "author": {
+        "name": "Executioner1939"
+      },
+      "homepage": "https://github.com/Executioner1939/claude-code-skills",
+      "repository": "https://github.com/Executioner1939/claude-code-skills",
+      "license": "MIT (with bundled Apache-2.0 terraform-skill by Anton Babenko at skills/terraform-skill/)"
     }
   ]
 }
