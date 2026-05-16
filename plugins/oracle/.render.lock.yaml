@@ -1,0 +1,61 @@
+input_fingerprint: 91e8b6b8a9c0a011ef51bf404e58c9c6fed61173bb2c93e120c7c2e9576217dd
+out_root: /Users/skunkworks/Documents/Work/Personal/claude-code-skills/plugins/oracle
+rendered_for: /private/tmp/oracle-test-all-three
+rendered_with: /Users/skunkworks/Documents/Work/Personal/claude-code-skills/plugins/oracle
+sources:
+  defaults: /Users/skunkworks/Documents/Work/Personal/claude-code-skills/plugins/oracle/values.yaml
+  extra_values: []
+  global_overrides: null
+  project_overrides: /private/tmp/oracle-test-all-three/.oracle/values.yaml
+templates:
+  skills/verify/SKILL.md: b26ce663e8ed667defdad896146e01aed4a4c25d3562a74484febb22fd0a978d
+values:
+  agents:
+    canon_reader:
+      effort: high
+      enabled: true
+    cost_rethinker:
+      effort: xhigh
+      enabled: true
+    forum_anthropologist:
+      effort: high
+      enabled: true
+    github_archivist:
+      effort: high
+      enabled: true
+    issue_investigator:
+      effort: high
+      enabled: true
+  budget:
+    monthly_credits: 20000
+    rolling_hour_ask_credits: 5000
+    single_call_ask_pct: 15
+    thresholds:
+      ask_permission_at_pct: 95
+      hard_deny_at_pct: 100
+      soft_remind_at_pct: 80
+  firecrawl:
+    api_key_env_var: FIRECRAWL_API_KEY
+  mcp_fleet:
+    enabled: false
+    services: []
+  project:
+    ci_runner: github-actions
+    doc_registry:
+    - docs.rs
+    - crates.io
+    - lib.rs
+    - this-week-in-rust.org
+    language: rust
+  research:
+    default_intensity: standard
+    max_parallel_subagents: 5
+    prefer_primary_sources: true
+  style:
+    no_emojis: true
+    prose_over_bullets: false
+  verification:
+    citation_format: url-and-line
+    forbid_speculation: true
+    require_citations: true
+    strictness: loose

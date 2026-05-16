@@ -1,0 +1,24 @@
+[project]
+name = "mcp-fleet"
+version = "0.1.0"
+description = "Multi-workspace MCP onboarding wizard. Textual TUI, per-workspace Chrome-profile isolation, auto wire into Claude Code."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "textual>=0.83.0",
+    "httpx>=0.27.0",
+    "playwright>=1.47.0",
+]
+
+[project.scripts]
+mcp-fleet = "mcp_fleet.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mcp_fleet"]
+
+[tool.uv]
+managed = true

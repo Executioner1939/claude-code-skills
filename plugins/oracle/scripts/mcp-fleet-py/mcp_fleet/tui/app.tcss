@@ -1,0 +1,179 @@
+/* Claude-Code-inspired aesthetic: minimal chrome, dense rows, subtle
+   borders, keyboard-driven. No big primary buttons, no boxed panels with
+   colored title labels.
+*/
+
+* {
+  scrollbar-size-vertical: 1;
+}
+
+Screen {
+  background: $background;
+  layout: vertical;
+}
+
+/* ----- Title strip ------------------------------------------------- */
+#title-bar {
+  height: 1;
+  padding: 0 1;
+  color: $foreground 80%;
+  background: $background;
+  text-style: bold;
+}
+
+#title-bar > .ttl-name { color: $accent; }
+#title-bar > .ttl-sub { color: $foreground 50%; }
+#title-bar > .ttl-path { color: $foreground 40%; }
+
+/* ----- Section headings (used between panes) ----------------------- */
+.section {
+  height: 1;
+  padding: 1 1 0 1;
+  color: $accent;
+  text-style: bold;
+}
+
+.section-sub {
+  height: 1;
+  padding: 0 1 0 1;
+  color: $foreground 40%;
+}
+
+/* ----- Bindings table --------------------------------------------- */
+#bindings {
+  height: auto;
+  min-height: 3;
+  max-height: 12;
+  margin: 0 1;
+  background: $background;
+  border: none;
+}
+
+DataTable > .datatable--header {
+  background: $background;
+  color: $foreground 60%;
+  text-style: dim;
+}
+
+DataTable > .datatable--cursor {
+  background: $background;
+}
+
+#empty-hint {
+  height: 1;
+  padding: 0 2;
+  color: $foreground 40%;
+  text-style: italic;
+}
+
+/* ----- Log pane --------------------------------------------------- */
+#log {
+  height: 1fr;
+  margin: 0 1 0 1;
+  background: $background;
+  border: none;
+  padding: 0 1 0 1;
+}
+
+/* ----- Footer ----------------------------------------------------- */
+Footer {
+  background: $background;
+  color: $foreground 50%;
+  text-style: dim;
+  height: 1;
+}
+
+Footer > .footer-key--key {
+  color: $accent;
+  text-style: bold;
+  background: $background;
+}
+
+Footer > .footer-key--description {
+  color: $foreground 60%;
+  background: $background;
+}
+
+/* ----- Modals ----------------------------------------------------- */
+ModalScreen {
+  align: center middle;
+  background: $background 50%;
+}
+
+#modal {
+  width: 64;
+  max-width: 90%;
+  height: auto;
+  background: $background;
+  border: tall $accent 60%;
+  padding: 1 2;
+}
+
+#modal-title {
+  height: 1;
+  color: $accent;
+  text-style: bold;
+  padding: 0 0 1 0;
+}
+
+#modal-prompt {
+  height: auto;
+  color: $foreground 80%;
+  padding: 0 0 1 0;
+}
+
+#hint {
+  height: 1;
+  color: $foreground 40%;
+  padding: 0 0 1 0;
+}
+
+#modal-actions {
+  layout: horizontal;
+  height: 3;
+  padding: 1 0 0 0;
+  align-horizontal: right;
+}
+
+#modal-actions > Button {
+  margin: 0 0 0 1;
+  border: none;
+  height: 1;
+  min-width: 10;
+  background: $background;
+  color: $foreground 70%;
+}
+
+#modal-actions > Button.-primary,
+#modal-actions > Button:focus {
+  background: $background;
+  color: $accent;
+  text-style: bold;
+}
+
+Input {
+  border: tall $foreground 20%;
+  background: $background;
+  color: $foreground;
+  padding: 0 1;
+  height: 3;
+}
+
+Input:focus {
+  border: tall $accent 80%;
+}
+
+Select {
+  border: tall $foreground 20%;
+  background: $background;
+  height: 3;
+}
+
+Select:focus {
+  border: tall $accent 80%;
+}
+
+.muted { color: $foreground 40%; }
+.ok    { color: $success 80%; }
+.warn  { color: $warning 80%; }
+.fail  { color: $error 80%; }

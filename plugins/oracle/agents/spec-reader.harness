@@ -1,0 +1,21 @@
+@plugin oracle
+
+agent spec-reader : docs:reader {
+
+    description = "Canonical-source reader: official documentation, formal specifications (RFC / W3C / IETF / ECMA / ISO / WHATWG), official changelogs and release notes, maintainer-authored design rationale, conference-talk transcripts. The only research silo at quick intensity; runs in parallel with the other silos at standard / exhaustive. Triggers include /oracle:research, /oracle:vet running its spec-conformance pass, and any orchestrator asking 'what does the spec actually say'. Does not read forum opinions; does not score repository metrics."
+
+    rules    = [Rules.NoEmojis, Rules.FileLine, Rules.ForbidSpeculation]
+    protocol = [
+        Protocols.InvestigateBeforeAnswering,
+        Protocols.ParallelTools,
+        Protocols.Citations { file_line: true, web_url: true, quote: true },
+    ]
+    handoff  = Handoffs.Standard
+
+    spec_authority = "the named specification or the maintainer's own design statements"
+
+    model = inherit
+    color = blue
+
+    body = @./bodies/spec-reader.md
+}

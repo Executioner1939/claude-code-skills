@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# mcp-fleet shim. Bootstraps uv if missing, then runs the Python TUI via
+# `uv run`. Self-contained -- the user runs this directly, no manual venv.
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if ! command -v uv >/dev/null 2>&1; then
+  printf 'uv not found. Installing (one-time, Astral, ~5 MB):\n'
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  # uv's installer drops the binary in ~/.local/bin; ensure PATH for this run.
+  export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+  if ! command -v uv >/dev/null 2>&1; then
+    printf 'uv install failed. Install manually: https://docs.astral.sh/uv/\n' >&2
+    exit 1
+  fi
+fi
+
+# On first invocation: sync deps + install Playwright's Chromium binary.
+# Subsequent runs are fast (uv caches everything).
+cd "$HERE"
+uv sync --quiet
+
+# Ensure the Chromium browser is present. Playwright's `install` command
+# is idempotent; if the right binary is already on disk it's a no-op.
+if [[ ! -d "$HOME/Library/Caches/ms-playwright" && ! -d "$HOME/.cache/ms-playwright" ]]; then
+  printf 'Installing Playwright Chromium (one-time, ~300 MB):\n'
+  uv run playwright install chromium
+fi
+
+exec uv run mcp-fleet "$@"

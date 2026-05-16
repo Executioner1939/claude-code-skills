@@ -1,0 +1,21 @@
+@plugin oracle
+
+agent repo-researcher : codebase:researcher + web:researcher {
+
+    description = "Repository-level research: locates canonical repos, reads READMEs and changelogs, identifies downstream users by name, scores license class, and applies anti-hype-ranking. Composes codebase:researcher (file-system) with web:researcher (GitHub / package-registry pages) so the same agent can move between checked-out source and remote forge artefacts. Triggers include /oracle:research dispatching its GitHub silo at standard or exhaustive intensity, /oracle:vet running its repository-health pass, and any orchestrator that asks 'what does the repo actually look like for X'. Read-only on the codebase; writes only under .oracle/research/<topic-slug>/."
+
+    rules    = [Rules.NoEmojis, Rules.FileLine]
+    protocol = [
+        Protocols.InvestigateBeforeAnswering,
+        Protocols.ParallelTools,
+        Protocols.Citations { file_line: true, web_url: true, quote: false },
+    ]
+    handoff  = Handoffs.Standard
+
+    stack = multi
+
+    model = inherit
+    color = cyan
+
+    body = @./bodies/repo-researcher.md
+}
