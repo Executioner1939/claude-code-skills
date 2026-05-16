@@ -5,6 +5,26 @@ All notable changes to the `oracle` plugin will be documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-05-16
+
+### Added
+
+- Four cherry-picked Firecrawl **research workflow** skills repackaged from
+  `firecrawl/firecrawl-workflows@main`:
+  - `firecrawl-deep-research` — multi-source autonomous research with
+    citations.
+  - `firecrawl-research-papers` — academic paper discovery and synthesis.
+  - `firecrawl-market-research` — market intelligence: sizing,
+    competitive landscape, trends.
+  - `firecrawl-competitive-intel` — focused competitor analysis from
+    public web data.
+- These complement the 14 foundational firecrawl skills from 0.7.0 and the
+  twelve original oracle skills. Total: 30 auto-triggering knowledge skills.
+- The DevOps-flavoured workflow skills (`firecrawl-knowledge-base`,
+  `firecrawl-knowledge-ingest`, `firecrawl-qa`,
+  `firecrawl-website-design-clone`) live in the sibling `oracle-devops`
+  plugin, alongside Anton Babenko's `terraform-skill`.
+
 ## [0.7.0] - 2026-05-16
 
 ### Added

@@ -1,0 +1,24 @@
+{
+  "name": "oracle-devops",
+  "description": "DevOps sub-plugin of the oracle harness. Bundles Anton Babenko's terraform-skill@v1.8.0 (Terraform / OpenTofu modules, tests, CI, scans, state ops, with version-aware guards diagnosing identity churn, secrets, blast radius, CI drift, and state corruption) plus four cherry-picked Firecrawl workflow skills useful for DevOps work (knowledge-base build, knowledge-ingest, web-content QA, website-design-clone for extracting design systems from running sites). Install per project root or per DevOps repo to get the terraform skill + the four research-into-implementation workflows in one shot.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Executioner1939"
+  },
+  "homepage": "https://github.com/Executioner1939/claude-code-skills",
+  "repository": "https://github.com/Executioner1939/claude-code-skills",
+  "license": "MIT",
+  "keywords": [
+    "devops",
+    "terraform",
+    "opentofu",
+    "iac",
+    "infrastructure-as-code",
+    "state-management",
+    "ci-cd",
+    "security-scanning",
+    "knowledge-base",
+    "qa",
+    "design-system-extraction"
+  ]
+}
