@@ -5,6 +5,44 @@ All notable changes to the `oracle-devops` plugin are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-05-17
+
+### Added
+- **`audit/mining/` scaffold** under the ci-moonrepo skill for the
+  adjacent-fix-coverage assertion gap surfaced by the 1.2.0 audit.
+  Two miners feed a shared co-occurrence schema that an upgraded
+  grader can score against:
+  - `mine-transcripts.py` -- scans `~/.claude/projects/<encoded-cwd>/
+    <session-id>.jsonl` for moon-touching sessions, classifies each
+    via shared keyword regex, emits (primary_path, adjacent_path,
+    count, evidence) triples per failure mode. Pre-filters to
+    moon-relevant paths only; deduplicates by last-3-segment key so
+    the same `moon.yml` under different worktrees aggregates.
+  - `mine-ci-chains.py` -- runs `git log` against a target repo,
+    groups commits within an N-minute window into chains, drops
+    chains that fall below the keyword-classifier threshold, emits
+    the same triples. Higher-signal surface than transcripts because
+    timestamps are objective and "missed-fix" semantics are
+    unambiguous (the later commit literally fixed something the
+    earlier one didn't).
+  - `classifier.py` -- shared keyword regex bank lifted from
+    `SKILL.md`'s description/keywords surface so mining and skill
+    triggering drift together.
+  - `grader-extension.md` -- specifies the new `adjacent_fix_coverage
+    >= K of top-N` assertion shape and worked grader procedure.
+- Smoke-tested locally: 1,257 transcripts scanned, 133 moon-relevant
+  sessions, 717 pairs for the largest failure mode (down from 116k
+  before the moon-relevance filter); 1,732 commits parsed from a
+  real moon-using repo, 21 chains found within a 60-minute window.
+
+### Notes
+- Both miners ship with a `--dry-run` flag and verbose logging.
+- README documents the limitations: keyword classifier is
+  intentionally promiscuous and the first run requires manual review
+  of the top-50 pairs before feeding into the grader.
+- The audit workspace itself (`ci-moonrepo-workspace/`) is gitignored
+  via the existing `*-workspace/` rule and remains uncommitted.
+
 ## [1.2.0] - 2026-05-17
 
 ### Changed
