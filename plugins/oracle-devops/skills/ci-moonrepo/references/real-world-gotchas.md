@@ -287,11 +287,11 @@ Canonical pre-commit pattern (husky/lefthook). Don't invent alternatives — thi
 
 ## When in doubt
 
-If a moon behaviour looks wrong — task resolution, affected detection, task inheritance, flag semantics — **read the docs before guessing**. Specifically:
-- `references/commands.md` for flag semantics and env vars
-- `references/ci-cd.md` for `moon ci` and affected resolution
-- `references/tasks.md` for inheritance and merge strategies
-- `references/migration-v1-to-v2.md` for anything that looks like v1 syntax
+If a moon behaviour looks wrong — task resolution, affected detection, task inheritance, flag semantics — read the canonical docs (https://moonrepo.dev/docs) before guessing. The in-skill surfaces:
+- `references/moon-cheatsheet.md` for flag semantics, env vars, task fields, MQL, v1→v2 migration table
+- `references/workflows.md` for symptom-keyed diagnosis when the behaviour matches a known failure mode
+- `references/ci-guide.md` for inheritance, revision-comparison, remote-cache deep dives and worked CI workflows
+- `references/advanced.md` for MQL, graphs, hooks, MCP
 
 moon has a lot of subtle semantic distinctions (additive vs narrowing, upstream vs downstream, direct vs deep). A minute in the docs beats an hour debugging a silent no-op.
 

@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, meta-tooling, and truth-verification.",
-    "version": "5.35.0",
+    "version": "5.36.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -62,8 +62,8 @@
     {
       "name": "oracle-devops",
       "source": "./plugins/oracle-devops",
-      "description": "Install in DevOps repos. Bundles terraform-skill (Terraform/OpenTofu modules, tests, CI, scans, state ops), moonrepo v2.2 (with reactive hooks: tasks.yml guard, moon-ci safety, workspace orient), and four Firecrawl workflow skills (knowledge-base, knowledge-ingest, qa, website-design-clone).",
-      "version": "1.1.0",
+      "description": "Install in DevOps repos. Bundles terraform-skill (Terraform/OpenTofu modules, tests, CI, scans, state ops), moonrepo v2.2 (workflow-first: six symptom-keyed decision trees, audit scripts, non-interactive graph wrapper, reactive hooks for tasks.yml guard / moon-ci safety / workspace orient), and four Firecrawl workflow skills (knowledge-base, knowledge-ingest, qa, website-design-clone).",
+      "version": "1.2.0",
       "category": "development",
       "keywords": [
         "devops",

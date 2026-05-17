@@ -63,8 +63,8 @@ Or, in a GitHub Actions context, use github.event.pull_request.base.sha
 plus github.event.pull_request.head.sha (these are stable), never
 github.event.before.
 
-Reference: plugins/ci-moonrepo/skills/ci-moonrepo/references/ci-guide.md
-section 5 (revision comparison) and section 14 (anti-patterns table).
+Reference: references/workflows.md §1 (affected-detection no-op) and
+references/ci-guide.md §2 (revision comparison deep dive).
 EOF
   exit 2
 fi
@@ -72,7 +72,7 @@ fi
 # ---- Tier 2: soft warn on `moon ci` lacking explicit base/head ----
 if printf '%s' "$COMMAND" | grep -qE 'moon[[:space:]]+ci\b'; then
   if ! printf '%s' "$COMMAND" | grep -qE -- '(--base|--head|MOON_BASE|MOON_HEAD)'; then
-    MSG="[ci-moonrepo] 'moon ci' invoked without --base/--head and no MOON_BASE/MOON_HEAD in the command. moon will auto-detect via the ci_env crate, which is fragile across CI providers and on merge-commit bases. Prefer explicit: 'moon ci --base \$BASE_SHA --head \$HEAD_SHA'. Source the base deterministically with 'git merge-base HEAD origin/main'. Reference: references/ci-guide.md section 5."
+    MSG="[ci-moonrepo] 'moon ci' invoked without --base/--head and no MOON_BASE/MOON_HEAD in the command. moon will auto-detect via the ci_env crate, which is fragile across CI providers and on merge-commit bases. Prefer explicit: 'moon ci --base \$BASE_SHA --head \$HEAD_SHA'. Source the base deterministically with 'git merge-base HEAD origin/main'. Reference: references/workflows.md §1 and references/ci-guide.md §2."
     jq -n --arg msg "$MSG" '{
       hookSpecificOutput: {
         hookEventName: "PreToolUse",
@@ -80,6 +80,44 @@ if printf '%s' "$COMMAND" | grep -qE 'moon[[:space:]]+ci\b'; then
       }
     }'
   fi
+fi
+
+# ---- Tier 3: warn on interactive graph commands without --json or --dot ----
+# moon project-graph / task-graph / action-graph open a browser when run
+# without --json or --dot. In a non-interactive context that hangs the
+# tool call. The skill bundles scripts/graph-json.sh as the safe wrapper.
+if printf '%s' "$COMMAND" | grep -qE 'moon[[:space:]]+(project-graph|task-graph|action-graph)\b'; then
+  if ! printf '%s' "$COMMAND" | grep -qE -- '(--json|--dot|scripts/graph-json\.sh)'; then
+    MSG="[ci-moonrepo] 'moon project-graph' / 'moon task-graph' / 'moon action-graph' are INTERACTIVE by default -- they open a browser to render the DAG and will hang in a non-interactive tool context. Pass --json or --dot, or use the bundled wrapper: '\${CLAUDE_PLUGIN_ROOT}/scripts/graph-json.sh <subcommand> [args...]'. Reference: references/advanced.md 'Project and action graphs'."
+    jq -n --arg msg "$MSG" '{
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        additionalContext: $msg
+      }
+    }'
+  fi
+fi
+
+# ---- Tier 4: catch the silently-ignored MOON_SKIP_SETUP_RUST ----
+if printf '%s' "$COMMAND" | grep -qE 'MOON_SKIP_SETUP_RUST\b'; then
+  MSG="[ci-moonrepo] MOON_SKIP_SETUP_RUST is NOT a real env var -- it is silently ignored by moon. Use MOON_SKIP_SETUP_TOOLCHAIN=rust (per-tool) or MOON_SKIP_SETUP_TOOLCHAIN=rust:1.90.0 (per-version). Reference: references/workflows.md §4 and references/moon-cheatsheet.md 'Environment variables'."
+  jq -n --arg msg "$MSG" '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      additionalContext: $msg
+    }
+  }'
+fi
+
+# ---- Tier 5: catch --json on moon query (it is the default, flag is ignored) ----
+if printf '%s' "$COMMAND" | grep -qE 'moon[[:space:]]+query[[:space:]]+[a-z-]+[[:space:]].*--json\b'; then
+  MSG="[ci-moonrepo] 'moon query' subcommands emit JSON by default -- there is no --json flag. The flag is silently ignored. Drop it from the invocation. Reference: references/moon-cheatsheet.md 'Affected detection'."
+  jq -n --arg msg "$MSG" '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      additionalContext: $msg
+    }
+  }'
 fi
 
 exit 0

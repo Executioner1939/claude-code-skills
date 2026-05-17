@@ -5,6 +5,78 @@ All notable changes to the `oracle-devops` plugin are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-05-17
+
+### Changed
+- **ci-moonrepo skill restructured workflow-first.** SKILL.md cut from
+  305 lines (essay-style "Rules" with inline citations) to a thin
+  dispatch table (~75 lines) keying user-symptom phrases to the matching
+  workflow in `references/workflows.md`. Net total skill size 4,911 →
+  2,400 lines (~50% reduction).
+  - New `references/workflows.md` (604 lines): the six failure modes as
+    symptom-keyed decision trees, not essays. Each ends in a smoke test.
+  - New `references/moon-cheatsheet.md` (453 lines): consolidates the
+    nine former canon-mirror files (concepts/commands/tasks/toolchains/
+    workspace-config/docker/codegen/ci-cd/migration-v1-to-v2) into one
+    quick-reference. Canon depth still lives at moonrepo.dev and is
+    fetched on demand via the oracle verification cascade.
+  - `references/ci-guide.md` trimmed 1,435 → 715 lines: keeps inheritance
+    pattern, revision-comparison deep dive, remote-cache config, three
+    toolchain strategies, two worked CI workflows. Drops the seven-step
+    canon recap, parallelism / reporting / release-notes sections, and
+    anti-patterns table (covered in workflows.md).
+  - `references/advanced.md` trimmed 383 → 214 lines: keeps MQL, graphs,
+    hooks, env vars, MCP, debugging. Drops release-history recap.
+  - Deleted `references/{concepts,commands,tasks,toolchains,workspace-config,docker,codegen,ci-cd,migration-v1-to-v2}.md`.
+
+### Added
+- **`scripts/` bundle for workflow smoke tests and graph-command safety:**
+  - `graph-json.sh` -- non-interactive wrapper for `moon project-graph`
+    / `task-graph` / `action-graph`. The bare forms open a browser and
+    hang in non-interactive tool contexts; this wrapper forces `--json`.
+  - `affected-fail-fast.sh` -- §1 fail-fast contract. Exits 1 if
+    `git diff $MOON_BASE..$MOON_HEAD` is non-empty but
+    `moon query projects --affected` returns zero.
+  - `audit-inheritance.sh` -- §2 smoke test (every .moon/tasks/*.yml has
+    `inheritedBy:`; every task has explicit `options.runInCI`).
+  - `audit-name-drift.sh` -- §3 four-name tuple check (moon id / cargo
+    name / Docker image / deploy manifest).
+  - `audit-toolchain.sh` -- §4 detection grep + multi-source-of-truth +
+    catches `MOON_SKIP_SETUP_RUST` (silently ignored) and
+    `MOON_TOOLCHAIN_FORCE_GLOBALS=<tool-name>` (parses as falsy).
+  - `audit-bin-collisions.sh` -- §6 cargo workspace [[bin]] uniqueness
+    plus moon project-id uniqueness.
+- **Extended PreToolUse Bash hook** (`hooks/moon-ci-guard.sh`) with
+  three new soft-warn tiers:
+  - graph-command interactivity warning (open browser, hangs CI)
+  - `MOON_SKIP_SETUP_RUST` detection (silently ignored by moon)
+  - `--json` on `moon query` detection (silently ignored; JSON is default)
+- **Hook messages re-pointed** at the new file/section structure
+  (workflows.md §N + ci-guide.md §N).
+
+### Fixed (verification-cascade corrections)
+- `MOON_TOOLCHAIN_FORCE_GLOBALS=<tool-name>` is **wrong**. moon source
+  parses it as a boolean (`crates/toolchain/src/lib.rs`); a tool name
+  evaluates as falsy. Corrected to `=true` / `=1` throughout.
+- `setup-rust` reads from `RUSTUP_TOOLCHAIN` / `rust-toolchain.toml` /
+  legacy `rust-toolchain` / inputs -- **not** `.prototools`. Strategy A
+  workflow updated.
+- `dtolnay/rust-toolchain` has no semver tags; pin by channel or version
+  (`@stable`, `@1.89.0`). Strategy A pin form corrected.
+- `mozilla-actions/sccache-action` latest is `v0.0.10` (was `v0.0.9`).
+  Updated. Action does NOT auto-set `RUSTC_WRAPPER=sccache`; worked
+  examples now show the explicit export.
+- §5 sccache + release-LTO claim refined via primary-source diagnosis
+  (mozilla/sccache `src/compiler/rust.rs:1119-1135`; rust-lang/rust#71850
+  closed 2025-01-30 as wontfix for fat-LTO). sccache rejects `bin`,
+  `cdylib`, `dylib`, `proc-macro` crate types by design; dep rlibs are
+  still cached but the final binary crate is not.
+- §1 `moon exec --downstream` claim corrected. The exec-vs-query
+  asymmetry was wrong -- both share `crates/affected/affected_tracker.rs`.
+  The real bug is `crates/vcs/src/git/git_client.rs:530-548` silently
+  dropping the head ref (open issue moonrepo/moon#2216, in-flight fix
+  PR moonrepo/moon#2513). Workflow now points at the verified issue.
+
 ## [1.1.0] - 2026-05-16
 
 ### Added

@@ -76,7 +76,7 @@ Use one of:
   .moon/tasks/ci-merge-production.yml  (inheritedBy: { tags: [ci-merge-production] })
   .moon/tasks/<toolchain>-developer.yml (inheritedBy: { toolchains: [<toolchain>] })
 
-Reference: plugins/ci-moonrepo/skills/ci-moonrepo/references/ci-guide.md section 3.
+Reference: references/workflows.md §2 (runInCI inheritance trap, "Inheritance discipline") and references/ci-guide.md §1 (full inheritance walkthrough).
 EOF
     exit 2
     ;;
@@ -86,7 +86,7 @@ esac
 case "$FILE_PATH" in
   */.moon/tasks/*.yml|*/.moon/tasks/*.yaml|.moon/tasks/*.yml|.moon/tasks/*.yaml)
     if [ -n "$CONTENT" ] && ! printf '%s' "$CONTENT" | grep -qE '^[[:space:]]*inheritedBy[[:space:]]*:'; then
-      MSG="[ci-moonrepo] Editing $FILE_PATH: this file must begin with an 'inheritedBy:' block (Rule 2 step 0, references/ci-guide.md section 3). Without it the tasks inherit into every project implicitly and trigger the runInCI polarity flip + six-axis merge archaeology + affected-detection graph drift failure modes. Tag-based pattern: 'inheritedBy: { tags: [ci-pull-request] }'. Toolchain-based pattern: 'inheritedBy: { toolchains: [rust] }'."
+      MSG="[ci-moonrepo] Editing $FILE_PATH: this file must begin with an 'inheritedBy:' block (see references/workflows.md §2 'Inheritance discipline' and references/ci-guide.md §1). Without it the tasks inherit into every project implicitly and trigger the runInCI polarity flip + six-axis merge archaeology + affected-detection graph drift failure modes. Tag-based pattern: 'inheritedBy: { tags: [ci-pull-request] }'. Toolchain-based pattern: 'inheritedBy: { toolchains: [rust] }'."
       jq -n --arg msg "$MSG" '{
         hookSpecificOutput: {
           hookEventName: "PreToolUse",
@@ -107,7 +107,7 @@ case "$FILE_PATH" in
 esac
 [ "$RELEVANT" -eq 0 ] && exit 0
 
-MSG="[ci-moonrepo] Editing $FILE_PATH. Skill ci-moonrepo:ci-moonrepo applies. Mandatory: tag-based explicit inheritance for .moon/tasks/**. Always pass --base/--head to moon ci. Comprehensive walkthrough in references/ci-guide.md (14 sections)."
+MSG="[ci-moonrepo] Editing $FILE_PATH. Skill ci-moonrepo applies. Mandatory: tag-based explicit inheritance for .moon/tasks/**. Always pass --base/--head to moon ci. Symptom-keyed workflows in references/workflows.md; reference material in references/moon-cheatsheet.md; long-form walkthrough in references/ci-guide.md. Audit scripts available under scripts/ (audit-inheritance.sh, audit-toolchain.sh, audit-name-drift.sh, audit-bin-collisions.sh)."
 jq -n --arg msg "$MSG" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
