@@ -5,6 +5,43 @@ All notable changes to the `oracle-devops` plugin are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-05-20
+
+### Added
+- **`openapi-rust-gen` skill** for regenerating Rust client crates from
+  an OpenAPI spec via the pinned `openapitools/openapi-generator-cli`
+  Docker image. Mirrors the hermes-platform `gen-hindsight` +
+  `refresh.sh` pattern as a reusable, repo-agnostic command so future
+  projects can stop reinventing it.
+  - Triggers on phrases like "regenerate the openapi rust client",
+    "generate a rust client from this openapi spec", "refresh the
+    openapi snapshot", and "moon task to regenerate the <x>-client
+    crate".
+  - Body documents the script contract, the standard invocation, the
+    `moon.yml` wiring (one `gen-<provider>` task + one
+    `refresh-<provider>-spec` task), and the failure modes the script
+    pre-flights.
+- **`scripts/openapi-rust-gen.sh`** -- single-pass, non-interactive
+  bundled bash script. Required flags: `--spec` (URL or local path),
+  `--out-dir`, `--crate-name`. Optional: `--generator-version`
+  (default `v7.10.0`, matching hermes-platform), `--refresh-only`,
+  `--workspace-root` (defaults to `git rev-parse --show-toplevel`).
+  - URL specs are fetched with curl, atomic temp+mv-written under
+    `<workspace>/docker/<provider>/<provider>.<ext>` (extension
+    inferred from URL, default yaml).
+  - Local specs must live under the workspace root (Docker bind mount
+    is `$workspaceRoot:/local`).
+  - Pre-flights `docker info` before any network call; fails fast with
+    actionable messages on docker-down, curl errors, missing
+    `Cargo.toml` in the generator output.
+
+### Notes
+- Generator pinned at `v7.10.0` to match hermes-platform's
+  `gen-hindsight`. Version bumps are a deliberate, reviewed change.
+- No slash command shipped; the skill's keyword/trigger surface is
+  specific enough for auto-trigger, and the script is the durable
+  interface.
+
 ## [1.2.1] - 2026-05-17
 
 ### Added

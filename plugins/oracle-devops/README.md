@@ -11,6 +11,21 @@ expertise with four DevOps-flavoured Firecrawl workflow skills.
   operations, and architecture decisions. Version-aware guards diagnose
   identity churn, secrets, blast radius, CI drift, and state corruption.
 
+- **`ci-moonrepo`** — moonrepo (moon) v2 expert. Workspace, tasks, CI/CD,
+  Docker, remote caching, codegen, WASM toolchains, v1-to-v2 migration. Six
+  production-derived failure modes (affected-detection no-ops, runInCI
+  inheritance traps, project-id/Cargo/Docker name drift, toolchain bootstrap
+  churn, remote-cache flakiness, `[[bin]]` collisions) each have a symptom-keyed
+  workflow and a smoke-test script. Ships reactive hooks (`SessionStart`,
+  `PreToolUse` edit/bash guards, `UserPromptSubmit` tagger).
+
+- **`openapi-rust-gen`** — regenerate a Rust client crate from an OpenAPI spec
+  via the pinned `openapitools/openapi-generator-cli` Docker image. Bundles a
+  reusable shell script (`scripts/openapi-rust-gen.sh`) that handles URL or
+  local-path specs, atomic snapshot writes under `docker/<provider>/`, and
+  docker-pre-flight checks. Body documents the standard moon-task wiring so
+  consuming repos get `moon run <crate>:gen-<provider>`.
+
 - **Four Firecrawl workflow skills**, cherry-picked for DevOps work:
   - `firecrawl-knowledge-base` — build a searchable KB from scraped sources
   - `firecrawl-knowledge-ingest` — feed content into an existing KB
