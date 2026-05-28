@@ -1,7 +1,7 @@
 {
   "name": "oracle-devops",
   "description": "Install in DevOps repos. Bundles terraform-skill (Terraform/OpenTofu modules, tests, CI, scans, state ops), moonrepo v2.2 (with reactive hooks: tasks.yml guard, moon-ci safety, workspace orient), and four Firecrawl workflow skills (knowledge-base, knowledge-ingest, qa, website-design-clone).",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "author": {
     "name": "Executioner1939"
   },

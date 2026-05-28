@@ -3,7 +3,7 @@
 A personal Claude Code marketplace. Twelve plugins covering CI/CD, Rust, documentation, code analysis, design systems, infrastructure-as-code review, Solana indexing, multi-agent orchestration, and meta-tooling. Shared conventions, kept in sync.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) (with bundled Apache-2.0 portions — see [Attribution](#attribution))
-[![Marketplace version](https://img.shields.io/badge/marketplace-v5.17.1-green.svg)](.claude-plugin/marketplace.json)
+[![Marketplace version](https://img.shields.io/badge/marketplace-v5.38.0-green.svg)](.claude-plugin/marketplace.json)
 [![Plugins](https://img.shields.io/badge/plugins-12-green.svg)](#plugins)
 
 ---

@@ -5,6 +5,28 @@ All notable changes to the `oracle-devops` plugin are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-05-28
+
+### Fixed
+- **ci-moonrepo: corrected the `moon query --json` behaviour across three
+  reference files.** The skill previously claimed a stray `--json` on a
+  `moon query` subcommand is "silently ignored." Verified against moon
+  2.2.5 and the official v2/v1 docs, the opposite is true: `--json` was
+  **removed** in v2 and now produces a hard clap error
+  (`unexpected argument`, exit code 2) on every `query` subcommand
+  (`projects`, `tasks`, `changed-files`). Under `set -e` / `pipefail`
+  that aborts the CI step rather than no-opping.
+  - `references/workflows.md` -- both "silently ignored" statements
+    rewritten to document the exit-2 hard error and the v1->v2 break.
+  - `references/moon-cheatsheet.md` -- added a `moon query *` entry to the
+    v1->v2 CLI breaking-changes list (v1 defaulted to a pipe-delimited
+    text table and offered `--json`; v2 made JSON the default and dropped
+    the flag).
+  - `references/real-world-gotchas.md` -- fixed an active bug in the
+    deploy-lane example, which recommended
+    `moon query projects --affected --json` (now exit 2); dropped the
+    flag.
+
 ## [1.3.0] - 2026-05-20
 
 ### Added

@@ -384,6 +384,7 @@ Run `moon migrate v2` first; it handles most renames. The manual residue:
 - `moon ci`: relations excluded by default; pass `-g, --include-relations` for v1 behaviour.
 - `moon generate`: destination moved from positional arg to `--to`.
 - `moon run` (no scope): no longer auto-finds closest project; use `~:` prefix.
+- `moon query *`: JSON is now the default output and the `--json` flag was **removed**. v1 defaulted to a pipe-delimited text table (`<id> | <source> | ... `) and emitted JSON only with `--json`. In v2 a leftover `--json` is a hard clap error (`unexpected argument`, exit code 2) on every `query` subcommand -- not a no-op -- so under `set -e`/`pipefail` it aborts the CI step. Delete `--json` from every `moon query` call during migration. (`--json` is still valid on `moon project`, `moon task`, and the `*-graph` commands.)
 
 ### Removed
 

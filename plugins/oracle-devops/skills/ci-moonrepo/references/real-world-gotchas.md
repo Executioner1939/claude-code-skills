@@ -341,6 +341,6 @@ A duplicate `mergeOutputs:` key inside `options:` -- typed twice by accident in 
 Recommended split:
 
 - **PR-validate lane:** bare `moon ci` (no explicit targets). Runs every affected task with `runInCI: true`. Predictable.
-- **Deploy lane:** `moon query projects --affected --json` to materialise the affected set, then `moon run :<task>` or `moon exec ...` per project, bypassing the `runInCI` filter entirely.
+- **Deploy lane:** `moon query projects --affected` to materialise the affected set (JSON is the default output in v2; there is no `--json` flag -- passing one exits 2), then `moon run :<task>` or `moon exec ...` per project, bypassing the `runInCI` filter entirely.
 
 Do not pass `runInCI: false` tasks as explicit targets to `moon ci`; the filter will eat them. Use `moon run` / `moon exec` instead.

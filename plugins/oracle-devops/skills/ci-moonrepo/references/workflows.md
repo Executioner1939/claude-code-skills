@@ -54,7 +54,7 @@ env:
 moon query projects --affected --base <ci-base-sha> --head <ci-head-sha>
 ```
 
-`moon query` emits JSON by default. There is no `--json` flag; using one is silently ignored. If the resolved list is non-empty here but empty in CI, the bug is upstream of moon (probably `fetch-depth` or base/head resolution). If empty locally too, go to step 4.
+`moon query` emits JSON by default (v2 change -- v1 printed a pipe-delimited text table and required `--json` for JSON). The `--json` flag was **removed** in v2: passing it is a hard clap error (`error: unexpected argument '--json' found`, exit code 2), not a no-op. Under `set -e` + `pipefail` a stray `--json` aborts the CI step, so strip it from any v1 script during migration. If the resolved list is non-empty here but empty in CI, the bug is upstream of moon (probably `fetch-depth` or base/head resolution). If empty locally too, go to step 4.
 
 **Step 4 -- check the task-graph propagation edge.**
 
@@ -615,7 +615,7 @@ Empty output is the pass condition. Run this in CI as a guard.
 | Inspect / diff cache hashes | `moon hash <hash> [<other-hash>]` |
 | Materialise projects for a deploy lane | `moon query projects --affected \| jq -r '.projects[].id'` |
 
-**No `--json` flag on any `moon query` subcommand.** JSON is the default output. Adding `--json` is silently ignored.
+**No `--json` flag on any `moon query` subcommand in v2.** JSON is the default output. Adding `--json` is **not** a no-op -- it is a hard error (`unexpected argument`, exit code 2) on every `query` subcommand (`projects`, `tasks`, `changed-files`), verified on moon 2.2.5. This is a v1->v2 break: v1 defaulted to a pipe-delimited text table and offered `--json`; v2 removed the flag and made JSON the default. Migrating a v1 CI script means deleting `--json` from every `moon query` call, not leaving it in.
 
 ## `[unverified-canon]` markers
 
