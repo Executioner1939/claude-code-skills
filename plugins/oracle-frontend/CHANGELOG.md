@@ -5,6 +5,16 @@ All notable changes to the `oracle-frontend` plugin are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-06-02
+
+### Added
+- `.lsp.json` wiring `typescript-language-server` as the LSP for
+  `.ts`/`.mts`/`.cts`/`.tsx`/`.js`/`.mjs`/`.cjs`/`.jsx` files. This covers
+  React, Next.js, Storybook, and Node code intelligence (those are all
+  TypeScript/JavaScript and have no dedicated language server of their own).
+  Prereq: `typescript-language-server` on PATH
+  (`npm i -g typescript-language-server typescript`).
+
 ## [1.0.0] - 2026-05-16
 
 ### Added

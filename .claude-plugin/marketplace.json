@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, meta-tooling, and truth-verification.",
-    "version": "5.39.0",
+    "version": "5.40.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -86,8 +86,8 @@
     {
       "name": "oracle-frontend",
       "source": "./plugins/oracle-frontend",
-      "description": "Install in FE sub-dirs (--scope local). Bundles 3 Chakra UI v3 skills (chakra-ui-builder, chakra-ui-migrate, chakra-ui-refactor) and the @chakra-ui/react-mcp server. Chakra Pro opt-in via CHAKRA_PRO_API_KEY env var.",
-      "version": "1.0.0",
+      "description": "Install in FE sub-dirs (--scope local). Bundles 3 Chakra UI v3 skills (chakra-ui-builder, chakra-ui-migrate, chakra-ui-refactor) and the @chakra-ui/react-mcp server, and wires typescript-language-server as the LSP for .ts/.tsx/.js/.jsx (covers React, Next.js, Storybook, Node). Chakra Pro opt-in via CHAKRA_PRO_API_KEY env var. Prereq: typescript-language-server on PATH (`npm i -g typescript-language-server typescript`).",
+      "version": "1.1.0",
       "category": "frontend",
       "keywords": [
         "chakra-ui",
@@ -95,6 +95,12 @@
         "frontend",
         "design-system",
         "react",
+        "nextjs",
+        "storybook",
+        "typescript",
+        "typescript-language-server",
+        "lsp",
+        "language-server",
         "mcp"
       ],
       "author": {
@@ -140,12 +146,15 @@
     {
       "name": "carbon-solana",
       "source": "./plugins/carbon-solana",
-      "description": "Carbon Solana indexing framework reference. Auto-loaded knowledge for the carbon-core pipeline (datasources, pipes, processors, decoders, schema matching) and per-protocol sub-skills for 64 Solana programs (Raydium AMM v4 / CLMM / CPMM / Launchpad, Pumpfun, Pump Swap, Meteora DLMM / DAMM v2 / DBC / Pools / Vault, Orca Whirlpool, Phoenix v1, OpenBook v2, Jupiter Swap / DCA / Limit / Perpetuals / Lend, Drift v2, Zeta, Marginfi v2, Kamino lending / vault / farms / limit-order, Lifinity, Stabble, Sharky, Marinade, Solayer, Bubblegum, MPL Core / Token Metadata, SPL Token / Token-2022 / ATA, ALT, Stake, System, Memo, Name Service, Swig, Wavebreak, Gavel, OKX DEX, DFlow, Circle CCTP v2, and more). Bundled scripts/carbon.py extracts struct fields, discriminators, and account variants on demand from your local cargo registry cache (or $CARBON_SRC) -- no stale snapshots.",
-      "version": "0.1.0",
+      "description": "Carbon Solana indexing framework reference. Auto-loaded knowledge for the carbon-core pipeline (datasources, pipes, processors, decoders, schema matching) and per-protocol sub-skills for 64 Solana programs (Raydium AMM v4 / CLMM / CPMM / Launchpad, Pumpfun, Pump Swap, Meteora DLMM / DAMM v2 / DBC / Pools / Vault, Orca Whirlpool, Phoenix v1, OpenBook v2, Jupiter Swap / DCA / Limit / Perpetuals / Lend, Drift v2, Zeta, Marginfi v2, Kamino lending / vault / farms / limit-order, Lifinity, Stabble, Sharky, Marinade, Solayer, Bubblegum, MPL Core / Token Metadata, SPL Token / Token-2022 / ATA, ALT, Stake, System, Memo, Name Service, Swig, Wavebreak, Gavel, OKX DEX, DFlow, Circle CCTP v2, and more). Bundled scripts/carbon.py extracts struct fields, discriminators, and account variants on demand from your local cargo registry cache (or $CARBON_SRC) -- no stale snapshots. Wires rust-analyzer as the LSP for .rs files (prereq: rust-analyzer on PATH).",
+      "version": "0.2.0",
       "category": "development",
       "keywords": [
         "carbon",
         "carbon-core",
+        "rust-analyzer",
+        "lsp",
+        "language-server",
         "solana",
         "indexer",
         "yellowstone-grpc",

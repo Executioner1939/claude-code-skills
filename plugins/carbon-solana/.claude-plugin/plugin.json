@@ -1,12 +1,12 @@
 {
   "name": "carbon-solana",
-  "description": "Carbon Solana indexing framework reference. Pipeline, datasources, decoders, processors, and per-protocol instruction/account/event schemas for 60+ Solana programs (Raydium, Pumpfun, Meteora, Orca, Jupiter, Drift, Kamino, Phoenix, etc.).",
-  "version": "0.1.0",
+  "description": "Carbon Solana indexing framework reference. Pipeline, datasources, decoders, processors, and per-protocol instruction/account/event schemas for 60+ Solana programs (Raydium, Pumpfun, Meteora, Orca, Jupiter, Drift, Kamino, Phoenix, etc.). Wires rust-analyzer as the LSP for .rs files. Prereq: rust-analyzer on PATH (`mise use rust-analyzer@latest`).",
+  "version": "0.2.0",
   "author": {
     "name": "Executioner1939"
   },
   "homepage": "https://github.com/Executioner1939/claude-code-skills",
   "repository": "https://github.com/Executioner1939/claude-code-skills",
   "license": "MIT",
-  "keywords": ["rust", "solana", "carbon", "indexer", "yellowstone-grpc", "raydium", "pumpfun", "meteora", "orca", "jupiter", "dex"]
+  "keywords": ["rust", "rust-analyzer", "lsp", "language-server", "solana", "carbon", "indexer", "yellowstone-grpc", "raydium", "pumpfun", "meteora", "orca", "jupiter", "dex"]
 }
