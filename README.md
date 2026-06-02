@@ -1,4 +1,4 @@
-# skunkworks
+# skunkworks-marketplace
 
 A private Claude Code marketplace. Five plugins that carry my working conventions
 into every repo I open: research that refuses to guess, DevOps and Rust tooling,
@@ -60,22 +60,22 @@ repository needs.
 Add the marketplace:
 
 ```
-/plugin marketplace add Executioner1939/claude-code-marketplace
+/plugin marketplace add Executioner1939/skunkworks-marketplace
 ```
 
 Install per repository:
 
 ```
-/plugin install oracle@skunkworks
-/plugin install oracle-devops@skunkworks
-/plugin install oracle-frontend@skunkworks --scope local
-/plugin install oracle-rust@skunkworks
-/plugin install carbon-solana@skunkworks
+/plugin install oracle@skunkworks-marketplace
+/plugin install oracle-devops@skunkworks-marketplace
+/plugin install oracle-frontend@skunkworks-marketplace --scope local
+/plugin install oracle-rust@skunkworks-marketplace
+/plugin install carbon-solana@skunkworks-marketplace
 ```
 
 `oracle-frontend` is meant to be installed at `--scope local` from a frontend
 subdirectory; the others are fine at user or project scope. After installing,
-`/plugin marketplace update skunkworks` pulls newer versions.
+`/plugin marketplace update skunkworks-marketplace` pulls newer versions.
 
 ---
 
