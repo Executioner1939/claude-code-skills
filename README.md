@@ -87,11 +87,10 @@ The big one, and the only pure workflow plugin. `oracle` exists to stop Claude
 guessing about anything externally verifiable — versions, library choices,
 citations, release notes — and to keep long sessions honest.
 
-It ships two slash commands, [`/oracle:init`](plugins/oracle/commands/init.md) and
-[`/oracle:narrator`](plugins/oracle/commands/narrator.md), and exposes the rest of
-its surface as model-invokable slash commands backed by
-[skills](plugins/oracle/skills/): `setup`, `research`, `verify`, `vet`, `budget`,
-and `mcp-fleet`. Behind the research command sits a panel of
+It exposes its surface as slash commands backed by
+[skills](plugins/oracle/skills/) — [`/oracle:init`](plugins/oracle/skills/init/SKILL.md)
+and [`/oracle:narrator`](plugins/oracle/skills/narrator/SKILL.md) alongside `setup`,
+`research`, `verify`, `vet`, `budget`, and `mcp-fleet`. Behind the research command sits a panel of
 [research subagents](plugins/oracle/agents/) — a canon reader for specs and
 official docs, a GitHub archivist, a forum anthropologist for lived experience, an
 issue investigator for maturity signals, and a cost rethinker that proposes cheaper
@@ -208,17 +207,17 @@ hook.
 ```
 .claude-plugin/marketplace.json   # the catalogue every plugin is registered in
 plugins/
-├── oracle/                       # workflow: commands/ agents/ skills/ docs/ + firecrawl MCP
+├── oracle/                       # workflow: agents/ skills/ docs/ + firecrawl MCP
 ├── oracle-devops/                # knowledge: 8 skills (moon, terraform, firecrawl, codegen)
 ├── oracle-frontend/              # knowledge: 3 Chakra skills + chakra MCP + TS LSP + hook
 ├── oracle-rust/                  # knowledge: rust-utoipa + rust-analyzer LSP + hook
 └── carbon-solana/                # knowledge: 1 main + 64 sub-skills + carbon.py + LSP + hook
 ```
 
-A workflow plugin keeps user-invokable slash commands in `commands/` (flat `.md`,
-`disable-model-invocation: true`), subagent definitions in `agents/`, and auto-loaded
-knowledge in `skills/<name>/SKILL.md`. A knowledge plugin is just the `skills/`
-tree, optionally with a `.lsp.json`, an `.mcp.json`, and a `hooks/` directory. Each
+A workflow plugin keeps its subagent definitions in `agents/` and all of its
+skills — both the user-invokable slash commands and the auto-loaded knowledge —
+in `skills/<name>/SKILL.md`. A knowledge plugin is just the `skills/` tree,
+optionally with a `.lsp.json`, an `.mcp.json`, and a `hooks/` directory. Each
 plugin carries its own `README.md` and `CHANGELOG.md`.
 
 ---
@@ -228,9 +227,11 @@ plugin carries its own `README.md` and `CHANGELOG.md`.
 Not enforced by the spec — patterns that have earned their place and get carried
 forward when a new plugin is added.
 
-- **Workflows in `commands/`, knowledge in `skills/`.** Slash-command files set
-  `disable-model-invocation: true` and an `argument-hint`; knowledge skills are
-  directories with a `SKILL.md` and sibling `references/`.
+- **Everything is a skill.** Both user-invokable slash commands and auto-loaded
+  knowledge live under `skills/<name>/SKILL.md` (the form the current docs steer new
+  work toward). A slash-command skill sets `disable-model-invocation: true` and an
+  `argument-hint`; a knowledge skill relies on its `description` triggers and keeps
+  sibling `references/`.
 - **LSP via `.lsp.json`.** Language servers are declared in a plugin-root `.lsp.json`
   (the documented mechanism), never inline in the marketplace entry. The binary must
   be on PATH; a SessionStart hook offers to install it and records the decision under
