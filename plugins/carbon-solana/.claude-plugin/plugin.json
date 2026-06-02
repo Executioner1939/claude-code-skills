@@ -1,7 +1,7 @@
 {
   "name": "carbon-solana",
   "description": "Carbon Solana indexing framework reference. Pipeline, datasources, decoders, processors, and per-protocol instruction/account/event schemas for 60+ Solana programs (Raydium, Pumpfun, Meteora, Orca, Jupiter, Drift, Kamino, Phoenix, etc.). Wires rust-analyzer as the LSP for .rs files. Prereq: rust-analyzer on PATH (`mise use rust-analyzer@latest`).",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Executioner1939"
   },

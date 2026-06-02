@@ -5,6 +5,18 @@ All notable changes to the `carbon-solana` plugin are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-02
+
+### Added
+
+- SessionStart LSP onboarding (`hooks/hooks.json` + `scripts/lsp-onboard.py`).
+  When `rust-analyzer` is not on PATH and the project contains `.rs` files, the
+  hook injects context asking Claude to offer installation via the user's
+  detected tooling (mise, rustup, cargo, brew) or the official route, then
+  records the decision under `${CLAUDE_PLUGIN_DATA}` so the prompt never
+  repeats. Silent and walk-free when the binary is already installed; never
+  installs anything itself; fails open so a session never breaks on detection.
+
 ## [0.2.0] - 2026-06-02
 
 ### Added

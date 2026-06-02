@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for CI/CD, Rust, documentation, code analysis, design, Solana indexing, multi-agent orchestration, meta-tooling, and truth-verification.",
-    "version": "5.40.0",
+    "version": "5.41.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -87,7 +87,7 @@
       "name": "oracle-frontend",
       "source": "./plugins/oracle-frontend",
       "description": "Install in FE sub-dirs (--scope local). Bundles 3 Chakra UI v3 skills (chakra-ui-builder, chakra-ui-migrate, chakra-ui-refactor) and the @chakra-ui/react-mcp server, and wires typescript-language-server as the LSP for .ts/.tsx/.js/.jsx (covers React, Next.js, Storybook, Node). Chakra Pro opt-in via CHAKRA_PRO_API_KEY env var. Prereq: typescript-language-server on PATH (`npm i -g typescript-language-server typescript`).",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "frontend",
       "keywords": [
         "chakra-ui",
@@ -113,14 +113,15 @@
     {
       "name": "oracle-rust",
       "source": "./plugins/oracle-rust",
-      "description": "Install in Rust repos. Bundles the rust-utoipa OpenAPI skill (utoipa v5.4: Axum/Actix-web/Rocket) and wires rust-analyzer as the LSP for .rs files. Prereq: rust-analyzer on PATH (`mise use rust-analyzer@latest`).",
-      "version": "1.0.0",
+      "description": "Install in Rust repos. Bundles the rust-utoipa OpenAPI skill (utoipa v5.4: Axum/Actix-web/Rocket) and wires rust-analyzer as the LSP for .rs files via .lsp.json, with a SessionStart hook that offers to install rust-analyzer (mise/rustup/cargo/brew or official) when it is missing in a Rust project. Prereq: rust-analyzer on PATH (`mise use rust-analyzer@latest`).",
+      "version": "1.1.0",
       "category": "development",
       "keywords": [
         "rust",
         "rust-analyzer",
         "lsp",
         "language-server",
+        "lsp-onboarding",
         "utoipa",
         "openapi",
         "axum",
@@ -133,21 +134,13 @@
       "homepage": "https://github.com/Executioner1939/claude-code-skills",
       "repository": "https://github.com/Executioner1939/claude-code-skills",
       "license": "MIT",
-      "strict": false,
-      "lspServers": {
-        "rust-analyzer": {
-          "command": "rust-analyzer",
-          "extensionToLanguage": {
-            ".rs": "rust"
-          }
-        }
-      }
+      "strict": false
     },
     {
       "name": "carbon-solana",
       "source": "./plugins/carbon-solana",
-      "description": "Carbon Solana indexing framework reference. Auto-loaded knowledge for the carbon-core pipeline (datasources, pipes, processors, decoders, schema matching) and per-protocol sub-skills for 64 Solana programs (Raydium AMM v4 / CLMM / CPMM / Launchpad, Pumpfun, Pump Swap, Meteora DLMM / DAMM v2 / DBC / Pools / Vault, Orca Whirlpool, Phoenix v1, OpenBook v2, Jupiter Swap / DCA / Limit / Perpetuals / Lend, Drift v2, Zeta, Marginfi v2, Kamino lending / vault / farms / limit-order, Lifinity, Stabble, Sharky, Marinade, Solayer, Bubblegum, MPL Core / Token Metadata, SPL Token / Token-2022 / ATA, ALT, Stake, System, Memo, Name Service, Swig, Wavebreak, Gavel, OKX DEX, DFlow, Circle CCTP v2, and more). Bundled scripts/carbon.py extracts struct fields, discriminators, and account variants on demand from your local cargo registry cache (or $CARBON_SRC) -- no stale snapshots. Wires rust-analyzer as the LSP for .rs files (prereq: rust-analyzer on PATH).",
-      "version": "0.2.0",
+      "description": "Carbon Solana indexing framework reference. Auto-loaded knowledge for the carbon-core pipeline (datasources, pipes, processors, decoders, schema matching) and per-protocol sub-skills for 64 Solana programs (Raydium AMM v4 / CLMM / CPMM / Launchpad, Pumpfun, Pump Swap, Meteora DLMM / DAMM v2 / DBC / Pools / Vault, Orca Whirlpool, Phoenix v1, OpenBook v2, Jupiter Swap / DCA / Limit / Perpetuals / Lend, Drift v2, Zeta, Marginfi v2, Kamino lending / vault / farms / limit-order, Lifinity, Stabble, Sharky, Marinade, Solayer, Bubblegum, MPL Core / Token Metadata, SPL Token / Token-2022 / ATA, ALT, Stake, System, Memo, Name Service, Swig, Wavebreak, Gavel, OKX DEX, DFlow, Circle CCTP v2, and more). Bundled scripts/carbon.py extracts struct fields, discriminators, and account variants on demand from your local cargo registry cache (or $CARBON_SRC) -- no stale snapshots. Wires rust-analyzer as the LSP for .rs files (prereq: rust-analyzer on PATH). A SessionStart hook offers to install rust-analyzer (mise/rustup/cargo/brew or official) when it is missing in a Solana/Rust project.",
+      "version": "0.3.0",
       "category": "development",
       "keywords": [
         "carbon",

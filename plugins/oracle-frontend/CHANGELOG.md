@@ -5,6 +5,17 @@ All notable changes to the `oracle-frontend` plugin are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-06-02
+
+### Added
+- SessionStart LSP onboarding (`hooks/hooks.json` + `scripts/lsp-onboard.py`).
+  When `typescript-language-server` is not on PATH and the project contains
+  `.ts`/`.tsx`/`.js`/`.jsx` (etc.) files, the hook injects context asking Claude
+  to offer installation via the user's detected tooling (mise, npm, pnpm) or the
+  official route, then records the decision under `${CLAUDE_PLUGIN_DATA}` so the
+  prompt never repeats. Silent and walk-free when the binary is already
+  installed; never installs anything itself; fails open.
+
 ## [1.1.0] - 2026-06-02
 
 ### Added

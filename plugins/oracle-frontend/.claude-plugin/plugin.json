@@ -1,7 +1,7 @@
 {
   "name": "oracle-frontend",
   "description": "Install in FE sub-dirs (--scope local). Bundles 3 Chakra UI v3 skills (chakra-ui-builder, chakra-ui-migrate, chakra-ui-refactor) and the @chakra-ui/react-mcp server, and wires typescript-language-server as the LSP for .ts/.tsx/.js/.jsx (covers React, Next.js, Storybook, Node). Chakra Pro opt-in via CHAKRA_PRO_API_KEY env var. Prereq: typescript-language-server on PATH (`npm i -g typescript-language-server typescript`).",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "Executioner1939"
   },
