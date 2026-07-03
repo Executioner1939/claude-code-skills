@@ -5,6 +5,44 @@ All notable changes to the `oracle` plugin will be documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-07-03
+
+### Added
+
+- `/oracle:bugfix` — a diagnose-then-fix workflow distilled from real
+  bug-fix sessions, generalized to any language/stack/host. Explicit
+  slash-command invocation, plus fires on messages that read as an
+  unambiguous bug report paired with a request to fix and ship it.
+  - **Ground before touching code**: confirm the actual repo/subtree
+    (`git remote -v` — monorepo subtrees can look standalone), check for
+    a concurrent session already working the same code path (`gh pr
+    list --state open` + sibling dirty-tree check) before implementing
+    and again before pushing, then read the git history of the touched
+    lines and classify what's there — an accidental regression, a
+    deliberate decision that's now wrong for a changed requirement (cite
+    the commit, say the reversal out loud), or someone else's legitimate
+    in-flight work (surface it, don't revert it).
+  - **Fix the root cause with scoped Boy Scout cleanup**: fix what you
+    diagnosed, fix a provably-identical gap in a sibling code path you're
+    already reading, and say so explicitly — nothing beyond that.
+  - **Test per detected stack**: reads the project's own documented
+    commands (package.json scripts, Makefile, CI workflow files) rather
+    than assuming a fixed toolchain; always adds or extends a test that
+    pins the specific bug scenario, not just "the build passes."
+  - **Hotfix is the default ship path**: branch off the repo's actual
+    default branch, PR with a structured root-cause body, merge using
+    whatever convention the repo's own merge history already shows
+    (never assumed), review-bypass only on explicit authorization.
+  - Ships `references/known-gotchas.md` — generic gotcha *classes*
+    (not project-specific facts): concurrent-work races, reverting
+    others' commits, build-mode config divergence, stale-state markers,
+    immutable declarative-infra fields, deploy-pipeline health-check
+    wedges, workspace/monorepo lockfile divergence, sandboxed-shell
+    permission limits, and squash-merge ancestry damage.
+  - Preloads `path-preflight` and `parallel-tools` as binding during
+    diagnosis; routes externally-grounded claims through the existing
+    verification cascade rather than asserting from memory.
+
 ## [0.9.0] - 2026-06-02
 
 ### Changed

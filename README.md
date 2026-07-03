@@ -6,7 +6,7 @@ a Chakra frontend track, and a Solana decoder reference. One marketplace, kept i
 sync, installed per-repo as needed.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Marketplace](https://img.shields.io/badge/marketplace-v5.41.0-green.svg)](.claude-plugin/marketplace.json)
+[![Marketplace](https://img.shields.io/badge/marketplace-v5.43.0-green.svg)](.claude-plugin/marketplace.json)
 [![Plugins](https://img.shields.io/badge/plugins-5-green.svg)](#plugins)
 [![Status](https://img.shields.io/badge/status-work%20in%20progress-orange.svg)](#status)
 
@@ -90,7 +90,7 @@ citations, release notes — and to keep long sessions honest.
 It exposes its surface as slash commands backed by
 [skills](plugins/oracle/skills/) — [`/oracle:init`](plugins/oracle/skills/init/SKILL.md)
 and [`/oracle:narrator`](plugins/oracle/skills/narrator/SKILL.md) alongside `setup`,
-`research`, `verify`, `vet`, `budget`, and `mcp-fleet`. Behind the research command sits a panel of
+`research`, `verify`, `vet`, `budget`, `mcp-fleet`, and `bugfix`. Behind the research command sits a panel of
 [research subagents](plugins/oracle/agents/) — a canon reader for specs and
 official docs, a GitHub archivist, a forum anthropologist for lived experience, an
 issue investigator for maturity signals, and a cost rethinker that proposes cheaper
@@ -115,6 +115,14 @@ Capabilities worth knowing about:
   [`/oracle:budget`](plugins/oracle/skills/budget/SKILL.md).
 - **Multi-workspace MCP onboarding** — [`mcp-fleet`](plugins/oracle/skills/mcp-fleet/SKILL.md)
   wires Chrome-profile-isolated OAuth/token access for several workspaces at once.
+- **Diagnose-then-fix a bug** — [`/oracle:bugfix`](plugins/oracle/skills/bugfix/SKILL.md)
+  grounds in git history before touching code (regression vs. a deliberate decision
+  that's now wrong vs. someone else's in-flight work), fixes the root cause with
+  scoped Boy Scout cleanup, adds regression tests, and ships as a hotfix — branch,
+  PR, merge — by default. Ships a
+  [known-gotchas reference](plugins/oracle/skills/bugfix/references/known-gotchas.md)
+  of recurring trap classes (concurrent-work races, build-mode config divergence,
+  immutable infra fields, squash-merge ancestry damage, and more).
 - **Session discipline** — a [session-checkpoint](plugins/oracle/skills/session-checkpoint/SKILL.md)
   loop summarises work at intervals, and [path-preflight](plugins/oracle/skills/path-preflight/SKILL.md)
   and [parallel-tools](plugins/oracle/skills/parallel-tools/SKILL.md) cut the
