@@ -1,0 +1,7 @@
+input_fingerprint: 1cdb8725c527a61f2676c9055a669d9bd3c850a0367fcab276fb9d00d4de7c7a
+outputs: {}
+plugin: harness-sdk
+rendered_for: /Users/skunkworks/Documents/Work/Personal/claude-code-skills
+sdk_version: 0.3.0
+value_sources:
+- /Users/skunkworks/Documents/Work/Personal/claude-code-skills/plugins/harness-sdk/defaults/values.yaml

@@ -1,0 +1,10 @@
+input_fingerprint: 0723b54f634684edbfe0a1b17325880600d7d0af8bfa56800328838a68353820
+outputs:
+  agents/repo-researcher.md: ecff18df48b8aa0ffbcbd2fe63c3fd88468426497bd1f01ac538c2b7e785905d
+  agents/spec-reader.md: fd7c88440f1c7b0b97e61d07ef8c05ee31ec78165b1079ba99b718d0dffa8384
+plugin: oracle
+rendered_for: /Users/skunkworks/Documents/Work/Personal/claude-code-skills
+sdk_version: 0.3.0
+value_sources:
+- /Users/skunkworks/Documents/Work/Personal/claude-code-skills/plugins/harness-sdk/defaults/values.yaml
+- /Users/skunkworks/Documents/Work/Personal/claude-code-skills/plugins/oracle/values.yaml
