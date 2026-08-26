@@ -5,6 +5,21 @@ All notable changes to the `oracle-devops` plugin are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-08-26
+
+### Changed
+
+- **terraform-skill synced to its current local development version (skill
+  metadata 1.7.0 -> 1.17.1).** Adds a Safe Destroy Protocol (mandatory
+  `terraform plan -destroy` preview of every resource -- implicit dependents
+  included -- with explicit confirmation, and no `-auto-approve` on destroy),
+  cross-cloud resource and security maps (AWS/Azure/GCP) in the
+  module-patterns and security-compliance references, a new
+  `references/code-intelligence-lsp.md`, a remote-backend selection table in
+  state-management, a Provisioners-as-last-resort section in code-patterns,
+  and switches the CI cleanup workflow reference from static AWS keys to OIDC
+  role assumption (`id-token: write` + `role-to-assume`).
+
 ## [1.3.1] - 2026-05-28
 
 ### Fixed
